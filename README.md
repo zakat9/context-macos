@@ -1,4 +1,6 @@
-# Context for Mac
+# Context for Mac: tag Apple Notes, Mail and files for AI drafts
+
+[한국어 빠른 시작](#한국어-빠른-시작)
 
 **Bring the right sources to your AI conversation.** Tag a note, an email, or a saved file while it’s in front of you. Later, look up that tag and copy the sources you choose, with their dates and citations. Context reads the current saved version. It doesn’t edit the original or send a message for you.
 
@@ -68,3 +70,13 @@ Files over 40 MB are listed but not read. Web pages cannot be tagged. Looking up
 **Privacy:** Context keeps a local index of tags and source references, not a library of document copies or past versions. It makes no network requests. When you copy or insert text into another app, review that draft before sending it.
 
 **Release status:** The Apple silicon build passed 45/45 Mac self-checks. Hands-on menu bar, permission, and live ChatGPT workflows are still unverified. See the [prerelease notes](https://github.com/zakat9/context-macos/releases/tag/v0.12.0) for test coverage and limitations.
+
+## 한국어 빠른 시작
+
+맥에서 **애플 메모, 메일, 엑셀 파일을 ChatGPT 질문에 참고 자료로 넣고 싶을 때** 쓰는 메뉴 막대 앱이야. 예를 들어 견적 메일과 공급사 통화 메모에 같은 태그를 붙여 두면, 나중에 두 앱을 따로 검색하지 않고 견적 금액과 납기 근거를 함께 찾을 수 있어.
+
+1. 샘플 메모를 열고 메뉴 막대의 태그 아이콘을 눌러. **App access**에서 Notes를 선택하고 **Request selected**로 접근을 허용해.
+2. 메모 제목을 확인한 뒤 **Add a tag**에 `견적`을 입력하고 Return을 눌러. 관련 메일이나 저장된 파일에도 같은 태그를 붙여.
+3. **Find context**에서 `견적`을 찾아 필요한 자료만 체크하고 **Copy**를 눌러. ChatGPT 또는 다른 AI 초안에 붙여넣으면 출처와 날짜가 함께 들어가. 전송은 직접 해.
+
+태그는 원본이 아닌 Mac의 로컬 색인에만 저장돼. PDF·Word는 이름과 날짜만 제공해. 선택형 Chrome 확장의 직접 삽입은 실제 ChatGPT에서 아직 검증되지 않았고, 현재 배포본은 Apple 공증 전 프리릴리스야.
