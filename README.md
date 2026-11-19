@@ -1,5 +1,9 @@
 # Context for Mac: tag Apple Notes, Mail and files for AI drafts
 
+## [Download Context for Mac · Mac용 앱 바로 다운로드 (ZIP)](https://github.com/zakat9/context-macos/releases/download/v0.12.0/Context-0.12.0-macOS-arm64-adhoc.zip)
+
+**Apple silicon (M-series) · v0.12.0 prerelease · No GitHub account needed.** Unzip and move **Context.app** to Applications. Not Apple-notarized; macOS may block it.
+
 [한국어 빠른 시작](#한국어-빠른-시작)
 
 **Bring the right sources to your AI conversation.** Tag a note, an email, or a saved file while it’s in front of you. Later, look up that tag and copy the sources you choose, with their dates and citations. Context reads the current saved version. It doesn’t edit the original or send a message for you.
@@ -72,6 +76,8 @@ Files over 40 MB are listed but not read. Web pages cannot be tagged. Looking up
 **Release status:** The Apple silicon build passed 45/45 Mac self-checks. Hands-on menu bar, permission, and live ChatGPT workflows are still unverified. See the [prerelease notes](https://github.com/zakat9/context-macos/releases/tag/v0.12.0) for test coverage and limitations.
 
 ## 한국어 빠른 시작
+
+**[Mac용 앱 바로 다운로드: Context 0.12.0 ZIP](https://github.com/zakat9/context-macos/releases/download/v0.12.0/Context-0.12.0-macOS-arm64-adhoc.zip)** · Apple Silicon(M 시리즈) 전용. GitHub 로그인 없이 받을 수 있습니다. 초록색 **Code → Download ZIP**은 앱 설치 파일이 아닙니다.
 
 맥에서 **애플 메모, 메일, 엑셀 파일을 ChatGPT 질문에 참고 자료로 넣고 싶을 때** 쓰는 메뉴 막대 앱이야. 예를 들어 견적 메일과 공급사 통화 메모에 같은 태그를 붙여 두면, 나중에 두 앱을 따로 검색하지 않고 견적 금액과 납기 근거를 함께 찾을 수 있어.
 
