@@ -1,32 +1,30 @@
-# Context for Mac: tag Apple Notes, Mail and files for AI drafts
+# Context for Mac
 
-## [Download Context for Mac · Mac용 앱 바로 다운로드 (ZIP)](https://github.com/zakat9/context-macos/releases/download/v0.12.0/Context-0.12.0-macOS-arm64-adhoc.zip)
+Tag Apple Notes, Mail messages and saved files from the macOS menu bar. Look up a tag to copy current source material into an AI draft with its dates and citations. Context never presses Send.
 
-**Apple silicon (M-series) · v0.12.0 prerelease · No GitHub account needed.** Unzip and move **Context.app** to Applications. Not Apple-notarized; macOS may block it.
+**[Download for Mac · Mac용 앱 다운로드 (ZIP)](https://github.com/zakat9/context-macos/releases/download/v0.12.0/Context-0.12.0-macOS-arm64-adhoc.zip)** · [Product page &amp; help](https://zakat9.github.io/context-macos/) · [한국어 안내](https://zakat9.github.io/context-macos/#ko) · [Release notes](https://github.com/zakat9/context-macos/releases/tag/v0.12.0)
 
-[한국어 빠른 시작](#한국어-빠른-시작)
+**0.12.0 prerelease.** The prebuilt app is for Apple silicon (M-series). The build targets macOS 12 or later and was self-tested on macOS 27.2.1. It is ad-hoc signed, not Apple-notarized; Gatekeeper may block it. No Intel binary is provided.
 
-**Bring the right sources to your AI conversation.** Tag a note, an email, or a saved file while it’s in front of you. Later, look up that tag and copy the sources you choose, with their dates and citations. Context reads the current saved version. It doesn’t edit the original or send a message for you.
+## Install and try it
 
-**[Download for Apple silicon](https://github.com/zakat9/context-macos/releases/download/v0.12.0/Context-0.12.0-macOS-arm64-adhoc.zip)** · [Build from source](https://github.com/zakat9/context-macos/releases/download/v0.12.0/Context-0.12.0-source.zip) · [Release notes](https://github.com/zakat9/context-macos/releases/tag/v0.12.0)
+1. Download the **app ZIP** above, unzip it and move **Context.app** to Applications. Open the app and look for the tag icon in the menu bar.
+2. Open a sample note. Click the tag icon → **App access**, select Notes and choose **Request selected**. When you return to the note, check the title under **Selected item**, type a tag such as `Quote` and press Return. Repeat for a related email or saved file. Each item can have up to two tags.
+3. Under **Find context**, select `Quote`. Preview a source, untick anything you don't want, then press **Copy** and paste into your draft. No extension is required.
 
-**0.12.0 prerelease.** The prebuilt app is not notarized. See [Install](#install) before opening it.
+[See the walkthrough with screenshots](https://zakat9.github.io/context-macos/) · [Installation help](https://zakat9.github.io/context-macos/#help)
 
-## A quick tour
+## Features and limits
 
-Suppose a supplier emails a revised quote and confirms the lead time on a call. The price is in Mail; the call notes are in Notes. Give both the tag **Quote** and you can bring them back together without searching two apps.
+- **Tag current item:** assign a shortcut in Settings to open the editor for the selected item.
+- **Manage tags:** preview the number of affected sources before renaming or merging a tag. Originals are never edited.
+- **Insert context:** the optional Chrome extension inserts sources into a ChatGPT draft. Tested on a fictional chat page, not the live ChatGPT editor. For any other AI app, use Copy and paste.
+- **File support:** reads saved Excel cell values, plain text and saved mail; PDF, Word, PowerPoint and iWork documents are taggable by name and date only. Files over 40 MB are listed, not read.
+- **Privacy:** Context keeps a local index under `~/WorkIndex/`, not copies of document contents or version history. The app makes no network requests. Review what you copy or insert before sending it to another service.
 
-| 1. Tag the note you’re looking at | 2. Choose the sources for your draft |
-| :--- | :--- |
-| <img src="https://github.com/user-attachments/assets/d67ba7c3-f79f-4987-8e06-f01dfa3110da" width="352" alt="Selected item shows the supplier call note with its Quote tag and an Add another tag field."> | <img src="https://github.com/user-attachments/assets/0024dd1b-b9ad-4401-a4f7-037672a931a0" width="352" alt="Find context shows the revised quote email and the supplier call note checked, with a Copy 2 sources button."> |
-| **Selected item** tells you exactly what you’re tagging. The tag lives in Context, not in the note. | **Find context** lists sources by their own dates, oldest first. Open a row to preview it; untick anything you don’t want to share. |
+## Build from source
 
-*The two screens show the 0.12 interface rendered in a browser with fictional sources, not a live Mail or Notes session.*
-
-## Install
-
-- **Apple silicon:** Download the app ZIP above, unzip it, move **Context.app** to your Applications folder, and open it. Look for the **tag icon in the macOS menu bar**. This build is ad-hoc signed: Gatekeeper may block it. Building from source is recommended; [release notes and checksums](https://github.com/zakat9/context-macos/releases/tag/v0.12.0) are available before you install.
-- **Build it yourself:** Download the **versioned source ZIP** above (not GitHub’s automatic “Source code” archive). With Apple’s Command Line Tools installed, open Terminal in the extracted project folder and run:
+Install Apple's Command Line Tools. Use the [versioned source ZIP](https://github.com/zakat9/context-macos/releases/download/v0.12.0/Context-0.12.0-source.zip) for the exact prerelease source. From the project root:
 
 ```bash
 cd app
@@ -34,55 +32,20 @@ bash build.sh install
 open ~/Applications/Context.app
 ```
 
-## Try it with one note
+The script runs the Mac self-test and installs to your user Applications folder. To run the fictional-data regression suite, use `node tests/run.js` from the project root (Node 18+). See [release notes](RELEASE-NOTES.md) and [remaining live checks](LIVE-CHECKS.md) for the tested scope. GitHub's **Code → Download ZIP** gives repository files, not an installable app.
 
-1. **Connect Notes.** Open a sample note. Click the menu bar tag icon → **App access**, select **Notes**, then **Request selected**. macOS asks separately for each selected app.
-2. **Tag it.** With the note in front, click the tag icon again. Check the title under **Selected item**, type `Quote` in **Add a tag**, and press **Return**. If the tag is already under **Tag as**, just click it. You can add up to two tags per item.
-3. **Use it.** Under **Find context**, select `Quote`. Click a source row to see exactly what will be copied. Leave the sources you want checked, press **Copy**, and paste into your AI draft. No extension is needed for this path.
+## Help and removal
 
-Try asking: *“What price did the supplier quote, what lead time did they confirm, and was the quote approved? Cite the email or note for each answer.”* If a source changed since the list was shown, look it up again before copying.
-
-## Three useful controls
-
-| When you want to… | Where to go | What happens |
-| :--- | :--- | :--- |
-| Tag a file or note without reaching for the menu bar | **Settings → Shortcuts → Tag current item** | Choose **Use ⌃⌥T** (Control–Option–T) or record your own. With one supported item selected, the shortcut opens its tag editor. Off by default. |
-| Rename a tag everywhere | **Manage tags → select a tag** | Enter the new name and review the source count. Choose **Rename**, or **Merge** if that tag already exists. An item with both keeps one; no original file changes. |
-| Skip manual copy and paste in a ChatGPT draft | **Settings → Insert context → Set up for Google Chrome** | The optional extension inserts at the caret. You still review the draft and press Send yourself. Setup below. |
-
-<details><summary><strong>Set up Insert context in Chrome</strong></summary>
-
-1. In Context, choose **Set up for Google Chrome**, then **Show extension**.
-2. In Chrome, open `chrome://extensions`, enable **Developer mode**, choose **Load unpacked**, and select the folder Context showed you.
-3. In `chrome://extensions/shortcuts`, assign a key to **Insert context at the caret**. This is separate from the Mac tagging shortcut.
-4. At `chatgpt.com`, click in the draft, press that key, choose a tag, review the selected sources, and press **Insert**. If you changed chats, moved the caret, or edited the draft, Context refuses to insert. Use **Copy instead** if needed.
-
-Tested in Chromium against a fictional chat page, not the live ChatGPT editor. For other AI apps, use **Copy** and paste.
-
-</details>
-
-## What you can bring into a draft
-
-| Source | What Context can include |
-| :--- | :--- |
-| Apple Notes, Apple Mail, saved `.eml` messages | Text plus source details. Notes and Mail need Automation access. |
-| Excel `.xlsx` / `.xlsm`, CSV, Markdown and plain-text files | Saved sheet and cell values, or file text, with a source reference. |
-| PDF, Word, PowerPoint and iWork documents | Taggable by name and date. Their document text is **not** extracted. |
-
-Files over 40 MB are listed but not read. Web pages cannot be tagged. Looking up a tag in the popover can open Notes or Mail and trigger a macOS permission prompt; the menu bar label and tagging shortcut do not.
-
-**Privacy:** Context keeps a local index of tags and source references, not a library of document copies or past versions. It makes no network requests. When you copy or insert text into another app, review that draft before sending it.
-
-**Release status:** The Apple silicon build passed 45/45 Mac self-checks. Hands-on menu bar, permission, and live ChatGPT workflows are still unverified. See the [prerelease notes](https://github.com/zakat9/context-macos/releases/tag/v0.12.0) for test coverage and limitations.
+- **Permission denied?** Review **System Settings → Privacy & Security → Automation**. Select one saved item and try again. Do not disable Gatekeeper.
+- **Shortcut or insertion not working?** Check the shortcut in Settings, or use the tag icon and Copy. [Report an issue](https://github.com/zakat9/context-macos/issues) with the app version, macOS version and fictional reproduction steps. Do not include personal files or mail.
+- **Uninstall:** disable Insert context in Settings if enabled and remove its Chrome extension. Quit Context and delete the app. Keep `~/WorkIndex/` to retain your local tags.
 
 ## 한국어 빠른 시작
 
-**[Mac용 앱 바로 다운로드: Context 0.12.0 ZIP](https://github.com/zakat9/context-macos/releases/download/v0.12.0/Context-0.12.0-macOS-arm64-adhoc.zip)** · Apple Silicon(M 시리즈) 전용. GitHub 로그인 없이 받을 수 있습니다. 초록색 **Code → Download ZIP**은 앱 설치 파일이 아닙니다.
+**[Apple Silicon용 앱 ZIP 다운로드](https://github.com/zakat9/context-macos/releases/download/v0.12.0/Context-0.12.0-macOS-arm64-adhoc.zip)** · [화면으로 보는 사용법](https://zakat9.github.io/context-macos/#ko)
 
-맥에서 **애플 메모, 메일, 엑셀 파일을 ChatGPT 질문에 참고 자료로 넣고 싶을 때** 쓰는 메뉴 막대 앱이야. 예를 들어 견적 메일과 공급사 통화 메모에 같은 태그를 붙여 두면, 나중에 두 앱을 따로 검색하지 않고 견적 금액과 납기 근거를 함께 찾을 수 있어.
+압축을 풀고 Context.app을 응용 프로그램 폴더로 옮기세요. 메뉴 막대의 태그 아이콘에서 Notes 접근을 허용한 뒤, 메모와 관련 메일에 같은 태그를 붙이세요. **Find context → Copy**로 필요한 자료만 출처와 함께 복사할 수 있습니다. 전송은 사용자가 직접 합니다. 이 버전은 Apple 공증 전 프리릴리스입니다.
 
-1. 샘플 메모를 열고 메뉴 막대의 태그 아이콘을 눌러. **App access**에서 Notes를 선택하고 **Request selected**로 접근을 허용해.
-2. 메모 제목을 확인한 뒤 **Add a tag**에 `견적`을 입력하고 Return을 눌러. 관련 메일이나 저장된 파일에도 같은 태그를 붙여.
-3. **Find context**에서 `견적`을 찾아 필요한 자료만 체크하고 **Copy**를 눌러. ChatGPT 또는 다른 AI 초안에 붙여넣으면 출처와 날짜가 함께 들어가. 전송은 직접 해.
+## License
 
-태그는 원본이 아닌 Mac의 로컬 색인에만 저장돼. PDF·Word는 이름과 날짜만 제공해. 선택형 Chrome 확장의 직접 삽입은 실제 ChatGPT에서 아직 검증되지 않았고, 현재 배포본은 Apple 공증 전 프리릴리스야.
+All rights reserved. No open-source license has been granted.
