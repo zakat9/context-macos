@@ -22,7 +22,7 @@ Tag Apple Notes, Mail messages and saved files from the macOS menu bar. Look up 
 2. Open a sample note. Click the tag icon → **App access**, select Notes and choose **Request selected**. When you return to the note, check the title under **Selected item**, type a tag such as `Quote` and press Return. Repeat for a related email or saved file. Each item can have up to two tags.
 3. Under **Find context**, select `Quote`. Preview a source, untick anything you don't want, then press **Copy** and paste into your draft. No extension is required.
 
-[See the walkthrough (0.12.0 example screens)](https://zakat9.github.io/context-macos/) · [Installation help](https://zakat9.github.io/context-macos/#help)
+[Watch the investor meeting demo (20 seconds)](https://zakat9.github.io/context-macos/#investor-demo) · [Installation help](https://zakat9.github.io/context-macos/#help)
 
 ## Upgrading from Context 0.12.2
 
@@ -62,7 +62,7 @@ The script runs the Mac self-test and installs to your user Applications folder.
 
 ## 한국어 빠른 시작
 
-**[Apple Silicon용 앱 ZIP 다운로드](https://github.com/zakat9/context-macos/releases/download/v0.12.3/contexta-0.12.3-macOS-arm64-adhoc.zip)** · [소스 ZIP](https://github.com/zakat9/context-macos/releases/download/v0.12.3/contexta-0.12.3-source.zip) · [SHA-256 체크섬](https://github.com/zakat9/context-macos/releases/download/v0.12.3/SHA256SUMS.txt) · [화면으로 보는 사용법 (0.12.0 예시)](https://zakat9.github.io/context-macos/#ko)
+**[Apple Silicon용 앱 ZIP 다운로드](https://github.com/zakat9/context-macos/releases/download/v0.12.3/contexta-0.12.3-macOS-arm64-adhoc.zip)** · [소스 ZIP](https://github.com/zakat9/context-macos/releases/download/v0.12.3/contexta-0.12.3-source.zip) · [SHA-256 체크섬](https://github.com/zakat9/context-macos/releases/download/v0.12.3/SHA256SUMS.txt) · [투자사 미팅 준비 데모 보기](https://zakat9.github.io/context-macos/#demo-ko)
 
 기존 Context 0.12.2에서 업데이트할 때는 `Context.app`을 종료하고 **contexta.app**을 설치하세요. 새 앱을 한 번 연 뒤 기존 앱을 삭제하세요. 태그와 설정을 보관하는 `~/WorkIndex/`는 그대로 두세요. 앱, Chrome 확장 프로그램, 도우미의 ID와 기존 단축키는 바뀌지 않았습니다.
 
