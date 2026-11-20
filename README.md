@@ -4,9 +4,11 @@ Tag Apple Notes, Mail messages and saved files from the macOS menu bar. Look up 
 
 **[Download for Mac · Mac용 앱 다운로드 (ZIP)](https://github.com/zakat9/context-macos/releases/download/v0.12.3/contexta-0.12.3-macOS-arm64-adhoc.zip)** · [SHA-256 checksums](https://github.com/zakat9/context-macos/releases/download/v0.12.3/SHA256SUMS.txt) · [Product page &amp; help](https://zakat9.github.io/context-macos/) · [한국어 안내](https://zakat9.github.io/context-macos/#ko) · [Release notes](https://github.com/zakat9/context-macos/releases/tag/v0.12.3)
 
-contexta 0.12.3 installs as **contexta.app**. If you use Context 0.12.2, quit it before installing. Open contexta once before removing the old Context.app; keep `~/WorkIndex/` for your tags and settings. If you use Insert context, reload the extension in Chrome after opening contexta.
+Upgrading from Context 0.12.2? Quit `Context.app`, install **contexta.app**, then open the new app once before removing the old one. Keep `~/WorkIndex/` in place to retain your tags and settings. Your existing shortcut stays the same. The app bundle ID, Chrome extension ID and helper ID have not changed.
 
-**0.12.3 prerelease.** The prebuilt app is for Apple silicon (M-series). The build targets macOS 12 or later and was self-tested on macOS 27.2.1. It is ad-hoc signed, not Apple-notarized; Gatekeeper may block it. No Intel binary is provided.
+If you use **Insert context**, opening contexta once updates the existing Chrome helper registration. Reload the extension in Chrome. If the helper still stops, open **Settings → Insert context** in contexta, turn it off and set it up again. Do not reopen the old app: it can point the helper back to itself.
+
+**0.12.3 prerelease (build 9).** The prebuilt app is for Apple silicon (M-series). The build targets macOS 12 or later. On macOS 27.2.1, 54/54 native self-tests passed. The upgrade was tested with temporary folders, not a real user profile or a live ChatGPT session. It is ad-hoc signed, not Apple-notarized; Gatekeeper may block it. No Intel binary is provided.
 
 ## Install and try it
 
@@ -48,9 +50,11 @@ The script runs the Mac self-test and installs to your user Applications folder.
 
 **[Apple Silicon용 앱 ZIP 다운로드](https://github.com/zakat9/context-macos/releases/download/v0.12.3/contexta-0.12.3-macOS-arm64-adhoc.zip)** · [소스 ZIP](https://github.com/zakat9/context-macos/releases/download/v0.12.3/contexta-0.12.3-source.zip) · [SHA-256 체크섬](https://github.com/zakat9/context-macos/releases/download/v0.12.3/SHA256SUMS.txt) · [화면으로 보는 사용법 (0.12.0 예시)](https://zakat9.github.io/context-macos/#ko)
 
-Context의 새 이름은 contexta입니다. 0.12.3 버전은 **contexta.app**으로 설치됩니다. 기존 Context 0.12.2 사용자는 먼저 앱을 종료하세요. 새 앱을 한 번 연 뒤 기존 Context.app을 삭제하고, 태그와 설정이 저장된 `~/WorkIndex/`는 그대로 두세요. Insert context를 사용한다면 새 앱을 연 뒤 Chrome에서 확장 프로그램을 다시 로드하세요.
+기존 Context 0.12.2에서 업데이트할 때는 `Context.app`을 종료하고 **contexta.app**을 설치하세요. 새 앱을 한 번 연 뒤 기존 앱을 삭제하세요. 태그와 설정을 보관하는 `~/WorkIndex/`는 그대로 두세요. 앱, Chrome 확장 프로그램, 도우미의 ID와 기존 단축키는 바뀌지 않았습니다.
 
-Apple Silicon(M 시리즈) 전용 · macOS 12 이상 빌드 대상 · ad-hoc 서명, Apple 미공증 프리릴리스입니다. Gatekeeper가 실행을 차단할 수 있습니다. Gatekeeper를 끄지 마세요.
+**Insert context** 사용자라면 새 앱을 한 번 열어 기존 Chrome 도우미의 경로를 갱신한 뒤, Chrome에서 확장 프로그램을 다시 로드하세요. 도우미가 계속 멈추면 contexta의 **Settings → Insert context**에서 기능을 끄고 다시 설정하세요. 예전 앱을 다시 열면 도우미가 이전 경로를 가리킬 수 있습니다.
+
+0.12.3 프리릴리스(빌드 9)는 Apple Silicon(M 시리즈)용이며 macOS 12 이상을 대상으로 빌드했습니다. macOS 27.2.1에서 자체 테스트 54/54개를 통과했습니다. 업그레이드는 임시 폴더에서만 테스트했으며 실제 사용자 프로필과 실제 ChatGPT 환경에서는 검증하지 않았습니다. ad-hoc 서명만 있으며 Apple 공증은 받지 않았습니다. Gatekeeper가 실행을 차단할 수 있습니다. Gatekeeper를 끄지 마세요.
 
 압축을 풀고 contexta.app을 응용 프로그램 폴더로 옮기세요. 메뉴 막대의 태그 아이콘에서 Notes 접근을 허용한 뒤, 메모와 관련 메일에 같은 태그를 붙이세요. **Find context → Copy**로 필요한 자료만 출처와 함께 복사할 수 있습니다. 전송은 사용자가 직접 합니다.
 
