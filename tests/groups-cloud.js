@@ -39,7 +39,7 @@ module.exports = async function (ctx) {
   var rOnline = Read.readFile(rec, onlineFile), dOnline = Read.describeFile(onlineFile, onlineFile.realPath);
   t('CL03', 'an online-only file (its contents still in the cloud) is tagged by its name and file date without its contents, and a lookup lists it as not read with what to do, instead of downloading it',
     dOnline.ok && dOnline.desc.title === 'supplier list.csv' && dOnline.desc.sourceTime && dOnline.desc.locator.value === onlineFile.realPath &&
-    rOnline.status === 'unreadable' && /^online only in Dropbox: its contents are not on this Mac, and Context does not download them\. In Finder choose "Make Available Offline" or "Download Now"/.test(rOnline.reason) && !rOnline.content && rOnline.observed.sourceTime,
+    rOnline.status === 'unreadable' && /^online only in Dropbox: its contents are not on this Mac, and contexta does not download them\. In Finder choose "Make Available Offline" or "Download Now"/.test(rOnline.reason) && !rOnline.content && rOnline.observed.sourceTime,
     JSON.stringify([dOnline, rOnline]));
   var pointer = new TextEncoder().encode(JSON.stringify({ doc_id: 'FICTIONAL123', email: EMAIL, url: 'https://docs.google.com/spreadsheets/d/FICTIONAL123' }));
   var gFile = { ok: true, realPath: GD + '/My Drive/Budget 2027.gsheet', bytes: pointer, mtimeMs: when, size: pointer.length };

@@ -1,6 +1,6 @@
 # Parked connector (not part of the app, not verified in any client)
 
-The connector is `node dev/workindex.js mcp`: a Model Context Protocol server that a chat client starts as a local
+The connector is `node dev/workindex.js mcp`: a Model contexta Protocol server that a chat client starts as a local
 process and talks to over standard input and output. It opens no network port and connects to nothing.
 It can only read: list tags, list the sources linked to a tag, and read those sources as they are saved now.
 

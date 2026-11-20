@@ -1,4 +1,4 @@
-/* Context — Insert context: what the Mac app answers when its browser extension asks.
+/* contexta — Insert context: what the Mac app answers when its browser extension asks.
  *
  * The extension's picker (in the browser, opened by a shortcut the person set there) asks four things, in order:
  *   open     the tags in use, most recently used first, with the number of sources each is on
@@ -21,7 +21,7 @@
  */
 var ContextInsert = (function (Core, Read) {
   'use strict';
-  var BEGIN = '--- Context evidence: begin ---', END = '--- Context evidence: end ---';
+  var BEGIN = '--- contexta evidence: begin ---', END = '--- contexta evidence: end ---';
   var MAX_TEXT = 200000;          /* characters; at most three bytes each in UTF-8 plus JSON escapes, so the answer stays under the browser's 1 MB */
 
   function lookupQuery(text) {
@@ -48,7 +48,7 @@ var ContextInsert = (function (Core, Read) {
     /* one indexed source, read as it is saved right now (the popover's reading, done at once) */
     function readRecord(rec) {
       var loc = rec.locator || {};
-      if (loc.type === 'url') return { status: 'external', reason: 'web link; Context does not fetch pages' };
+      if (loc.type === 'url') return { status: 'external', reason: 'web link; contexta does not fetch pages' };
       if (loc.type === 'file') {
         var f = ask('readFile', loc.value);
         if (f && f.ok && typeof f.base64 === 'string') { f.bytes = Read.base64Bytes(f.base64); delete f.base64; }
@@ -105,11 +105,11 @@ var ContextInsert = (function (Core, Read) {
       if (!H || !req.token || req.token !== H.token) return { ok: false, reason: 'expired', message: 'This list is no longer current. Choose the tag again.' };
       var l = index();
       if (!l.index) { held = null; return { ok: false, reason: 'index', message: l.error }; }
-      /* the tags themselves may have been changed in Context meanwhile (a rename, a merge, a tag taken off) */
+      /* the tags themselves may have been changed in contexta meanwhile (a rename, a merge, a tag taken off) */
       var recs = Core.resolve(l.index, H.q.tags.map(function (t) { return t.key; }));
       if (recs.map(binding).sort().join(' ') !== H.bindings) {
         held = null;
-        return { ok: false, reason: 'index-changed', message: 'Tags were changed in Context after this list was shown. Choose the tag again.', tags: tagsOf(l.index) };
+        return { ok: false, reason: 'index-changed', message: 'Tags were changed in contexta after this list was shown. Choose the tag again.', tags: tagsOf(l.index) };
       }
       var want = {}; (Array.isArray(req.selected) ? req.selected : []).forEach(function (id) { want[String(id)] = true; });
       var pick = H.entries.filter(function (e) { return want[e.record.id]; });
@@ -140,7 +140,7 @@ var ContextInsert = (function (Core, Read) {
       else if (req.op === 'lookup') out = lookup(req);
       else if (req.op === 'render') out = render(req);
       else if (req.op === 'done') { held = null; out = { ok: true }; }
-      else out = { ok: false, reason: 'unknown', message: 'Context does not know this request.' };
+      else out = { ok: false, reason: 'unknown', message: 'contexta does not know this request.' };
       if (req.id != null) out.id = req.id;
       return out;
     }

@@ -5,7 +5,7 @@
 	<key>CFBundleDevelopmentRegion</key>
 	<string>en</string>
 	<key>CFBundleDisplayName</key>
-	<string>Context</string>
+	<string>contexta</string>
 	<key>CFBundleExecutable</key>
 	<string>WorkIndex</string>
 	<key>CFBundleIconFile</key>
@@ -15,19 +15,19 @@
 	<key>CFBundleInfoDictionaryVersion</key>
 	<string>6.0</string>
 	<key>CFBundleName</key>
-	<string>Context</string>
+	<string>contexta</string>
 	<key>CFBundlePackageType</key>
 	<string>APPL</string>
 	<key>CFBundleShortVersionString</key>
-	<string>0.12.2</string>
+	<string>0.12.3</string>
 	<key>CFBundleVersion</key>
-	<string>8</string>
+	<string>9</string>
 	<key>LSMinimumSystemVersion</key>
 	<string>12.0</string>
 	<key>LSUIElement</key>
 	<true/>
 	<key>NSAppleEventsUsageDescription</key>
-	<string>Context asks the app in front which single note, message or file is selected, so it can show its tags in the menu bar and its title when you tag it, and reads tagged notes and messages when you look up a tag or insert context. It only reads them; nothing leaves this Mac unless you copy or insert it yourself.</string>
+	<string>contexta asks the app in front which single note, message or file is selected, so it can show its tags in the menu bar and its title when you tag it, and reads tagged notes and messages when you look up a tag or insert context. It only reads them; nothing leaves this Mac unless you copy or insert it yourself.</string>
 	<key>NSHighResolutionCapable</key>
 	<true/>
 	<key>NSHumanReadableCopyright</key>

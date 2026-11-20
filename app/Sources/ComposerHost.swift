@@ -1,6 +1,6 @@
-// Context — Insert context: the local helper, and the plumbing it shares with the app.
+// contexta — Insert context: the local helper, and the plumbing it shares with the app.
 //
-// The browser starts this same executable with "chrome-extension://…/" as an argument when the Context extension
+// The browser starts this same executable with "chrome-extension://…/" as an argument when the contexta extension
 // opens its picker (that is how browsers start a "native messaging host"). Started like that, the executable shows
 // no window and no menu-bar item, and makes no AppKit call: it only carries messages.
 //
@@ -8,10 +8,10 @@
 //   helper  ⇄ the app    a socket file in ~/WorkIndex/composer (a folder only this user can open); same framing
 //
 // The helper passes a request on only when all of this is so, and otherwise answers every request with the reason:
-//   forbidden     the argument is not the Context extension's own address
+//   forbidden     the argument is not the contexta extension's own address
 //   off           Insert context is not switched on in Settings
 //   not-paired    the program that started the helper is not a browser Insert context was set up for
-//   not-running   the Context app is not running (the helper never starts it), or what answers on the socket is not
+//   not-running   the contexta app is not running (the helper never starts it), or what answers on the socket is not
 //                 this same executable
 //
 // There is no network in any of this: no port is opened and nothing listens beyond this user's own files.

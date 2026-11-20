@@ -1,4 +1,4 @@
-/* Round 2 — Context. One tag across a workbook (USD and KRW, saved three times), Mail messages, a note and a message
+/* Round 2 — contexta. One tag across a workbook (USD and KRW, saved three times), Mail messages, a note and a message
  * file, registered from different apps over two weeks. Scored against the prewritten answer key (answer-key.json):
  * current saved values at the right cells, correct citations, chronology across sources, request versus approval,
  * and nothing stale, irrelevant or unticked in what is copied. */
@@ -8,7 +8,7 @@ var L = require('./lib.js'), Popover = require('../../core/popover.js');
 var KEY = JSON.parse(fs.readFileSync(path.join(__dirname, 'answer-key.json'), 'utf8'));
 
 module.exports = async function () {
-  var out = { name: 'Context', checks: [], scores: {}, blocked: [], notes: [], comparison: null };
+  var out = { name: 'contexta', checks: [], scores: {}, blocked: [], notes: [], comparison: null };
   function check(id, what, pass, expected, actual) { out.checks.push({ id: id, what: what, pass: !!pass, expected: expected, actual: actual }); }
   var dir = fs.mkdtempSync(path.join(os.tmpdir(), 'workindex-round2-')), mac = L.Mac.create(dir), clock = { ms: 0 };
   var played = await L.playScenario(mac, Popover, clock), pop = played.pop, objects = mac.objects();

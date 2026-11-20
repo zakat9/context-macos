@@ -67,13 +67,13 @@ code{font:inherit;color:var(--ink);-webkit-user-select:text;user-select:text}
 </ol>
 <p class="msg" id="insertMsg" role="status"></p>
 <script>
-/* Context — Settings: the rules of the Settings window.
+/* contexta — Settings: the rules of the Settings window.
  *
  * Two things can be set, and they have nothing to do with each other:
  *
  *   Shortcuts › Tag current item   A key chord of the person's choosing. Nothing is set until they set it. The Mac
  *                                  app registers it with macOS as a hot key (macOS then tells the app when it is
- *                                  pressed; the app listens to no other key) and only while an app Context follows is
+ *                                  pressed; the app listens to no other key) and only while an app contexta follows is
  *                                  in front. A chord that is refused here, or that macOS does not accept, changes
  *                                  nothing: the chord that was set before stays set.
  *   Insert context                 Whether the browser extension may ask this app for tags and sources, and for
@@ -116,14 +116,14 @@ var ContextSettings = (function () {
     var label = /^Key[A-Z]$/.test(e.code) ? e.code.slice(3) : /^Digit\d$/.test(e.code) ? e.code.slice(5) : /^F\d+$/.test(e.code) ? e.code : LABEL[e.code];
     return { ok: true, chord: clean({ keyCode: code, modifiers: mods, key: label }) };
   }
-  /* may this chord be the shortcut? `current` is what is set now; `others` are Context's other shortcuts: [{ name, chord }] */
+  /* may this chord be the shortcut? `current` is what is set now; `others` are contexta's other shortcuts: [{ name, chord }] */
   function check(chord, current, others) {
     var c = clean(chord);
     if (!c) return { ok: false, code: 'bad', message: 'That is not a key chord.' };
     if (c.modifiers.indexOf('control') < 0 && c.modifiers.indexOf('option') < 0) return { ok: false, code: 'needs-modifier', message: 'Use Control or Option in the shortcut, so that it does not take over a key you type or a menu command.' };
     if (current && same(c, current)) return { ok: false, code: 'same', message: show(c) + ' is already the shortcut.' };
     var clash = (others || []).filter(function (o) { return same(o.chord, c); })[0];
-    if (clash) return { ok: false, code: 'duplicate', message: show(c) + ' is already Context\'s shortcut for ' + clash.name + '.' };
+    if (clash) return { ok: false, code: 'duplicate', message: show(c) + ' is already contexta\'s shortcut for ' + clash.name + '.' };
     return { ok: true, chord: c };
   }
   /* what is kept in the settings file: known fields only */
@@ -189,7 +189,7 @@ var ContextSettings = (function () {
       return ask('insertEnable', which).then(function (r) {
         st.busy = false;
         if (r.ok) { st.insert = { on: !!r.insert.on, browsers: (r.insert.browsers || []).slice() }; st.insertMessage = 'Registered. Now the three steps, in that browser.'; st.insertKind = 'done'; }
-        else if (r.reason !== 'cancelled') { st.insertMessage = { 'no-folder': 'That browser\'s folder for local helpers was not found. Is the browser installed, and has it been started once?', 'not-saved': 'The helper could not be registered. Nothing was changed.', 'not-a-browser': 'That is not an application.', 'no-socket': 'Context could not open its local connection. Nothing was changed.' }[r.reason] || 'That did not work. Nothing was changed.'; st.insertKind = 'error'; }
+        else if (r.reason !== 'cancelled') { st.insertMessage = { 'no-folder': 'That browser\'s folder for local helpers was not found. Is the browser installed, and has it been started once?', 'not-saved': 'The helper could not be registered. Nothing was changed.', 'not-a-browser': 'That is not an application.', 'no-socket': 'contexta could not open its local connection. Nothing was changed.' }[r.reason] || 'That did not work. Nothing was changed.'; st.insertKind = 'error'; }
         return changed();
       });
     }
@@ -197,7 +197,7 @@ var ContextSettings = (function () {
       st.busy = true;
       return ask('insertDisable').then(function (r) {
         st.busy = false;
-        if (r.ok) { st.insert = { on: false, browsers: [] }; st.insertMessage = 'Insert context is off. The browser extension can no longer reach Context.'; st.insertKind = 'done'; }
+        if (r.ok) { st.insert = { on: false, browsers: [] }; st.insertMessage = 'Insert context is off. The browser extension can no longer reach contexta.'; st.insertKind = 'done'; }
         else { st.insertMessage = 'It could not be switched off completely. Try again.'; st.insertKind = 'error'; }
         return changed();
       });

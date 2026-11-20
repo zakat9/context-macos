@@ -1,5 +1,5 @@
 #!/usr/bin/env node
-/* Context 0.12.1 — layout checks for the popover whose height follows its content, and for its bottom toolbar.
+/* contexta 0.12.1 — layout checks for the popover whose height follows its content, and for its bottom toolbar.
  * The page bundled into the app (app/Resources/popover.html) runs in a real browser against the pretend Mac. The
  * Swift side is stood in for: when the page sends its height, this test does what AppDelegate.fitPopover does
  * (width 352, height within 160 and the room) and resizes the browser's viewport to it, as the popover would.
@@ -172,8 +172,8 @@ function nid(i) { return 'x-coredata://FICTIONAL-01201/ICNote/p' + i; }
   await pg.keyboard.press('End'); var r2 = await pg.evaluate(function () { return document.activeElement.id; });
   await pg.keyboard.press('Home'); var r3 = await pg.evaluate(function () { return document.activeElement.id; });
   await pg.keyboard.press('ArrowLeft'); var r4 = await pg.evaluate(function () { return document.activeElement.id; });
-  t('L12', 'the toolbar: role toolbar with a name; buttons App access, Settings, Manage tags and Quit (spoken "Quit Context"), icons hidden from VoiceOver; no underline anywhere at rest; Quit greyer than the rest but still at least 4.5:1; Tab still reaches every button in order; the keyboard focus ring is drawn inside the button (offset ' + ring.offset + '); arrows, Home and End move along the toolbar',
-    a11y.role === 'toolbar' && a11y.label === 'Context' && a11y.text.join() === 'App access,Settings,Manage tags,Quit' && a11y.names[3] === 'Quit Context' && a11y.svgHidden && a11y.underline === 0 && a11y.quietColor !== a11y.mainColor && a11y.contrast.every(function (c) { return c >= 4.5; }) &&
+  t('L12', 'the toolbar: role toolbar with a name; buttons App access, Settings, Manage tags and Quit (spoken "Quit contexta"), icons hidden from VoiceOver; no underline anywhere at rest; Quit greyer than the rest but still at least 4.5:1; Tab still reaches every button in order; the keyboard focus ring is drawn inside the button (offset ' + ring.offset + '); arrows, Home and End move along the toolbar',
+    a11y.role === 'toolbar' && a11y.label === 'contexta' && a11y.text.join() === 'App access,Settings,Manage tags,Quit' && a11y.names[3] === 'Quit contexta' && a11y.svgHidden && a11y.underline === 0 && a11y.quietColor !== a11y.mainColor && a11y.contrast.every(function (c) { return c >= 4.5; }) &&
     tabs.slice(-4).join() === 'accessBtn,prefsBtn,manageBtn,quitBtn' && ring.id === 'accessBtn' && ring.style === 'solid' && ring.width === '2px' && parseFloat(ring.offset) < 0 && r1 === 'prefsBtn' && r2 === 'quitBtn' && r3 === 'accessBtn' && r4 === 'accessBtn',
     JSON.stringify([a11y, tabs, ring, r1, r2, r3, r4]));
 

@@ -23,7 +23,7 @@ p('**Read this first.** Every result below is a simulation: the product\'s rules
 p();
 p('| Round | Run 1: build as it stood | Run 2: after the first fixes | Run 3: final build | Blocked (not run) |');
 p('|---|---|---|---|---|');
-[['r1', '1. Speed'], ['r2', '2. Context'], ['r3', '3. AI handoff']].forEach(function (x) {
+[['r1', '1. Speed'], ['r2', '2. contexta'], ['r3', '3. AI handoff']].forEach(function (x) {
   p('| ' + x[1] + ' | ' + (before && before.rounds[x[0]] ? tally(before.rounds[x[0]]) + ' pass' : 'not run') + ' | ' + (mid && mid.rounds[x[0]] ? tally(mid.rounds[x[0]]) + ' pass' : 'not run') + ' | **' + tally(after.rounds[x[0]]) + ' pass** | ' + after.rounds[x[0]].blocked.length + ' |');
 });
 p();
@@ -85,7 +85,7 @@ r1.notes.forEach(function (n) { p('- Note: ' + n); });
 
 /* ───────── round 2 ───────── */
 var r2 = after.rounds.r2, b2 = before && before.rounds.r2;
-p(); p('## Round 2: Context'); p();
+p(); p('## Round 2: contexta'); p();
 p('One synthetic corpus, "Pine Ridge tooling budget" (5 to 19 November 2026): a workbook in USD and KRW saved three times, four Mail messages (a quote, a request, an approval, one without a readable date), an Apple Note edited once, a message saved as a file, and a tagged file that is later deleted. The workbook is registered from Finder and again from Excel. Untagged and other-tag sources carry canary lines. The answer key (`tests/rounds/answer-key.json`) was written by hand before the run.');
 p();
 p('| Measure against the answer key | Result after fixes |');

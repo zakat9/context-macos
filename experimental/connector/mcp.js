@@ -1,4 +1,4 @@
-/* Work Index v9 — connector: a Model Context Protocol server over stdio (newline-delimited JSON-RPC 2.0).
+/* Work Index v9 — connector: a Model contexta Protocol server over stdio (newline-delimited JSON-RPC 2.0).
  * Read-only: it can list tags, resolve a tag to its linked sources, and read those sources on demand.
  * It cannot tag, cannot read anything that is not in the index, and makes no network connection.
  * Each call reads the index and the sources again; nothing is cached between calls. */

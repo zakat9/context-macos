@@ -1,11 +1,11 @@
-// Context — the Tag current item shortcut.
+// contexta — the Tag current item shortcut.
 //
 // The chord is the person's choice (Settings › Shortcuts). Nothing is registered until they choose one.
 // It is given to macOS as a hot key (Carbon's RegisterEventHotKey): macOS then tells this app when that one chord is
 // pressed. This app installs no event tap and no key monitor, and never sees any other key.
 //
-// The chord is registered only while an app Context follows is in front (core/status.js says when: "scope"). In a
-// browser, in Context's own windows and everywhere else it is not registered at all, so the same keys keep their
+// The chord is registered only while an app contexta follows is in front (core/status.js says when: "scope"). In a
+// browser, in contexta's own windows and everywhere else it is not registered at all, so the same keys keep their
 // meaning there.
 //
 // A new chord is tried while the old one is still registered. If macOS does not take it, the old one stays as it was.
@@ -85,13 +85,13 @@ final class HotKeyCenter {
     /// The chord was pressed while it was registered.
     var onPressed: (() -> Void)?
 
-    /// At launch: the chord from the settings file. Nothing is registered until an app Context follows is in front.
+    /// At launch: the chord from the settings file. Nothing is registered until an app contexta follows is in front.
     func begin(with saved: Chord?) {
         chord = saved
         apply()
     }
 
-    /// An app Context follows came to the front (true), or any other app, or Context itself (false).
+    /// An app contexta follows came to the front (true), or any other app, or contexta itself (false).
     func setScope(_ on: Bool) {
         if inScope == on { return }
         inScope = on

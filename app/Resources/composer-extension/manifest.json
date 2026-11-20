@@ -1,9 +1,9 @@
 {
   "manifest_version": 3,
-  "name": "Context: Insert context",
-  "short_name": "Context",
-  "version": "0.12.2",
-  "description": "Puts the sources you tagged in the Context Mac app into the ChatGPT message box, at the caret, when you ask. It never sends a message.",
+  "name": "contexta: Insert context",
+  "short_name": "contexta",
+  "version": "0.12.3",
+  "description": "Puts the sources you tagged in the contexta Mac app into the ChatGPT message box, at the caret, when you ask. It never sends a message.",
   "key": "MIIBIjANBgkqhkiG9w0BAQEFAAOCAQ8AMIIBCgKCAQEA6tOeGmaUjwxRYvtDu1qtVRdPSwkVdgYHBD6P1EbxwUU++7+NnJJXK0kZ+kGD1czn91cE/wAF/Yflby9oseXSulQofLLReMkzAVZcgGp9KhuweXyiD433+jZFHRxfhQTWYrgKdxVecb6qWL8qbWntMbK/zRzPQcguXWcP1Sn7prci0jiNK8dbXRRGfL4Z/Brt4T6P3vhXJVAj9BO7Zv063tLdaCVZTVCVXwH4a0NgYiCBSpkocRQ6Fdv5TWyZZOQcX3SuyjcyKVIp4tMqKBs6nxI6BD4MueGwHTgvNz0QMGasFYG1IGTyRE2pY9JoyGOISfAbouqmTcjimTb3I1DAuQIDAQAB",
   "minimum_chrome_version": "116",
   "icons": { "16": "icon-16.png", "32": "icon-32.png", "48": "icon-48.png", "128": "icon-128.png" },

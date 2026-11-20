@@ -1,5 +1,5 @@
 #!/usr/bin/env node
-/* TEST STAND-IN for the Swift helper (the Context app run by the browser with "chrome-extension://…" as its
+/* TEST STAND-IN for the Swift helper (the contexta app run by the browser with "chrome-extension://…" as its
  * argument). It does what that helper is written to do: speak the browser's native-messaging framing on stdin and
  * stdout (4 bytes of length, then JSON), pass each request to the app over a local socket with the same framing,
  * and pass the answer back; when the app cannot be reached, answer every request with the reason.

@@ -4,7 +4,7 @@
 <meta charset="utf-8">
 <meta http-equiv="Content-Security-Policy" content="default-src 'none'; style-src 'unsafe-inline'; script-src 'unsafe-inline'">
 <meta name="viewport" content="width=device-width, initial-scale=1">
-<title>Context</title>
+<title>contexta</title>
 <style>
 /* One popover, 352 points wide, light. Its height is its content's height (the app sizes the popover to it, within the
    screen); only the list of sources or tags scrolls when there is more than fits. Regular weight everywhere: the order
@@ -189,21 +189,21 @@ body[data-mode=tag] #itemLine{display:none}
     <p id="renameTitle"></p>
     <input type="text" id="renameField" autocomplete="off" autocapitalize="off" autocorrect="off" spellcheck="false" placeholder="New name" aria-label="New name for this tag" aria-describedby="renamePlan">
     <div id="renamePlan" role="status"></div>
-    <p class="msg" id="renameNote">Only Context's own index changes. Your files, mail and notes are not touched.</p>
+    <p class="msg" id="renameNote">Only contexta's own index changes. Your files, mail and notes are not touched.</p>
     <div class="acts2"><button type="button" class="btn" id="renameCancel">Cancel</button><button type="submit" class="btn primary" id="renameBtn" disabled>Rename</button></div>
   </form>
 </section>
 </main>
-<footer id="footer" role="toolbar" aria-label="Context" aria-orientation="horizontal">
-  <button type="button" class="tool" id="accessBtn" title="Which apps Context may ask, and macOS permission for each"><svg viewBox="0 0 14 14" aria-hidden="true"><rect x="2.5" y="6.2" width="9" height="6.3" rx="1.4"/><path d="M4.6 6.2V4.4a2.4 2.4 0 0 1 4.8 0v1.8"/></svg>App access</button>
+<footer id="footer" role="toolbar" aria-label="contexta" aria-orientation="horizontal">
+  <button type="button" class="tool" id="accessBtn" title="Which apps contexta may ask, and macOS permission for each"><svg viewBox="0 0 14 14" aria-hidden="true"><rect x="2.5" y="6.2" width="9" height="6.3" rx="1.4"/><path d="M4.6 6.2V4.4a2.4 2.4 0 0 1 4.8 0v1.8"/></svg>App access</button>
   <button type="button" class="tool" id="prefsBtn" title="Shortcut and Insert context"><svg viewBox="0 0 14 14" aria-hidden="true"><circle cx="7" cy="7" r="1.9"/><path d="M7 1.6v1.6M7 10.8v1.6M1.6 7h1.6M10.8 7h1.6M3.2 3.2l1.1 1.1M9.7 9.7l1.1 1.1M3.2 10.8l1.1-1.1M9.7 4.3l1.1-1.1"/></svg>Settings</button>
   <button type="button" class="tool" id="manageBtn" aria-pressed="false" title="Rename or merge a tag everywhere"><svg viewBox="0 0 14 14" aria-hidden="true"><path d="M1.9 2.9a1 1 0 0 1 1-1h3.6a1 1 0 0 1 .7.3l5 5a1 1 0 0 1 0 1.4l-3.6 3.6a1 1 0 0 1-1.4 0l-5-5a1 1 0 0 1-.3-.7z"/><circle cx="4.7" cy="4.7" r=".9"/></svg>Manage tags</button>
-  <button type="button" class="tool quiet" id="quitBtn" aria-label="Quit Context" title="Quit Context">Quit</button>
+  <button type="button" class="tool quiet" id="quitBtn" aria-label="Quit contexta" title="Quit contexta">Quit</button>
 </footer>
 </div>
 
 <script>
-/* Context v9 — core rules (pure: no file, network or OS access).
+/* contexta v9 — core rules (pure: no file, network or OS access).
  *
  * Model: a local tag points to a WHOLE source object (one email message, one note, one saved file such
  * as an entire workbook). The index is current-state only:
@@ -216,7 +216,7 @@ body[data-mode=tag] #itemLine{display:none}
 var WorkIndexCore = (function () {
   'use strict';
 
-  var VERSION = '0.12.2';
+  var VERSION = '0.12.3';
   var MAX_TAGS = 2;
   var LOOKUP_PREFIX = '::';
   var NAME_CHAR = /[\p{L}\p{M}\p{N}_-]/u;
@@ -348,7 +348,7 @@ var WorkIndexCore = (function () {
 
   function loadIndex(json) {
     var raw = typeof json === 'string' ? JSON.parse(json) : json;
-    if (!raw || typeof raw !== 'object' || !raw.objects || typeof raw.objects !== 'object') throw new Error('not a Context file');
+    if (!raw || typeof raw !== 'object' || !raw.objects || typeof raw.objects !== 'object') throw new Error('not a contexta file');
     var idx = emptyIndex();
     var seen = new Map(), all = raw.objects;
     for (var k in all) if (Object.prototype.hasOwnProperty.call(all, k)) { var r = sanitizeRecord(all[k], seen); if (r) idx.objects[r.id] = r; }
@@ -560,7 +560,7 @@ var WorkIndexCore = (function () {
 
   /* ───────── cloud folders ─────────
      Google Drive, Dropbox, OneDrive, Box and iCloud Drive keep their files in folders on this Mac (macOS's File
-     Provider: ~/Library/CloudStorage/<Provider>-<account>/, iCloud Drive in ~/Library/Mobile Documents/). Context
+     Provider: ~/Library/CloudStorage/<Provider>-<account>/, iCloud Drive in ~/Library/Mobile Documents/). contexta
      treats them as the saved files they are. Their folder names carry the account (for Google Drive the account's
      email address), so a file there is named by the service and its place inside it, never by that folder.
      → { provider, place, text } or null for a file that is not in a cloud folder. */
@@ -653,7 +653,7 @@ var WorkIndexCore = (function () {
     var readN = 0, notReadN = 0;
     tl.dated.concat(tl.undated).forEach(function (x) { if (x.state.status === 'ok') readN++; else notReadN++; });
     var total = tl.dated.length + tl.undated.length + tl.unavailable.length;
-    L.push('# Context context for ' + tags);
+    L.push('# contexta context for ' + tags);
     L.push('');
     if (!total) {
       L.push('No source is tagged ' + tags + ' in the local index.' + (opts.known && opts.known.length ? ' Tags in use: ' + opts.known.map(function (t) { return LOOKUP_PREFIX + t; }).join(' ') + '.' : ' The index is empty.'));
@@ -663,7 +663,7 @@ var WorkIndexCore = (function () {
     if (opts.scope) L.push('- This copy holds ' + opts.scope.selected + ' of the ' + opts.scope.total + ' sources linked to ' + tags + ', as chosen by the person who copied it. The others are not in it.');
     L.push('- Read at ' + formatWhen(now) + ' from this computer. Each source appears once, in its current saved form. Earlier versions are not kept, not shown and not reconstructed.');
     L.push('- Order: by each source\'s own date. “sent” is the date on a message. “last saved” is the date of the current saved version of a note or file, so its content may be newer than its position among earlier messages suggests. “file date only” means no other date is known.');
-    L.push('- Lines starting with > are quoted from the source. Everything else is written by Context from dates and locators only.');
+    L.push('- Lines starting with > are quoted from the source. Everything else is written by contexta from dates and locators only.');
     sizeNoteAt = L.length;
     function section(item, idx) {
       var head = (idx != null ? (idx + 1) + '. ' : '') + (item.sourceTime ? formatWhen(item.sourceTime) + ' — ' + DATE_LABEL[item.sourceTimeType] : 'Date unknown') + ' — ' + (KIND_LABEL[item.kind] || 'File') + ' [' + item.label + ']';
@@ -823,7 +823,7 @@ var WorkIndexCore = (function () {
     return src ? src.replace('with timeout of 5 seconds', 'with timeout of 2 seconds') : null;
   }
   /* The menu-bar label asks the same read-only question as the popover but gives up after 1 second instead of 2:
-     an app that is stuck must not hold a tag in the menu bar, or Context's own menu item, any longer than that. */
+     an app that is stuck must not hold a tag in the menu bar, or contexta's own menu item, any longer than that. */
   function scriptForWatch(bundleId) { var t = scriptForSelection(bundleId); return t ? t.replace(/timeout of 2 seconds/, 'timeout of 1 seconds') : null; }
 
   /* Message-ID from the first bytes of an .eml file, so a message file gets the same identifier everywhere */
@@ -855,7 +855,7 @@ if (typeof module !== 'undefined' && module.exports) module.exports = WorkIndexC
 
 </script>
 <script>
-/* Context — reading a source's current saved contents.
+/* contexta — reading a source's current saved contents.
  * Pure: bytes and text in, structured content out. No file, network or operating-system access, no libraries.
  * The same file runs inside the Mac app's popover and under the tests.
  * Every call works on what it is handed; nothing is kept between calls. */
@@ -1311,7 +1311,7 @@ var WorkIndexRead = (function (Core) {
     if (!file || !file.ok) return { status: 'unavailable', reason: fileReason(file, p) };
     var cloud = Core.cloudPlace(p), dated = { title: baseName(p), sourceTime: file.mtimeMs ? localIso(Math.floor(file.mtimeMs)) : null, sourceTimeType: 'modified-only', sourceCreated: null };
     if (Core.isGoogleNative(p)) return { status: 'unreadable', reason: 'a Google ' + ({ gdoc: 'Docs', gsheet: 'Sheets', gslides: 'Slides' }[extName(p).slice(1).toLowerCase()] || 'Drive') + ' file: its text is in Google Drive online, not on this Mac. To include it, download a copy (File › Download as .xlsx, .csv or .txt), tag that copy and look it up again', observed: dated };
-    if (file.online) return { status: 'unreadable', reason: 'online only' + (cloud ? ' in ' + cloud.provider : '') + ': its contents are not on this Mac, and Context does not download them. In Finder choose "Make Available Offline" or "Download Now", then look it up again', observed: dated };
+    if (file.online) return { status: 'unreadable', reason: 'online only' + (cloud ? ' in ' + cloud.provider : '') + ': its contents are not on this Mac, and contexta does not download them. In Finder choose "Make Available Offline" or "Download Now", then look it up again', observed: dated };
     if (file.size > MAX_FILE || !file.bytes) return { status: 'unreadable', reason: 'file is larger than 40 MB', observed: { title: baseName(p), sourceTime: file.mtimeMs ? localIso(Math.floor(file.mtimeMs)) : null, sourceTimeType: 'modified-only', sourceCreated: null } };
     var buf = file.bytes, o, observed;
     try { o = observe(p, buf, file.mtimeMs); } catch (e0) { o = { kind: Core.kindForPath(p), title: baseName(p), sourceTime: file.mtimeMs ? localIso(Math.floor(file.mtimeMs)) : null, sourceTimeType: 'modified-only', sourceCreated: null }; }
@@ -1368,7 +1368,7 @@ if (typeof module !== 'undefined' && module.exports) module.exports = WorkIndexR
 
 </script>
 <script>
-/* Context — the popover's rules.
+/* contexta — the popover's rules.
  *
  * The Mac app is one menu-bar icon and one transient popover. The shell (Swift) owns no rules: when the icon is
  * clicked it notes which app was in front and opens the popover; everything else is decided here.
@@ -1399,7 +1399,7 @@ if (typeof module !== 'undefined' && module.exports) module.exports = WorkIndexR
  */
 var WorkIndexPopover = (function (Core, Read) {
   'use strict';
-  var NOTHING = 'Select one note, mail message or saved file in its app, then click the Context icon.';
+  var NOTHING = 'Select one note, mail message or saved file in its app, then click the contexta icon.';
   var NOUN = { 'com.apple.Notes': 'note', 'com.apple.mail': 'message', 'com.apple.finder': 'file' };
   var RECENT = 8;
 
@@ -1462,16 +1462,16 @@ var WorkIndexPopover = (function (Core, Read) {
 
     /* the one object selected (or the one saved document open) in an app, asked now */
     /* `captured` is the app's answer when the shell has already asked it (the Tag current item shortcut asks before
-       Context comes to the front); otherwise the app is asked now */
+       contexta comes to the front); otherwise the app is asked now */
     function readSelection(bid, captured) {
-      if (!Core.scriptForSelection(bid)) return Promise.resolve({ state: 'none', reason: 'other-app', message: NOTHING });   /* an app Context does not follow is asked nothing */
+      if (!Core.scriptForSelection(bid)) return Promise.resolve({ state: 'none', reason: 'other-app', message: NOTHING });   /* an app contexta does not follow is asked nothing */
       var app = Core.SELECTION_APPS[bid];
       return (captured && typeof captured === 'object' ? Promise.resolve(captured) : ask('selection', bid)).then(function (r) {
         if (!r.ok) {
-          if (r.code === -1744) return { state: 'none', reason: 'not-asked', app: app, message: 'Context has not been allowed to ask ' + app + ' yet.' };
-          if (r.code === -1743) return { state: 'none', reason: 'denied', app: app, message: 'Context is not allowed to ask ' + app + ' which item is selected.' };
+          if (r.code === -1744) return { state: 'none', reason: 'not-asked', app: app, message: 'contexta has not been allowed to ask ' + app + ' yet.' };
+          if (r.code === -1743) return { state: 'none', reason: 'denied', app: app, message: 'contexta is not allowed to ask ' + app + ' which item is selected.' };
           if (r.code === -1712) return { state: 'none', reason: 'no-answer', app: app, message: app + ' did not answer.' };
-          var again = st.via === 'shortcut' ? ', then press the shortcut again.' : ', then click the Context icon again.';
+          var again = st.via === 'shortcut' ? ', then press the shortcut again.' : ', then click the contexta icon again.';
           return { state: 'none', reason: 'no-item', app: app, message: (NOUN[bid] ? 'Select one ' + NOUN[bid] + ' in ' + app : 'Open one saved document in ' + app) + again };
         }
         var a = Core.parseActive(r.reply, offset());
@@ -1482,7 +1482,7 @@ var WorkIndexPopover = (function (Core, Read) {
         return ask('readFile', a.path).then(function (f) {
           if (f.ok && !f.bytes) return { state: 'object', app: app, desc: Core.fileDesc(f.realPath, f.mtimeMs ? Read.localIso(Math.floor(f.mtimeMs)) : null) };
           var d = Read.describeFile(f, a.path);
-          if (!d.ok) return { state: 'none', reason: f.reason === 'denied' ? 'file-denied' : 'not-a-file', app: app, message: f.reason === 'denied' ? 'macOS is not letting Context read that file. Nothing can be tagged.' : 'Only a saved file can be tagged.' };
+          if (!d.ok) return { state: 'none', reason: f.reason === 'denied' ? 'file-denied' : 'not-a-file', app: app, message: f.reason === 'denied' ? 'macOS is not letting contexta read that file. Nothing can be tagged.' : 'Only a saved file can be tagged.' };
           return { state: 'object', desc: d.desc, app: app };
         });
       });
@@ -1579,7 +1579,7 @@ var WorkIndexPopover = (function (Core, Read) {
     /* one indexed source, read as it is saved right now */
     function readRecord(rec) {
       var loc = rec.locator || {};
-      if (loc.type === 'url') return Promise.resolve({ status: 'external', reason: 'web link; Context does not fetch pages. Open it where you are signed in' });
+      if (loc.type === 'url') return Promise.resolve({ status: 'external', reason: 'web link; contexta does not fetch pages. Open it where you are signed in' });
       if (loc.type === 'file') return ask('readFile', loc.value).then(function (f) { return Read.readFile(rec, f, { maxCellsPerSheet: opts.maxCellsPerSheet }); });
       if (loc.type === 'apple-notes' || loc.type === 'apple-mail') {
         if (!Core.scriptForRead(loc)) return Promise.resolve({ status: 'unavailable', reason: 'the entry does not hold enough to find this object again' });
@@ -1909,7 +1909,7 @@ if (typeof module !== 'undefined' && module.exports) module.exports = WorkIndexP
       var acts = $('noneActs'); acts.textContent = '';
       $('noneMsg').textContent = t.message; $('noneMore').textContent = '';
       if (t.reason === 'denied') {
-        $('noneMore').textContent = 'macOS asks once per app. Turn on ' + t.app + ' under Context in System Settings, then click the icon again.';
+        $('noneMore').textContent = 'macOS asks once per app. Turn on ' + t.app + ' under contexta in System Settings, then click the icon again.';
         acts.appendChild(button('Open Automation settings', 'settingsBtn', function () { call('settings'); }));
       } else if (t.reason === 'not-asked') {
         $('noneMore').textContent = 'macOS asks once per app, in its own prompt. App access starts that; then use the shortcut or the icon again.';
@@ -1942,7 +1942,7 @@ if (typeof module !== 'undefined' && module.exports) module.exports = WorkIndexP
     } else if (v.indexError && !L) { sum.textContent = v.indexError; sum.className = 'msg on'; }
     else if (!L) {
       sum.textContent = '';
-      list.appendChild(el('p', 'hint', v.recent.length ? 'Look up a tag to list its sources as they are saved now. Tick the ones you want, then copy them for an AI.' : 'No tags yet. Tag an item first: select it in its app, then click the Context icon.'));
+      list.appendChild(el('p', 'hint', v.recent.length ? 'Look up a tag to list its sources as they are saved now. Tick the ones you want, then copy them for an AI.' : 'No tags yet. Tag an item first: select it in its app, then click the contexta icon.'));
     } else if (L.error) { sum.textContent = L.error; sum.className = 'msg on'; }
     else if (!total) { sum.textContent = L.empty + (v.recent.length ? ' Tags in use are listed above.' : ''); sum.className = 'msg on'; }
     else {
@@ -2038,7 +2038,7 @@ if (typeof module !== 'undefined' && module.exports) module.exports = WorkIndexP
     else if (!M.message) plan.appendChild(el('p', 'msg', 'Type the new name. If it is a tag you already use, the two are merged.'));
     plan.setAttribute('role', M.state === 'stale' || M.state === 'error' ? 'alert' : 'status');
     btn.disabled = !(P && P.ok); btn.textContent = P && P.ok && P.action === 'merge' ? 'Merge' : 'Rename';
-    btn.title = P && P.ok ? (P.action === 'merge' ? 'Join ' + P.from + ' into ' + P.to : 'Rename ' + P.from + ' to ' + P.to) + ' in Context\'s index' : '';
+    btn.title = P && P.ok ? (P.action === 'merge' ? 'Join ' + P.from + ' into ' + P.to : 'Rename ' + P.from + ' to ' + P.to) + ' in contexta\'s index' : '';
   }
 
   function render(v, fields) {
@@ -2228,7 +2228,7 @@ if (typeof module !== 'undefined' && module.exports) module.exports = WorkIndexP
   var fitting = 0;
   if (typeof ResizeObserver === 'function') new ResizeObserver(function () { if (!fitting) fitting = requestAnimationFrame(function () { fitting = 0; fit(); }); }).observe($('frame'));
   render(pop.view(), true);
-  if (!native && !pretend) $('noneMsg').textContent = 'This is the Context popover. It works inside the Mac app.';
+  if (!native && !pretend) $('noneMsg').textContent = 'This is the contexta popover. It works inside the Mac app.';
 })();
 </script>
 </body>

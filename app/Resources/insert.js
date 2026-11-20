@@ -1,4 +1,4 @@
-/* Context v9 — core rules (pure: no file, network or OS access).
+/* contexta v9 — core rules (pure: no file, network or OS access).
  *
  * Model: a local tag points to a WHOLE source object (one email message, one note, one saved file such
  * as an entire workbook). The index is current-state only:
@@ -11,7 +11,7 @@
 var WorkIndexCore = (function () {
   'use strict';
 
-  var VERSION = '0.12.2';
+  var VERSION = '0.12.3';
   var MAX_TAGS = 2;
   var LOOKUP_PREFIX = '::';
   var NAME_CHAR = /[\p{L}\p{M}\p{N}_-]/u;
@@ -143,7 +143,7 @@ var WorkIndexCore = (function () {
 
   function loadIndex(json) {
     var raw = typeof json === 'string' ? JSON.parse(json) : json;
-    if (!raw || typeof raw !== 'object' || !raw.objects || typeof raw.objects !== 'object') throw new Error('not a Context file');
+    if (!raw || typeof raw !== 'object' || !raw.objects || typeof raw.objects !== 'object') throw new Error('not a contexta file');
     var idx = emptyIndex();
     var seen = new Map(), all = raw.objects;
     for (var k in all) if (Object.prototype.hasOwnProperty.call(all, k)) { var r = sanitizeRecord(all[k], seen); if (r) idx.objects[r.id] = r; }
@@ -355,7 +355,7 @@ var WorkIndexCore = (function () {
 
   /* ───────── cloud folders ─────────
      Google Drive, Dropbox, OneDrive, Box and iCloud Drive keep their files in folders on this Mac (macOS's File
-     Provider: ~/Library/CloudStorage/<Provider>-<account>/, iCloud Drive in ~/Library/Mobile Documents/). Context
+     Provider: ~/Library/CloudStorage/<Provider>-<account>/, iCloud Drive in ~/Library/Mobile Documents/). contexta
      treats them as the saved files they are. Their folder names carry the account (for Google Drive the account's
      email address), so a file there is named by the service and its place inside it, never by that folder.
      → { provider, place, text } or null for a file that is not in a cloud folder. */
@@ -448,7 +448,7 @@ var WorkIndexCore = (function () {
     var readN = 0, notReadN = 0;
     tl.dated.concat(tl.undated).forEach(function (x) { if (x.state.status === 'ok') readN++; else notReadN++; });
     var total = tl.dated.length + tl.undated.length + tl.unavailable.length;
-    L.push('# Context context for ' + tags);
+    L.push('# contexta context for ' + tags);
     L.push('');
     if (!total) {
       L.push('No source is tagged ' + tags + ' in the local index.' + (opts.known && opts.known.length ? ' Tags in use: ' + opts.known.map(function (t) { return LOOKUP_PREFIX + t; }).join(' ') + '.' : ' The index is empty.'));
@@ -458,7 +458,7 @@ var WorkIndexCore = (function () {
     if (opts.scope) L.push('- This copy holds ' + opts.scope.selected + ' of the ' + opts.scope.total + ' sources linked to ' + tags + ', as chosen by the person who copied it. The others are not in it.');
     L.push('- Read at ' + formatWhen(now) + ' from this computer. Each source appears once, in its current saved form. Earlier versions are not kept, not shown and not reconstructed.');
     L.push('- Order: by each source\'s own date. “sent” is the date on a message. “last saved” is the date of the current saved version of a note or file, so its content may be newer than its position among earlier messages suggests. “file date only” means no other date is known.');
-    L.push('- Lines starting with > are quoted from the source. Everything else is written by Context from dates and locators only.');
+    L.push('- Lines starting with > are quoted from the source. Everything else is written by contexta from dates and locators only.');
     sizeNoteAt = L.length;
     function section(item, idx) {
       var head = (idx != null ? (idx + 1) + '. ' : '') + (item.sourceTime ? formatWhen(item.sourceTime) + ' — ' + DATE_LABEL[item.sourceTimeType] : 'Date unknown') + ' — ' + (KIND_LABEL[item.kind] || 'File') + ' [' + item.label + ']';
@@ -618,7 +618,7 @@ var WorkIndexCore = (function () {
     return src ? src.replace('with timeout of 5 seconds', 'with timeout of 2 seconds') : null;
   }
   /* The menu-bar label asks the same read-only question as the popover but gives up after 1 second instead of 2:
-     an app that is stuck must not hold a tag in the menu bar, or Context's own menu item, any longer than that. */
+     an app that is stuck must not hold a tag in the menu bar, or contexta's own menu item, any longer than that. */
   function scriptForWatch(bundleId) { var t = scriptForSelection(bundleId); return t ? t.replace(/timeout of 2 seconds/, 'timeout of 1 seconds') : null; }
 
   /* Message-ID from the first bytes of an .eml file, so a message file gets the same identifier everywhere */
@@ -648,7 +648,7 @@ var WorkIndexCore = (function () {
 })();
 if (typeof module !== 'undefined' && module.exports) module.exports = WorkIndexCore;
 
-/* Context — reading a source's current saved contents.
+/* contexta — reading a source's current saved contents.
  * Pure: bytes and text in, structured content out. No file, network or operating-system access, no libraries.
  * The same file runs inside the Mac app's popover and under the tests.
  * Every call works on what it is handed; nothing is kept between calls. */
@@ -1104,7 +1104,7 @@ var WorkIndexRead = (function (Core) {
     if (!file || !file.ok) return { status: 'unavailable', reason: fileReason(file, p) };
     var cloud = Core.cloudPlace(p), dated = { title: baseName(p), sourceTime: file.mtimeMs ? localIso(Math.floor(file.mtimeMs)) : null, sourceTimeType: 'modified-only', sourceCreated: null };
     if (Core.isGoogleNative(p)) return { status: 'unreadable', reason: 'a Google ' + ({ gdoc: 'Docs', gsheet: 'Sheets', gslides: 'Slides' }[extName(p).slice(1).toLowerCase()] || 'Drive') + ' file: its text is in Google Drive online, not on this Mac. To include it, download a copy (File › Download as .xlsx, .csv or .txt), tag that copy and look it up again', observed: dated };
-    if (file.online) return { status: 'unreadable', reason: 'online only' + (cloud ? ' in ' + cloud.provider : '') + ': its contents are not on this Mac, and Context does not download them. In Finder choose "Make Available Offline" or "Download Now", then look it up again', observed: dated };
+    if (file.online) return { status: 'unreadable', reason: 'online only' + (cloud ? ' in ' + cloud.provider : '') + ': its contents are not on this Mac, and contexta does not download them. In Finder choose "Make Available Offline" or "Download Now", then look it up again', observed: dated };
     if (file.size > MAX_FILE || !file.bytes) return { status: 'unreadable', reason: 'file is larger than 40 MB', observed: { title: baseName(p), sourceTime: file.mtimeMs ? localIso(Math.floor(file.mtimeMs)) : null, sourceTimeType: 'modified-only', sourceCreated: null } };
     var buf = file.bytes, o, observed;
     try { o = observe(p, buf, file.mtimeMs); } catch (e0) { o = { kind: Core.kindForPath(p), title: baseName(p), sourceTime: file.mtimeMs ? localIso(Math.floor(file.mtimeMs)) : null, sourceTimeType: 'modified-only', sourceCreated: null }; }
@@ -1159,7 +1159,7 @@ var WorkIndexRead = (function (Core) {
 })(typeof WorkIndexCore !== 'undefined' ? WorkIndexCore : require('./rules.js'));
 if (typeof module !== 'undefined' && module.exports) module.exports = WorkIndexRead;
 
-/* Context — Insert context: what the Mac app answers when its browser extension asks.
+/* contexta — Insert context: what the Mac app answers when its browser extension asks.
  *
  * The extension's picker (in the browser, opened by a shortcut the person set there) asks four things, in order:
  *   open     the tags in use, most recently used first, with the number of sources each is on
@@ -1182,7 +1182,7 @@ if (typeof module !== 'undefined' && module.exports) module.exports = WorkIndexR
  */
 var ContextInsert = (function (Core, Read) {
   'use strict';
-  var BEGIN = '--- Context evidence: begin ---', END = '--- Context evidence: end ---';
+  var BEGIN = '--- contexta evidence: begin ---', END = '--- contexta evidence: end ---';
   var MAX_TEXT = 200000;          /* characters; at most three bytes each in UTF-8 plus JSON escapes, so the answer stays under the browser's 1 MB */
 
   function lookupQuery(text) {
@@ -1209,7 +1209,7 @@ var ContextInsert = (function (Core, Read) {
     /* one indexed source, read as it is saved right now (the popover's reading, done at once) */
     function readRecord(rec) {
       var loc = rec.locator || {};
-      if (loc.type === 'url') return { status: 'external', reason: 'web link; Context does not fetch pages' };
+      if (loc.type === 'url') return { status: 'external', reason: 'web link; contexta does not fetch pages' };
       if (loc.type === 'file') {
         var f = ask('readFile', loc.value);
         if (f && f.ok && typeof f.base64 === 'string') { f.bytes = Read.base64Bytes(f.base64); delete f.base64; }
@@ -1266,11 +1266,11 @@ var ContextInsert = (function (Core, Read) {
       if (!H || !req.token || req.token !== H.token) return { ok: false, reason: 'expired', message: 'This list is no longer current. Choose the tag again.' };
       var l = index();
       if (!l.index) { held = null; return { ok: false, reason: 'index', message: l.error }; }
-      /* the tags themselves may have been changed in Context meanwhile (a rename, a merge, a tag taken off) */
+      /* the tags themselves may have been changed in contexta meanwhile (a rename, a merge, a tag taken off) */
       var recs = Core.resolve(l.index, H.q.tags.map(function (t) { return t.key; }));
       if (recs.map(binding).sort().join(' ') !== H.bindings) {
         held = null;
-        return { ok: false, reason: 'index-changed', message: 'Tags were changed in Context after this list was shown. Choose the tag again.', tags: tagsOf(l.index) };
+        return { ok: false, reason: 'index-changed', message: 'Tags were changed in contexta after this list was shown. Choose the tag again.', tags: tagsOf(l.index) };
       }
       var want = {}; (Array.isArray(req.selected) ? req.selected : []).forEach(function (id) { want[String(id)] = true; });
       var pick = H.entries.filter(function (e) { return want[e.record.id]; });
@@ -1301,7 +1301,7 @@ var ContextInsert = (function (Core, Read) {
       else if (req.op === 'lookup') out = lookup(req);
       else if (req.op === 'render') out = render(req);
       else if (req.op === 'done') { held = null; out = { ok: true }; }
-      else out = { ok: false, reason: 'unknown', message: 'Context does not know this request.' };
+      else out = { ok: false, reason: 'unknown', message: 'contexta does not know this request.' };
       if (req.id != null) out.id = req.id;
       return out;
     }

@@ -13,7 +13,7 @@ var RUNS = { 1: [['run1-as-built', 'first run, as built'], ['run2-after-cycle1',
   5: [['run1-as-built', 'first run'], ['run2-after-cycle5', 'retest after the expectations were brought up to date']] };
 var NOTES = {
   1: { scenario: 'The rules of the menu-bar label (core/status.js) driven by a pretend shell with its own clock against the pretend Mac: app switches, selection changes inside an app, four switches 60 ms apart, late answers, a stuck app, tag edits in the popover and from outside, unsaved / saved / saved-as documents, a renamed file and a renamed note, a saved .eml, permission not asked / allowed / switched off, a quit app, sleep, ten idle minutes, 600 timed selection changes, long Latin and Korean tag names, an unreadable index, and 1,500 randomized steps. Assumed answer time of an app: 30 ms.',
-    found: ['Product. A stuck app held its last tag in the menu bar for 2,180 ms, because the label\'s question waited 2 s like the popover\'s. On a Mac it would also hold Context\'s own menu item for that long, since AppleScript has to run on the main thread.',
+    found: ['Product. A stuck app held its last tag in the menu bar for 2,180 ms, because the label\'s question waited 2 s like the popover\'s. On a Mac it would also hold contexta\'s own menu item for that long, since AppleScript has to run on the main thread.',
       'Product, found while making the pretend shell behave like the main thread. An answer can come back after another app has come to the front; nothing in the shell stopped it being passed on.',
       'Simulator. It counted a "prompt" when permission changed while a question was already on its way; macOS decides that when the question is sent. It also let the timer fire while a question was running, which the main thread cannot do.',
       'Tests. C1.05 expected exactly one question after the last switch (there are several, at the fast pace). C1.18\'s first trial did not start from a real change. C1.21 judged a label by the last question that finished, not by the app the label names.',
@@ -62,7 +62,7 @@ var NOTES = {
 };
 function row(cells) { return '| ' + cells.join(' | ') + ' |'; }
 var out = [], final = load('final');
-out.push('# Context 0.11 — five test, fix, retest cycles on one build', '',
+out.push('# contexta 0.11 — five test, fix, retest cycles on one build', '',
   'Every cycle was run against the build as it stood, the results were kept, what was wrong was fixed, and the cycle was run again. This file is written by `tests/cycles/report.js` from the kept result files in `tests/cycles/results/`; the counts, build numbers and measurements in the tables are read from those files, the sentences about findings and changes are written by hand.', '',
   '**What these results are.** Simulations: the real rules and the real pages of this build, run in Node, Bun and Chrome on Linux against a pretend Mac, a pretend menu-bar shell with its own clock, and a mocked macOS permission prompt. **Nothing here was run on macOS.** The Swift shell was not compiled; no real Notes, Mail, Finder, Excel, Aside or ChatGPT was involved. Everything that needs them is listed as blocked, by name, at the end of each cycle and in `LIVE-CHECKS.md`. A "build" below is the first 16 hex digits of a SHA-256 over `core/`, `app/` and `dev/`.', '');
 if (final) {

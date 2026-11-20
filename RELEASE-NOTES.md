@@ -1,60 +1,79 @@
-# Context 0.12.2 (prerelease)
+# contexta 0.12.3 (prerelease)
 
 A macOS menu bar app that brings the latest notes, emails, and files you choose into an AI draft, with dates and
 sources attached.
 
-> **Prerelease.** Ad-hoc signed, not notarized. The app compiles and passes its self-test on one Mac. The cloud-folder
-> handling is tested with fictional paths against a stand-in for the app; it has not yet been tried with a real Google
-> Drive, Dropbox or iCloud Drive folder (see `LIVE-CHECKS.md`, section K). Please test with fictional files.
+> **Prerelease.** Ad-hoc signed, not notarized. The app compiles and passes its self-test on one Mac. The upgrade from
+> Context 0.12.2 is tested natively with temporary folders, but not yet by a person on a Mac: see `LIVE-CHECKS.md`,
+> section L. Please test with fictional notes, messages and files.
 
-A small update to 0.12.1. Everything else works as before: the popover sizes itself to its content, there are at most
-two tags per item, and the Tag current item shortcut, Insert context and Manage tags are unchanged. Your tags,
-settings and index format are unchanged.
+## New name: contexta
 
-## New in 0.12.2: cloud folders
+The app formerly called **Context** is now **contexta**, all lowercase. This release only changes the name; every
+feature works as in 0.12.2:
+- the popover sizes itself to its content;
+- at most two tags per item;
+- Tag current item, Insert context and Manage tags;
+- cloud folders.
 
-Files in the folders that Google Drive, Dropbox, OneDrive, Box and iCloud Drive keep on your Mac can be tagged, looked
-up and copied like any other saved file. Context does not sign in to any service and opens no network connection.
+The name changed in:
+- Finder and Spotlight (`contexta.app`);
+- the menu bar item's tooltip and VoiceOver label;
+- window titles and messages;
+- the macOS Automation prompt;
+- the browser extension's name ("contexta: Insert context") and messages;
+- the documentation;
+- the download names.
 
-- **Named by service, not by account.** In the popover, the lookup list and the copied text, such a file appears as
-  `Google Drive › My Drive › Reports › q3.xlsx` or `Dropbox › Team › list.csv`. The account folder on disk is left
-  out; for Google Drive, that folder's name contains your email address.
-- **Online-only files are never downloaded.** A file that is still in the cloud (it has a cloud icon in Finder) can be
-  tagged by name and date. A lookup lists it as not read and says what to do: in Finder, choose "Make Available
-  Offline" or "Download Now", then look the tag up again. Context does not open its contents, so the cloud app does
-  not start a download.
-- **Google Docs, Sheets and Slides** (`.gdoc`, `.gsheet`, `.gslides`, and similar) are only links on your Mac; their
-  text is online. They can be tagged and are listed by name and date, with how to include them: download a copy (for
-  example as `.xlsx` or `.csv`), tag that copy and look the tag up again. The account email and document address
-  inside the link file are never used.
-- Files opened in a web browser (drive.google.com, dropbox.com) still cannot be tagged.
+The everyday phrases "Insert context" and "Find context" stay as they were.
+
+What stays the same, so your setup carries over:
+- the bundle ID `local.workindex.app` and the executable `WorkIndex`;
+- your tags and settings in `~/WorkIndex/`, and your shortcut;
+- the browser extension's ID and its helper (`local.workindex.composer`).
+
+## Upgrading from Context 0.12.2
+
+1. Quit Context.
+2. Install contexta. It goes in `~/Applications/contexta.app` and does not remove or overwrite `Context.app`.
+3. Open contexta once. If you had turned on Insert context, contexta updates the browser's helper registration so it
+   points to contexta instead of Context.app.
+   - Only registrations you set up before are changed.
+   - A registration you removed is not recreated.
+   - No new browser is registered and nothing is asked.
+4. Delete `Context.app` yourself. If you open it again, it points the registration back to itself.
+5. In `chrome://extensions`, press reload on the extension. It is now called "contexta: Insert context" and keeps its
+   ID and shortcut.
+
+If Insert context says "The contexta helper stopped", open contexta once. If the message stays, turn Insert context
+off in contexta's Settings and set it up again. macOS may ask for Automation permission again, as it can after any
+update of an ad-hoc signed app.
 
 ## Tested for this release
 - **Native, on this Mac:** compiled with `swiftc` (Swift 6.4.2, Swift 5 language mode) on macOS 27.2.1, Apple silicon,
-  with no warnings. Self-test: 50 of 50 checks pass. The new check confirms that a file stored on this Mac is not
-  mistaken for an online-only placeholder and that its contents are read.
-- **Simulated (fictional data, a stand-in for the Mac app):**
-  - `node tests/run.js`: 196 of 196, including 8 new cloud-folder checks with made-up Google Drive, Dropbox, OneDrive,
-    Box and iCloud Drive paths. They run from Finder all the way to the copied text and confirm no email address or home
-    folder appears in it.
-  - Page tests in Chrome: 6 of 6, 20 of 20 and 14 of 14.
-  - Cycles: 87 of 87 (14 need a person). Rounds: 39 of 39 (7 need a person).
-  - Browser extension in a real Chromium: 21 of 21 (4 not run).
-- Not tested: a real online-only file. Only the cloud app can create one, and no real cloud folder or account on this
-  Mac was opened.
+  with no warnings. Self-test: 54 of 54 checks pass. Four new checks run the upgrade with temporary folders:
+  - the app is named contexta and keeps its bundle ID and executable;
+  - settings written by 0.12.2 are read unchanged;
+  - a helper registration still pointing to `Context.app` is updated to point to contexta, one that is already right
+    is left alone, and one that was removed stays removed;
+  - a browser that was never set up is not touched, and no connection is opened.
+- **Simulated (fictional data, a stand-in for the Mac app):** `node tests/run.js` passes 203 of 203, including 7 new
+  checks for the name change and what stays the same. Page tests in Chrome, cycles, rounds and the browser-extension
+  test: see `RELEASE-REVIEW-0.12.3.md`.
+- Nothing was installed, and no real user data was read.
 
 ## Known limitations
-- Ad-hoc signature only. Gatekeeper blocks the downloaded app until you choose "Open Anyway", and macOS may ask for
-  Automation permission again after every rebuild. Building from source is recommended.
+- Ad-hoc signature only: Gatekeeper blocks the downloaded app until you choose "Open Anyway". Building from source is
+  recommended.
 - The prebuilt zip is for Apple silicon. On an Intel Mac, build from source.
-- A file that the cloud app moves or renames is a different file to Context: tag it again.
+- Not yet checked by a person: the upgrade on a real Mac, including whether macOS keeps the Automation permissions you
+  gave Context.
 - Insert context works with ChatGPT in a Chromium-family browser only and is untested against the real ChatGPT page.
-- Word, PowerPoint, PDF and iWork files can be tagged but are listed by name and date only; their text is not read.
 - English interface only.
 
 ## Assets
-- `Context-0.12.2-source.zip`: the source, tests and fictional fixtures.
-- `Context-0.12.2-macOS-arm64-adhoc.zip`: the app built from that source (ad hoc signed).
+- `contexta-0.12.3-source.zip`: the source, tests and fictional fixtures.
+- `contexta-0.12.3-macOS-arm64-adhoc.zip`: the app built from that source (ad hoc signed).
 - `SHA256SUMS.txt`: checksums. Verify with `shasum -a 256 -c SHA256SUMS.txt`.
 
 No license has been chosen yet; until one is added, all rights are reserved.

@@ -1,4 +1,4 @@
-/* Context — the popover's rules.
+/* contexta — the popover's rules.
  *
  * The Mac app is one menu-bar icon and one transient popover. The shell (Swift) owns no rules: when the icon is
  * clicked it notes which app was in front and opens the popover; everything else is decided here.
@@ -29,7 +29,7 @@
  */
 var WorkIndexPopover = (function (Core, Read) {
   'use strict';
-  var NOTHING = 'Select one note, mail message or saved file in its app, then click the Context icon.';
+  var NOTHING = 'Select one note, mail message or saved file in its app, then click the contexta icon.';
   var NOUN = { 'com.apple.Notes': 'note', 'com.apple.mail': 'message', 'com.apple.finder': 'file' };
   var RECENT = 8;
 
@@ -92,16 +92,16 @@ var WorkIndexPopover = (function (Core, Read) {
 
     /* the one object selected (or the one saved document open) in an app, asked now */
     /* `captured` is the app's answer when the shell has already asked it (the Tag current item shortcut asks before
-       Context comes to the front); otherwise the app is asked now */
+       contexta comes to the front); otherwise the app is asked now */
     function readSelection(bid, captured) {
-      if (!Core.scriptForSelection(bid)) return Promise.resolve({ state: 'none', reason: 'other-app', message: NOTHING });   /* an app Context does not follow is asked nothing */
+      if (!Core.scriptForSelection(bid)) return Promise.resolve({ state: 'none', reason: 'other-app', message: NOTHING });   /* an app contexta does not follow is asked nothing */
       var app = Core.SELECTION_APPS[bid];
       return (captured && typeof captured === 'object' ? Promise.resolve(captured) : ask('selection', bid)).then(function (r) {
         if (!r.ok) {
-          if (r.code === -1744) return { state: 'none', reason: 'not-asked', app: app, message: 'Context has not been allowed to ask ' + app + ' yet.' };
-          if (r.code === -1743) return { state: 'none', reason: 'denied', app: app, message: 'Context is not allowed to ask ' + app + ' which item is selected.' };
+          if (r.code === -1744) return { state: 'none', reason: 'not-asked', app: app, message: 'contexta has not been allowed to ask ' + app + ' yet.' };
+          if (r.code === -1743) return { state: 'none', reason: 'denied', app: app, message: 'contexta is not allowed to ask ' + app + ' which item is selected.' };
           if (r.code === -1712) return { state: 'none', reason: 'no-answer', app: app, message: app + ' did not answer.' };
-          var again = st.via === 'shortcut' ? ', then press the shortcut again.' : ', then click the Context icon again.';
+          var again = st.via === 'shortcut' ? ', then press the shortcut again.' : ', then click the contexta icon again.';
           return { state: 'none', reason: 'no-item', app: app, message: (NOUN[bid] ? 'Select one ' + NOUN[bid] + ' in ' + app : 'Open one saved document in ' + app) + again };
         }
         var a = Core.parseActive(r.reply, offset());
@@ -112,7 +112,7 @@ var WorkIndexPopover = (function (Core, Read) {
         return ask('readFile', a.path).then(function (f) {
           if (f.ok && !f.bytes) return { state: 'object', app: app, desc: Core.fileDesc(f.realPath, f.mtimeMs ? Read.localIso(Math.floor(f.mtimeMs)) : null) };
           var d = Read.describeFile(f, a.path);
-          if (!d.ok) return { state: 'none', reason: f.reason === 'denied' ? 'file-denied' : 'not-a-file', app: app, message: f.reason === 'denied' ? 'macOS is not letting Context read that file. Nothing can be tagged.' : 'Only a saved file can be tagged.' };
+          if (!d.ok) return { state: 'none', reason: f.reason === 'denied' ? 'file-denied' : 'not-a-file', app: app, message: f.reason === 'denied' ? 'macOS is not letting contexta read that file. Nothing can be tagged.' : 'Only a saved file can be tagged.' };
           return { state: 'object', desc: d.desc, app: app };
         });
       });
@@ -209,7 +209,7 @@ var WorkIndexPopover = (function (Core, Read) {
     /* one indexed source, read as it is saved right now */
     function readRecord(rec) {
       var loc = rec.locator || {};
-      if (loc.type === 'url') return Promise.resolve({ status: 'external', reason: 'web link; Context does not fetch pages. Open it where you are signed in' });
+      if (loc.type === 'url') return Promise.resolve({ status: 'external', reason: 'web link; contexta does not fetch pages. Open it where you are signed in' });
       if (loc.type === 'file') return ask('readFile', loc.value).then(function (f) { return Read.readFile(rec, f, { maxCellsPerSheet: opts.maxCellsPerSheet }); });
       if (loc.type === 'apple-notes' || loc.type === 'apple-mail') {
         if (!Core.scriptForRead(loc)) return Promise.resolve({ status: 'unavailable', reason: 'the entry does not hold enough to find this object again' });

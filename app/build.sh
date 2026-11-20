@@ -1,5 +1,5 @@
 #!/bin/bash
-# Builds "Context.app" on this Mac and runs its self-test. Nothing is downloaded, uploaded or published.
+# Builds "contexta.app" on this Mac and runs its self-test. Nothing is downloaded, uploaded or published.
 # Needs the Swift compiler that comes with Apple's Command Line Tools:  xcode-select --install
 #   ./build.sh            build into ./build and run the self-test
 #   ./build.sh install    the same, then copy the app to ~/Applications
@@ -15,7 +15,7 @@ for made in popover.html access.html settings.html status.js insert.js composer-
   if [ ! -f "Resources/$made" ]; then echo "Resources/$made is missing. It is made by: node ../dev/build-popover.js"; exit 1; fi
 done
 
-APP="build/Context.app"
+APP="build/contexta.app"
 rm -rf build
 mkdir -p "$APP/Contents/MacOS" "$APP/Contents/Resources"
 
@@ -38,10 +38,10 @@ echo
 
 if [ "${1:-}" = "install" ]; then
   mkdir -p "$HOME/Applications"
-  rm -rf "$HOME/Applications/Context.app"
-  cp -R "$APP" "$HOME/Applications/Context.app"
+  rm -rf "$HOME/Applications/contexta.app"
+  cp -R "$APP" "$HOME/Applications/contexta.app"
   echo
-  echo "Installed: $HOME/Applications/Context.app"
+  echo "Installed: $HOME/Applications/contexta.app"
 fi
 echo
 echo "Start it with:  open \"$APP\"   (a tag icon appears in the menu bar; Quit is at the bottom of its popover)"

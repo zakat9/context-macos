@@ -1,4 +1,4 @@
-// Draws Context's application icon: a white tag carrying two lines of "context", on a teal-to-green rounded square.
+// Draws contexta's application icon: a white tag carrying two lines of "context", on a teal-to-green rounded square.
 // Every size is drawn from the same shapes at its own pixel size (no scaling of a large picture), with CoreGraphics
 // and ImageIO only: no window, no AppKit, nothing downloaded. Only needed if the icon is to change.
 //   swift dev/make-app-icon.swift <out-folder>            writes <out-folder>/AppIcon.iconset/*.png

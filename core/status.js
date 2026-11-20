@@ -1,11 +1,11 @@
-/* Context — what the menu-bar item shows while the popover is closed.
+/* contexta — what the menu-bar item shows while the popover is closed.
  *
  * The item shows the tags (0 to 2) of the ONE whole object that is selected in the app in front: a note, a mail
  * message, a saved file. This file decides everything about that: when the app in front is asked, which answers are
  * believed, and what the item shows. The Mac shell (Status.swift) only carries events in and commands out.
  *
  * What it will not do, by construction:
- *   · It asks nothing of an app Context does not follow, and nothing while the popover is open or the Mac is asleep.
+ *   · It asks nothing of an app contexta does not follow, and nothing while the popover is open or the Mac is asleep.
  *   · It asks only for the selected object's identity (the same read-only question the popover asks). No contents.
  *   · It never causes a macOS permission prompt and never opens an app: every question carries the rule that the
  *     shell must first see the app running, in front and already allowed, and must not ask otherwise.
@@ -25,7 +25,7 @@
  *             { do:'index' }                         read the index file and send it back as an 'index' event
  *             { do:'wait', ms }                      one timer; a new one replaces the old
  *             { do:'idle' }                          no timer
- *             { do:'scope', on }                     an app Context follows is (or is not) in front: register (or give up) the hot key
+ *             { do:'scope', on }                     an app contexta follows is (or is not) in front: register (or give up) the hot key
  */
 var ContextStatus = (function (Core) {
   'use strict';
@@ -60,24 +60,24 @@ var ContextStatus = (function (Core) {
     function show(out) {
       var view, sel = st.sel, app = appName();
       if (st.indexFailed) view = off('The index file cannot be read, so no tags can be shown.');
-      else if (st.paused) view = off('Context is resting while the Mac is asleep or locked.');
-      else if (!st.app || !st.followed) view = off('Nothing to tag in this app. Context follows one selected note, mail message or saved file.');
-      else if (st.why === 'not-allowed') view = off('Context is not allowed to ask ' + app + ' which item is selected. Click, then choose App access.');
-      else if (st.why === 'not-asked') view = off('Context has not asked to follow ' + app + ' yet. Click, then choose App access.');
+      else if (st.paused) view = off('contexta is resting while the Mac is asleep or locked.');
+      else if (!st.app || !st.followed) view = off('Nothing to tag in this app. contexta follows one selected note, mail message or saved file.');
+      else if (st.why === 'not-allowed') view = off('contexta is not allowed to ask ' + app + ' which item is selected. Click, then choose App access.');
+      else if (st.why === 'not-asked') view = off('contexta has not asked to follow ' + app + ' yet. Click, then choose App access.');
       else if (st.why === 'no-answer') view = off(app + ' is not answering. Tags will show again when it does.');
       else if (st.why === 'no-item') view = off(st.message || 'Select one item in ' + app + ' to see its tags.');
-      else if (!sel || !st.index) view = { state: 'wait', title: '', tags: [], tooltip: 'Checking what is selected in ' + app + '…', label: 'Context. Checking what is selected in ' + app + '.' };
+      else if (!sel || !st.index) view = { state: 'wait', title: '', tags: [], tooltip: 'Checking what is selected in ' + app + '…', label: 'contexta. Checking what is selected in ' + app + '.' };
       else {
         var tags = tagsOf(sel), kind = Core.KIND_LABEL[sel.kind] || 'File', what = kind + ' in ' + app + ': ' + short(sel.title, TITLE_CHARS);
         view = tags.length
-          ? { state: 'tags', title: compact(tags), tags: tags, tooltip: (tags.length === 1 ? 'Tag: ' : 'Tags: ') + tags.join(', ') + '\n' + what, label: 'Context. ' + (tags.length === 1 ? 'Tag: ' : 'Tags: ') + tags.join(', ') + '. ' + what + '.' }
-          : { state: 'none', title: '', tags: [], tooltip: 'No tags on this ' + (NOUN[sel.kind] || 'item') + '. Click to tag it.\n' + what, label: 'Context. No tags. ' + what + '.' };
+          ? { state: 'tags', title: compact(tags), tags: tags, tooltip: (tags.length === 1 ? 'Tag: ' : 'Tags: ') + tags.join(', ') + '\n' + what, label: 'contexta. ' + (tags.length === 1 ? 'Tag: ' : 'Tags: ') + tags.join(', ') + '. ' + what + '.' }
+          : { state: 'none', title: '', tags: [], tooltip: 'No tags on this ' + (NOUN[sel.kind] || 'item') + '. Click to tag it.\n' + what, label: 'contexta. No tags. ' + what + '.' };
       }
       view.do = 'show';
       var text = JSON.stringify(view);
       if (text !== st.shown) { st.shown = text; st.count.shows++; out.push(view); }
     }
-    function off(why) { return { state: 'off', title: '', tags: [], tooltip: why, label: 'Context. ' + why }; }
+    function off(why) { return { state: 'off', title: '', tags: [], tooltip: why, label: 'contexta. ' + why }; }
 
     function pace(now) { var quiet = now - st.changedAt; return quiet < PACE.fastFor ? PACE.fast : quiet < PACE.midFor ? PACE.mid : PACE.slow; }
     function watching() { return !!st.app && st.followed && !st.paused && !st.popover && !st.own && !st.indexFailed; }
@@ -95,9 +95,9 @@ var ContextStatus = (function (Core) {
 
     function onApp(e, out) {
       st.paused = false;
-      if (e.own) {                                               /* Context itself came to the front */
+      if (e.own) {                                               /* contexta itself came to the front */
         st.own = true; st.popover = !!e.popover; drop();
-        out.push({ do: 'scope', on: false });                    /* while Context itself is in front the shortcut is not registered */
+        out.push({ do: 'scope', on: false });                    /* while contexta itself is in front the shortcut is not registered */
         if (!st.popover) { st.app = null; st.followed = false; clear('other-app'); }
         show(out); out.push({ do: 'idle' });
         return;
@@ -105,7 +105,7 @@ var ContextStatus = (function (Core) {
       var same = st.app && st.app.bundleId === e.bundleId && (st.app.pid || 0) === (e.pid || 0) && !st.own;
       st.own = false; st.popover = false;
       if (same && st.followed) { if (!st.pending) out.push({ do: 'wait', ms: 0 }); return; }
-      var back = st.app && st.app.bundleId === e.bundleId && (st.app.pid || 0) === (e.pid || 0) && st.sel;    /* back from Context's own popover: same app, look at once, keep what is shown until the answer */
+      var back = st.app && st.app.bundleId === e.bundleId && (st.app.pid || 0) === (e.pid || 0) && st.sel;    /* back from contexta's own popover: same app, look at once, keep what is shown until the answer */
       st.app = { bundleId: String(e.bundleId || ''), name: String(e.name || ''), pid: e.pid || 0 };
       st.followed = !!Core.scriptForSelection(st.app.bundleId);
       out.push({ do: 'scope', on: st.followed });                /* the Tag current item shortcut is registered only while such an app is in front */

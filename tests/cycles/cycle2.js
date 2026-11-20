@@ -1,5 +1,5 @@
 /* Cycle 2 — first run, batch permission, denial and revoke, recovery.
- * The macOS prompt is MOCKED here (tests/lib/macos-prompts.js): these checks show what Context's own rules and pages
+ * The macOS prompt is MOCKED here (tests/lib/macos-prompts.js): these checks show what contexta's own rules and pages
  * do around it. What macOS itself does is in the blocked list at the end. */
 'use strict';
 var fs = require('fs'), path = require('path');
@@ -119,12 +119,12 @@ module.exports = async function (S, C) {
   } finally { await br.close(); }
 
   /* ── before and after, by what a person has to do ── */
-  S.measure('first run, three open apps → all three requested: clicks in Context before (0.10.3, read from App.swift, not run)', '4 (three tick boxes + Request selected), or 2 with Select all, which also opens every closed app');
-  S.measure('first run, three open apps → all three requested: clicks in Context after (0.11, mocked prompts)', '1 (Request selected; the three are ticked to begin with)');
-  S.measure('macOS prompts to answer, before and after', '3 and 3 (one per app; Context cannot reduce, merge or answer them)');
+  S.measure('first run, three open apps → all three requested: clicks in contexta before (0.10.3, read from App.swift, not run)', '4 (three tick boxes + Request selected), or 2 with Select all, which also opens every closed app');
+  S.measure('first run, three open apps → all three requested: clicks in contexta after (0.11, mocked prompts)', '1 (Request selected; the three are ticked to begin with)');
+  S.measure('macOS prompts to answer, before and after', '3 and 3 (one per app; contexta cannot reduce, merge or answer them)');
   S.measure('window appears at launch: before → after', 'every launch → only when there is no index and no app is allowed yet (and whenever asked for)');
   S.measure('app was refused → reach the Automation setting: before → after', 'read the path and find it in System Settings → one button (popover or window) opens that pane');
-  S.blocked('C2.N1', 'on a real Mac: the macOS prompt appears once per app, in order, with Context named; "Don\'t Allow" is reported as Not allowed; a closed app opens without coming to the front', 'needs macOS: prompts here are mocked');
+  S.blocked('C2.N1', 'on a real Mac: the macOS prompt appears once per app, in order, with contexta named; "Don\'t Allow" is reported as Not allowed; a closed app opens without coming to the front', 'needs macOS: prompts here are mocked');
   S.blocked('C2.N2', 'on a real Mac: the Settings… buttons open Privacy & Security › Automation; switching an app on or off there is picked up when the window returns to the front, by the popover, and by the menu-bar label within 5 s', 'needs macOS');
   S.blocked('C2.N3', 'on a real Mac: the App access window (a web view in the same 360 × 338 window) looks and behaves as in the Chrome render, and Return / Escape / arrows work in it', 'needs macOS: the Swift for the window (Access.swift) has not been compiled or run here');
 };

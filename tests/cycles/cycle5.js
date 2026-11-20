@@ -50,7 +50,7 @@ module.exports = async function (S, C) {
     /* evening: the workbook is saved again with the approved numbers */
     fs.writeFileSync(W.wb, L.workbook(3)); sim.activate(EXCEL); sim.advance(1000); var g8 = glance('workbook after saving again');
     mac.notes[NOTE].text = 'Call with Jonas about the cap\nJonas agrees to USD 55,000, in writing by Friday.\nPRIVATE-CANARY: he is unhappy with Kestrel.'; mac.notes[NOTE].modified = '2026-11-18T18:05:00';
-    S.check('C5.02', 'the workbook is saved again and the note is edited: nothing has to be done in Context, and the workbook still shows its tag (same file, same entry)', g8 === 'tags:Cost' && Object.keys(mac.objects()).length === 3, g8);
+    S.check('C5.02', 'the workbook is saved again and the note is edited: nothing has to be done in contexta, and the workbook still shows its tag (same file, same entry)', g8 === 'tags:Cost' && Object.keys(mac.objects()).length === 3, g8);
 
     /* day 2: in the browser, about to ask the AI */
     sim.activate(ASIDE, { name: 'Aside' }); sim.advance(1000); var g9 = glance('in the browser'), asksBrowser = sim.counts.asks; sim.advance(60000);

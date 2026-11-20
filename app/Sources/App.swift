@@ -1,4 +1,4 @@
-// Context — the app: one menu-bar item, one transient popover, and two small windows (App access, Settings).
+// contexta — the app: one menu-bar item, one transient popover, and two small windows (App access, Settings).
 // No Dock icon, no floating window, no key or mouse monitoring, no network.
 //
 // The menu-bar item shows the tags of the one whole object selected in the app in front (Status.swift decides when
@@ -32,7 +32,7 @@ final class AppDelegate: NSObject, NSApplicationDelegate, NSPopoverDelegate {
     private var giveFocusBack = true
 
     func applicationDidFinishLaunching(_ notification: Notification) {
-        // One Context, one menu-bar item: a second copy started by mistake leaves at once.
+        // One contexta, one menu-bar item: a second copy started by mistake leaves at once.
         if let own = Bundle.main.bundleIdentifier {
             let me = ProcessInfo.processInfo.processIdentifier
             let others = NSRunningApplication.runningApplications(withBundleIdentifier: own).filter { $0.processIdentifier != me }
@@ -87,8 +87,8 @@ final class AppDelegate: NSObject, NSApplicationDelegate, NSPopoverDelegate {
             }
             statusItem = item
         }
-        showStatus(["state": "off", "title": "", "tooltip": "Context: tag what is selected, or copy context for an AI",
-                    "label": "Context"])
+        showStatus(["state": "off", "title": "", "tooltip": "contexta: tag what is selected, or copy context for an AI",
+                    "label": "contexta"])
 
         if let accessPage = loadAccessPage() {
             let window = AccessWindow(page: accessPage)
@@ -178,7 +178,7 @@ final class AppDelegate: NSObject, NSApplicationDelegate, NSPopoverDelegate {
         guard let button = statusItem?.button else { return }
         let state = command["state"] as? String ?? "off"
         let title = command["title"] as? String ?? ""
-        if let image = NSImage(systemSymbolName: state == "tags" ? "tag.fill" : "tag", accessibilityDescription: "Context") {
+        if let image = NSImage(systemSymbolName: state == "tags" ? "tag.fill" : "tag", accessibilityDescription: "contexta") {
             image.isTemplate = true
             button.image = image
             button.title = title.isEmpty ? "" : " " + title
@@ -201,7 +201,7 @@ final class AppDelegate: NSObject, NSApplicationDelegate, NSPopoverDelegate {
     }
 
     /// The Tag current item shortcut was pressed. macOS reports the one registered chord; nothing else is listened to.
-    /// What is selected is asked BEFORE Context comes forward, and only of an app Context follows that is in front
+    /// What is selected is asked BEFORE contexta comes forward, and only of an app contexta follows that is in front
     /// and already allowed (looked up without a prompt). The popover then opens on exactly that answer; before a tag
     /// is written the popover asks again and refuses if the selection is no longer the same item.
     private func tagCurrentItem() {
@@ -281,7 +281,7 @@ final class AppDelegate: NSObject, NSApplicationDelegate, NSPopoverDelegate {
 
     private func fail(_ message: String) {
         let alert = NSAlert()
-        alert.messageText = "Context cannot start"
+        alert.messageText = "contexta cannot start"
         alert.informativeText = message
         alert.addButton(withTitle: "Quit")
         NSApplication.shared.activate(ignoringOtherApps: true)
@@ -295,7 +295,7 @@ struct WorkIndexMain {
     @MainActor
     static func main() {
         // A browser starts this executable as its local helper with the extension's address as an argument.
-        // Then there is no app: no window, no menu-bar item, only messages carried to the running Context.
+        // Then there is no app: no window, no menu-bar item, only messages carried to the running contexta.
         if let origin = CommandLine.arguments.dropFirst().first(where: { $0.hasPrefix("chrome-extension://") }) {
             exit(runComposerHost(origin: origin))
         }

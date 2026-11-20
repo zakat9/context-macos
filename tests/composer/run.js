@@ -12,7 +12,7 @@
  *                       what is being typed into.
  * WHAT IS A STAND-IN    The Mac side. The helper the browser launches is tests/composer/host-standin.js (Node), not the
  *                       Swift helper; the app it talks to is this test process with a pretend Mac (fictional notes,
- *                       mail and files in a temporary folder), not Context.app.
+ *                       mail and files in a temporary folder), not contexta.app.
  * NOT DONE HERE         Pressing a keyboard shortcut (Chrome's own shortcut handling opens the same picker); any real
  *                       AI chat; macOS; the compiled app.
  *
@@ -44,7 +44,7 @@ function frame(obj) { var body = Buffer.from(JSON.stringify(obj), 'utf8'), head 
 
   /* ── the stand-in for the app's side of the bridge: the real rules, a pretend Mac ── */
   var world = { closed: {}, notAllowed: {}, refusedReads: 0, requests: [], hellos: [] };
-  function appRead(bid, name, fn) { return function (arg) { if (world.closed[bid]) { world.refusedReads++; return { ok: false, reason: name + ' is closed: open it to include this' }; } if (world.notAllowed[bid]) { world.refusedReads++; return { ok: false, reason: 'Context is not allowed to ask ' + name + ' (App access)' }; } return fn(arg); }; }
+  function appRead(bid, name, fn) { return function (arg) { if (world.closed[bid]) { world.refusedReads++; return { ok: false, reason: name + ' is closed: open it to include this' }; } if (world.notAllowed[bid]) { world.refusedReads++; return { ok: false, reason: 'contexta is not allowed to ask ' + name + ' (App access)' }; } return fn(arg); }; }
   var engine = Insert.create({ readIndex: mac.now.readIndex, readFile: mac.now.readFile, readNote: appRead(NOTES, 'Notes', mac.now.readNote), readMail: appRead(MAIL, 'Mail', mac.now.readMail) });
   var server = null, conns = [];
   function startApp() { return new Promise(function (res) { try { fs.unlinkSync(sockPath); } catch (e) { /* none */ } server = net.createServer(function (conn) { conns.push(conn); var buf = Buffer.alloc(0), greeted = false; conn.on('data', function (d) { buf = Buffer.concat([buf, d]); for (;;) { if (buf.length < 4) return; var n = buf.readUInt32LE(0); if (buf.length < 4 + n) return; var m = JSON.parse(buf.slice(4, 4 + n).toString('utf8')); buf = buf.slice(4 + n); if (!greeted) { greeted = true; world.hellos.push(m); continue; } world.requests.push(m.op); conn.write(frame(engine.handle(m))); } }); conn.on('error', function () {}); }); server.listen(sockPath, res); }); }
@@ -55,7 +55,7 @@ function frame(obj) { var body = Buffer.from(JSON.stringify(obj), 'utf8'), head 
   fs.mkdirSync(path.join(ud, 'NativeMessagingHosts'), { recursive: true });
   var wrapper = path.join(work, 'context-helper'); fs.writeFileSync(wrapper, '#!/bin/sh\nexec "' + process.execPath + '" "' + path.join(__dirname, 'host-standin.js') + '" "' + sockPath + '" "$@"\n'); fs.chmodSync(wrapper, 0o755);
   var hostManifest = path.join(ud, 'NativeMessagingHosts', Lib.HOST + '.json');
-  function registerHelper() { fs.writeFileSync(hostManifest, JSON.stringify({ name: Lib.HOST, description: 'Context: Insert context (test stand-in)', path: wrapper, type: 'stdio', allowed_origins: ['chrome-extension://' + EXT_ID + '/'] })); }
+  function registerHelper() { fs.writeFileSync(hostManifest, JSON.stringify({ name: Lib.HOST, description: 'contexta: Insert context (test stand-in)', path: wrapper, type: 'stdio', allowed_origins: ['chrome-extension://' + EXT_ID + '/'] })); }
   registerHelper();
   var ctx = await chromium.launchPersistentContext(ud, { executablePath: process.env.CHROME || '/usr/bin/google-chrome', headless: false, timeout: 40000, args: ['--no-sandbox', '--disable-extensions-except=' + EXT, '--load-extension=' + EXT], viewport: { width: 980, height: 760 } });
   var fixture = fs.readFileSync(path.join(__dirname, 'fixture.html'), 'utf8'), outside = [];
@@ -96,7 +96,7 @@ function frame(obj) { var body = Buffer.from(JSON.stringify(obj), 'utf8'), head 
     P.click = async function (sel) { var b = JSON.parse(await P.ev('(function(){var e=document.querySelector(' + JSON.stringify(sel) + ');if(!e)return "null";e.scrollIntoView({block:"nearest"});var r=e.getBoundingClientRect();return JSON.stringify({x:r.left+r.width/2,y:r.top+r.height/2})})()')); if (!b) throw new Error('nothing to click: ' + sel); await send('Input.dispatchMouseEvent', { type: 'mousePressed', x: b.x, y: b.y, button: 'left', clickCount: 1 }); await send('Input.dispatchMouseEvent', { type: 'mouseReleased', x: b.x, y: b.y, button: 'left', clickCount: 1 }); await sleep(120); };
     P.close = async function () { await send('Runtime.evaluate', { expression: 'window.close()' }); await sleep(150); };
     P.shot = async function (file) { var r = await send('Page.captureScreenshot', { format: 'png' }); if (r.result && r.result.data) fs.writeFileSync(file, Buffer.from(r.result.data, 'base64')); };
-    P.started = await P.wait('document.getElementById("msg").textContent && !/Asking Context|Checking where/.test(document.body.innerText)', 6000);
+    P.started = await P.wait('document.getElementById("msg").textContent && !/Asking contexta|Checking where/.test(document.body.innerText)', 6000);
     P.state = function () { return P.ev('JSON.stringify({target:document.getElementById("target").textContent,chat:document.getElementById("chat").textContent,msg:document.getElementById("msg").textContent,insert:document.getElementById("insert").textContent+(document.getElementById("insert").disabled?" (off)":""),copy:document.getElementById("copy").disabled?"off":"on",tags:Array.prototype.map.call(document.querySelectorAll("#tags .tagrow"),function(b){return b.textContent}),rows:Array.prototype.map.call(document.querySelectorAll("#list .src"),function(r){return r.querySelector(".badge").textContent+(r.querySelector("input").checked?"":"(out)")+(r.querySelector(".flag")?"(changed)":"")}),summary:document.getElementById("summary").textContent,focus:document.activeElement?document.activeElement.id||document.activeElement.tagName:""})').then(function (s) { return s ? JSON.parse(s) : null; }); };
     P.choose = async function (typed) { await P.type(typed); await P.key('Enter'); return P.wait('document.querySelectorAll("#list .src").length > 0 || /No source|No tag|not |Choose/.test(document.getElementById("msg").textContent)', 6000); };
     return P;
@@ -181,7 +181,7 @@ function frame(obj) { var body = Buffer.from(JSON.stringify(obj), 'utf8'), head 
     await fresh(pg, '/c/aaa', DRAFT); P = await openPicker(pg); await P.choose('Travel');
     await pg.evaluate(function (d) { window.__setDraft(d, 6); }, DRAFT);
     await P.click('#insert'); await P.wait('/Nothing was inserted/.test(document.getElementById("msg").textContent)'); var sm = await P.state(), am = await side(pg); await P.close();
-    t('I10', 'the draft is changed, or only the caret is moved, after the picker opened: nothing is inserted and the picker says which of the two it was', /^The draft changed after this was opened\. Nothing was inserted\./.test(sd.msg) && !/Context evidence/.test(ad.draft) && /^The caret moved after this was opened\. Nothing was inserted\./.test(sm.msg) && am.draft === DRAFT, sd.msg + ' | ' + sm.msg);
+    t('I10', 'the draft is changed, or only the caret is moved, after the picker opened: nothing is inserted and the picker says which of the two it was', /^The draft changed after this was opened\. Nothing was inserted\./.test(sd.msg) && !/contexta evidence/.test(ad.draft) && /^The caret moved after this was opened\. Nothing was inserted\./.test(sm.msg) && am.draft === DRAFT, sd.msg + ' | ' + sm.msg);
 
     /* ── places where nothing may be inserted ── */
     await fresh(pg, '/c/aaa', DRAFT, 7, 14); var bsel = await side(pg); P = await openPicker(pg); var ss = await P.state(); await P.choose('Travel'); var ss2 = await P.state(); await P.close();
@@ -207,7 +207,7 @@ function frame(obj) { var body = Buffer.from(JSON.stringify(obj), 'utf8'), head 
       kinds.push({ kind: kind, target: sk2.target, insert: sk3.insert, same: before === await pg.evaluate(function () { return document.body.innerHTML + '|' + Array.prototype.map.call(document.querySelectorAll('input,textarea'), function (e) { return e.value; }).join('|'); }) });
     }
     t('I13', 'unclear or unsupported places: two message boxes; no message box; a one-line field or a password field carrying the message box\'s name; a look-alike box on another site. In each the picker says why, Insert stays off, and the page is not changed',
-      /More than one message box/.test(kinds[0].target) && /was not found/.test(kinds[1].target) && /a kind Context does not know/.test(kinds[2].target) && /a kind Context does not know/.test(kinds[3].target) && /This tab is not ChatGPT/.test(kinds[4].target) && kinds.every(function (k) { return / \(off\)$/.test(k.insert) && k.same; }), JSON.stringify(kinds));
+      /More than one message box/.test(kinds[0].target) && /was not found/.test(kinds[1].target) && /a kind contexta does not know/.test(kinds[2].target) && /a kind contexta does not know/.test(kinds[3].target) && /This tab is not ChatGPT/.test(kinds[4].target) && kinds.every(function (k) { return / \(off\)$/.test(k.insert) && k.same; }), JSON.stringify(kinds));
 
     /* ── sources that are missing, or that changed ── */
     await fresh(pg, '/c/aaa', DRAFT); P = await openPicker(pg); await P.choose('Cost'); var rowX = await P.ev('document.querySelector("#list .src:nth-child(8) .m").textContent');
@@ -227,14 +227,14 @@ function frame(obj) { var body = Buffer.from(JSON.stringify(obj), 'utf8'), head 
     world.notAllowed[MAIL] = true; world.closed[NOTES] = true;
     await fresh(pg, '/c/aaa', DRAFT); P = await openPicker(pg); await P.choose('Cost'); var sp = await P.state(), rowsP = JSON.parse(await P.ev('JSON.stringify(Array.prototype.map.call(document.querySelectorAll("#list .src .m"),function(m){return m.textContent}))'));
     await P.close(); world.notAllowed = {}; world.closed = {};
-    t('I16', 'Mail is not allowed for Context and Notes is closed: their sources are listed as unavailable with those reasons (the bridge never asks macOS for permission and never opens an app); the files are still read',
+    t('I16', 'Mail is not allowed for contexta and Notes is closed: their sources are listed as unavailable with those reasons (the bridge never asks macOS for permission and never opens an app); the files are still read',
       rowsP.filter(function (r) { return /not allowed to ask Mail/.test(r); }).length === 4 && rowsP.filter(function (r) { return /Notes is closed/.test(r); }).length === 1 && rowsP.filter(function (r) { return /^Email, sent|^Workbook, last saved/.test(r); }).length === 2 && world.refusedReads >= 5, JSON.stringify(rowsP));
     await stopApp(); await fresh(pg, '/c/aaa', DRAFT); P = await openPicker(pg); var sr = await P.state(); await P.close(); await startApp();
     fs.writeFileSync(sockPath + '.off', ''); P = await openPicker(pg); var sf = await P.state(); await P.close(); fs.unlinkSync(sockPath + '.off');
     fs.unlinkSync(hostManifest); P = await openPicker(pg); var sh = await P.state(); await P.close(); registerHelper();
     var ar = await side(pg);
     t('I17', 'the app is not running; Insert context is switched off in the app; the helper is not registered with this browser: each time the picker says which, in plain words with the way out, lists nothing, and Insert and Copy stay off',
-      /^The Context Mac app is not running\./.test(sr.msg) && /^Insert context is switched off in the Context Mac app\. It is switched on in its Settings\.$/.test(sf.msg) && /^Context is not connected to this browser\. In the Context Mac app, open Settings and set up Insert context for this browser\.$/.test(sh.msg) && [sr, sf, sh].every(function (x) { return x.insert === 'Insert (off)' && x.copy === 'off' && x.tags.length === 0; }) && ar.draft === DRAFT, [sr.msg, sf.msg, sh.msg].join(' | '));
+      /^The contexta Mac app is not running\./.test(sr.msg) && /^Insert context is switched off in the contexta Mac app\. It is switched on in its Settings\.$/.test(sf.msg) && /^contexta is not connected to this browser\. In the contexta Mac app, open Settings and set up Insert context for this browser\.$/.test(sh.msg) && [sr, sf, sh].every(function (x) { return x.insert === 'Insert (off)' && x.copy === 'off' && x.tags.length === 0; }) && ar.draft === DRAFT, [sr.msg, sf.msg, sh.msg].join(' | '));
 
     /* ── other kinds of message box ── */
     await fresh(pg, '/c/aaa?composer=textarea', 'Line one\nLine two', 8); P = await openPicker(pg); await P.choose('Travel'); await P.key('Enter'); for (w = 0; w < 50 && !(await P.closed()); w++) await sleep(60);
@@ -244,13 +244,13 @@ function frame(obj) { var body = Buffer.from(JSON.stringify(obj), 'utf8'), head 
     var ah = await side(pg), ch = await clip(pg), reverted = await pg.evaluate(function () { return window.__reverted || 0; });
     t('I19', 'an editor that keeps its own copy of the text and puts it back when something is typed in from outside, taking text only through its own paste handling: the first way is undone by the editor, the page script notices, hands the evidence over the second way, it arrives once and stays; the system clipboard still holds what it held', reverted >= 1 && ah.paste === 1 && ah.draft.indexOf(DRAFT + '\n' + Insert.BEGIN) === 0 && ah.draft.split(Insert.BEGIN).length === 2 && ch === SENTINEL && ah.sent === 0, JSON.stringify([reverted, ah.paste, ah.draft.slice(0, 90), ch]));
 
-    /* ── a tag is renamed in Context while the picker is open ── */
+    /* ── a tag is renamed in contexta while the picker is open ── */
     await fresh(pg, '/c/aaa', DRAFT); P = await openPicker(pg); await P.choose('Travel');
     var pop = C.Popover.create(mac.host); await pop.opened({ bundleId: NOTES }); await pop.manageOpen(); await pop.renameChoose('Travel'); await pop.renamePreview('Trips'); var rn = await pop.renameCommit('rename');
     await P.click('#insert'); await P.wait('/Tags were changed/.test(document.getElementById("msg").textContent)'); var si = await P.state(), ai = await side(pg);
     await P.choose('Tri'); var si2 = await P.state(); await P.key('Enter'); for (w = 0; w < 50 && !(await P.closed()); w++) await sleep(60); var ai2 = await side(pg);
-    t('I20', 'a tag is renamed in Context (Manage tags) while the picker shows its sources: Insert gives nothing and says the tags were changed; the picker\'s list of tags already shows the new name; choosing it inserts',
-      /Renamed Travel to Trips/.test(rn.manage.message) && /^Tags were changed in Context after this list was shown\. Choose the tag again\. Nothing was inserted or copied\.$/.test(si.msg) && ai.draft === DRAFT && si.tags.some(function (x) { return /^Trips1 source$/.test(x); }) && !si.tags.some(function (x) { return /^Travel/.test(x); }) && /context for ::Trips/.test(ai2.draft), si.msg + ' ' + si.tags.join() + ' ' + ai2.draft.slice(60, 130));
+    t('I20', 'a tag is renamed in contexta (Manage tags) while the picker shows its sources: Insert gives nothing and says the tags were changed; the picker\'s list of tags already shows the new name; choosing it inserts',
+      /Renamed Travel to Trips/.test(rn.manage.message) && /^Tags were changed in contexta after this list was shown\. Choose the tag again\. Nothing was inserted or copied\.$/.test(si.msg) && ai.draft === DRAFT && si.tags.some(function (x) { return /^Trips1 source$/.test(x); }) && !si.tags.some(function (x) { return /^Travel/.test(x); }) && /context for ::Trips/.test(ai2.draft), si.msg + ' ' + si.tags.join() + ' ' + ai2.draft.slice(60, 130));
 
     /* ── across everything above ── */
     var total = await pg.evaluate(function () { return { sent: window.__sent, clicks: window.__sendClicks }; });
@@ -260,7 +260,7 @@ function frame(obj) { var body = Buffer.from(JSON.stringify(obj), 'utf8'), head 
 
   blocked.push(['I.N1', 'an actual AI chat: the real ChatGPT page and its real editor (does it have one visible #prompt-textarea, does it take inserted text this way, does it keep the caret)', 'not run: no request may reach chatgpt.com from here, and no account was used']);
   blocked.push(['I.N2', 'the keyboard shortcut: set one at chrome://extensions/shortcuts and press it in a ChatGPT tab', 'not run: the picker was opened with chrome.action.openPopup; the shortcut is the browser\'s own way of opening the same picker']);
-  blocked.push(['I.N3', 'the Mac helper and app: the browser starting Context.app\'s executable as the helper, the helper reaching the running app, the app refusing anything that is not its own helper started by the browser it was set up for', 'not run: needs macOS and the compiled app; here a Node stand-in played both']);
+  blocked.push(['I.N3', 'the Mac helper and app: the browser starting contexta.app\'s executable as the helper, the helper reaching the running app, the app refusing anything that is not its own helper started by the browser it was set up for', 'not run: needs macOS and the compiled app; here a Node stand-in played both']);
   blocked.push(['I.N4', 'other browsers (Aside included): whether they load this extension and where they look for the helper\'s registration', 'not run']);
   var bad = results.filter(function (r) { return !r.pass; });
   var out = { label: label, ranAt: new Date().toISOString(), build: L.buildHash(), browser: version, extensionId: EXT_ID, real: 'browser, extension, toolbar picker, page script, native-messaging launch, clipboard of the test display, core/insert.js', fixture: 'the chat page (tests/composer/fixture.html answered under https://chatgpt.com inside the test browser)', standIn: 'the Mac helper and the Mac app (Node, pretend Mac)', checks: results, blocked: blocked.map(function (b) { return { id: b[0], text: b[1], why: b[2] }; }) };

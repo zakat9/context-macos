@@ -1,12 +1,12 @@
-/* Context — the App access window's rules.
+/* contexta — the App access window's rules.
  *
- * Context may ask an app which item is selected only after macOS has let it, and macOS decides that per app, in its
+ * contexta may ask an app which item is selected only after macOS has let it, and macOS decides that per app, in its
  * own prompt, once. This file decides what the window lists, what is ticked to begin with, and how several apps are
  * requested with one button: one app after another, each with its own macOS prompt, each answer shown as it comes.
  * It cannot answer a prompt, skip one, or ask again after "Don't Allow": after that only System Settings can change it.
  *
  * host (promises of plain objects):
- *   apps()        → { ok, apps: [{ id, name, installed, running }] }      the apps Context can follow, nothing else
+ *   apps()        → { ok, apps: [{ id, name, installed, running }] }      the apps contexta can follow, nothing else
  *   check(id)     → { ok, code }      0 allowed · -1744 not asked yet · -1743 not allowed. Never shows a prompt.
  *   request(id)   → { ok, code }      opens the app if it is closed (in the background), then lets macOS ask. May show ONE prompt.
  *   settings()    → opens System Settings at Privacy & Security › Automation

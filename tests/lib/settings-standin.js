@@ -1,6 +1,6 @@
 /* Test asset: a pretend Mac for the Settings window. It does what app/Sources/Settings.swift and HotKey.swift are
  * written to do: keep the settings in one small file, register the Tag current item chord with a pretend macOS
- * (which refuses a chord that something else holds), keep it registered only while an app Context follows is in
+ * (which refuses a chord that something else holds), keep it registered only while an app contexta follows is in
  * front, and register or remove the browser helper's file. It is a model of that Swift, not the Swift. */
 'use strict';
 var fs = require('fs'), path = require('path');
@@ -16,12 +16,12 @@ function create(dir, setup) {
   function write(s) { if (os.failWrite) return false; fs.mkdirSync(dir, { recursive: true }); var tmp = os.file + '.tmp'; fs.writeFileSync(tmp, JSON.stringify(Settings.sanitize(s), null, 1)); fs.renameSync(tmp, os.file); return true; }
   function macRegister(chord) { if (os.failRegister != null) return os.failRegister; return os.taken[id(chord)] ? -9878 : 0; }       /* what RegisterEventHotKey would answer */
   function apply() { os.registered = os.active && os.current ? os.current : null; }
-  /* at launch: what the file says, registered only if an app Context follows is in front */
+  /* at launch: what the file says, registered only if an app contexta follows is in front */
   os.start = function () { os.current = read().tagShortcut; apply(); return os; };
   os.scope = function (on) { os.active = !!on; apply(); };
   os.press = function (chord) { if (os.registered && Settings.same(os.registered, chord)) { os.pressed++; if (os.onPressed) os.onPressed(); return true; } return false; };
   os.host = {
-    state: function () { os.calls.push('state'); var s = read(); return Promise.resolve({ ok: true, tagShortcut: s.tagShortcut, insert: { on: s.insert.on, browsers: s.insert.browsers.map(function (b) { return b.name; }) }, extensionFolder: '/Applications/Context.app/Contents/Resources/composer-extension' }); },
+    state: function () { os.calls.push('state'); var s = read(); return Promise.resolve({ ok: true, tagShortcut: s.tagShortcut, insert: { on: s.insert.on, browsers: s.insert.browsers.map(function (b) { return b.name; }) }, extensionFolder: '/Applications/contexta.app/Contents/Resources/composer-extension' }); },
     setShortcut: function (chord) {
       os.calls.push('setShortcut');
       var c = Settings.clean(chord), ok = c && Settings.check(c, null, []).ok;
@@ -41,7 +41,7 @@ function create(dir, setup) {
       if (!fs.existsSync(b.folder)) return Promise.resolve({ ok: false, reason: 'no-folder' });
       var manifest = path.join(b.folder, 'local.workindex.composer.json'), s = read();
       if (os.failWrite) return Promise.resolve({ ok: false, reason: 'not-saved' });
-      fs.writeFileSync(manifest, JSON.stringify({ name: 'local.workindex.composer', description: 'Context: Insert context', path: '/Applications/Context.app/Contents/MacOS/WorkIndex', type: 'stdio', allowed_origins: ['chrome-extension://' + (setup.extensionId || 'x') + '/'] }));
+      fs.writeFileSync(manifest, JSON.stringify({ name: 'local.workindex.composer', description: 'contexta: Insert context', path: '/Applications/contexta.app/Contents/MacOS/WorkIndex', type: 'stdio', allowed_origins: ['chrome-extension://' + (setup.extensionId || 'x') + '/'] }));
       s.insert.browsers = s.insert.browsers.filter(function (x) { return x.bundleId !== b.bundleId; }).concat([{ name: b.name, bundleId: b.bundleId, manifest: manifest }]); s.insert.on = true;
       write(s);
       return Promise.resolve({ ok: true, insert: { on: true, browsers: s.insert.browsers.map(function (x) { return x.name; }) } });

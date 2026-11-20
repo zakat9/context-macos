@@ -1,15 +1,15 @@
-// Context — Insert context, the app's side.
+// contexta — Insert context, the app's side.
 //
 // When the person has switched Insert context on (Settings), the app answers its own browser extension:
 // which tags there are, which sources a tag has, and the text of the sources the person ticked. The rules are in
 // core/insert.js and run here in JavaScriptCore; this file gives them five read-only functions and a local socket.
 //
 // What this side may do, and nothing more:
-//   · read Context's own index file, and the saved files the index points at;
+//   · read contexta's own index file, and the saved files the index points at;
 //   · read a tagged note or message, but only when Notes or Mail is ALREADY open and ALREADY allowed (looked up
 //     without a prompt). Otherwise that source is "not available now". No app is opened, no prompt can appear;
 //   · answer on a socket file in ~/WorkIndex/composer, and only to this same executable started as the helper
-//     (ComposerHost.swift), whose first message names the Context extension.
+//     (ComposerHost.swift), whose first message names the contexta extension.
 // It writes nothing except, when the person sets Insert context up: the extension's folder (a copy, so the browser's
 // "Load unpacked" can reach it) and one small registration file in the folder of the browser they chose.
 // It never touches the clipboard, the index, a source, or the browser.
@@ -102,7 +102,7 @@ final class InsertEngine {
         }
         let permission = AccessWindow.permission(bundleId, ask: false)
         if permission == 0 { return nil }
-        return jsonString(["ok": false, "code": permission, "reason": "Context is not allowed to ask " + name + " (App access)"])
+        return jsonString(["ok": false, "code": permission, "reason": "contexta is not allowed to ask " + name + " (App access)"])
     }
 }
 
@@ -141,7 +141,7 @@ final class Composer {
 
     // MARK: setting up (only ever from the Settings window)
 
-    /// Where the Chromium-family browsers Context knows keep their data, under ~/Library/Application Support.
+    /// Where the Chromium-family browsers contexta knows keep their data, under ~/Library/Application Support.
     private static let dataFolders: [String: String] = [
         "com.google.Chrome": "Google/Chrome",
         "org.chromium.Chromium": "Chromium",
@@ -163,11 +163,11 @@ final class Composer {
         return Choice(name: "Google Chrome", bundleId: "com.google.Chrome", hostsFolder: folder)
     }
 
-    /// "Other…": the person chooses the browser, and, for a browser Context does not know, its data folder.
+    /// "Other…": the person chooses the browser, and, for a browser contexta does not know, its data folder.
     static func askForBrowser() -> Picked {
         let panel = NSOpenPanel()
         panel.title = "Choose the browser"
-        panel.message = "Choose the Chromium-family browser in which you will load the Context extension."
+        panel.message = "Choose the Chromium-family browser in which you will load the contexta extension."
         panel.prompt = "Choose"
         panel.allowedContentTypes = [.applicationBundle]
         panel.allowsMultipleSelection = false
@@ -182,7 +182,7 @@ final class Composer {
         }
         let folderPanel = NSOpenPanel()
         folderPanel.title = "Choose the browser's data folder"
-        folderPanel.message = "Context does not know where " + name + " keeps its data. Choose that folder: the browser shows it at chrome://version as “Profile Path”, without the last part."
+        folderPanel.message = "contexta does not know where " + name + " keeps its data. Choose that folder: the browser shows it at chrome://version as “Profile Path”, without the last part."
         folderPanel.prompt = "Choose"
         folderPanel.canChooseFiles = false
         folderPanel.canChooseDirectories = true
@@ -218,10 +218,10 @@ final class Composer {
         return true
     }
 
-    /// What tells a browser that the Context extension, and no other, may start this executable as its helper.
+    /// What tells a browser that the contexta extension, and no other, may start this executable as its helper.
     static func registration(executable: String) -> Data? {
         let manifest: [String: Any] = ["name": Scripts.composerHostName,
-                                       "description": "Context: gives the Context extension the tagged sources you choose",
+                                       "description": "contexta: gives the contexta extension the tagged sources you choose",
                                        "path": executable,
                                        "type": "stdio",
                                        "allowed_origins": ["chrome-extension://" + Scripts.composerExtensionId + "/"]]
@@ -247,16 +247,24 @@ final class Composer {
         try? FileManager.default.removeItem(atPath: path)
     }
 
-    /// At launch, when Insert context is on: the app may have been moved or rebuilt since it was set up, so the
-    /// extension's copy and the registrations are written again. Nothing new is registered.
-    func refresh(_ browsers: [PairedBrowser]) {
+    /// At launch, when Insert context is on: the app may have been moved, rebuilt or renamed since it was set up
+    /// (0.12.3 renamed Context.app to contexta.app), so the extension's copy is refreshed, and each registration this
+    /// app wrote for a browser the person set up is pointed at this executable again if it points elsewhere.
+    /// Only an existing registration of this helper is rewritten: a browser that was never set up, or whose
+    /// registration file the person removed, is left as it is. Nothing new is registered and nothing is asked.
+    /// Answers, per browser: "current" (already this executable), "repaired", "absent" (left alone) or "failed".
+    @discardableResult
+    func refresh(_ browsers: [PairedBrowser]) -> [String] {
         _ = copyExtension()
-        for browser in browsers {
-            let folder = URL(fileURLWithPath: browser.manifest).deletingLastPathComponent()
-            var isDirectory: ObjCBool = false
-            if FileManager.default.fileExists(atPath: folder.path, isDirectory: &isDirectory), isDirectory.boolValue {
-                _ = register(in: folder)
-            }
+        guard let executable = Bundle.main.executablePath else { return browsers.map { _ in "failed" } }
+        return browsers.map { browser -> String in
+            let file = URL(fileURLWithPath: browser.manifest)
+            guard file.lastPathComponent == Scripts.composerHostName + ".json",
+                  let data = FileManager.default.contents(atPath: file.path),
+                  let root = (try? JSONSerialization.jsonObject(with: data, options: [])) as? [String: Any],
+                  (root["name"] as? String) == Scripts.composerHostName else { return "absent" }
+            if (root["path"] as? String) == executable { return "current" }
+            return register(in: file.deletingLastPathComponent()) != nil ? "repaired" : "failed"
         }
     }
 
@@ -273,7 +281,7 @@ final class Composer {
         try? FileManager.default.setAttributes([.posixPermissions: 0o700], ofItemAtPath: directory.path)
         let path = socketPath
         guard var address = unixAddress(path) else { return false }
-        unlink(path)                                    // left by an earlier run; there is only ever one Context
+        unlink(path)                                    // left by an earlier run; there is only ever one contexta
         let fd = socket(AF_UNIX, SOCK_STREAM, 0)
         guard fd >= 0 else { return false }
         let size = socklen_t(MemoryLayout<sockaddr_un>.size)

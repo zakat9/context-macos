@@ -1,4 +1,4 @@
-/* Context — reading a source's current saved contents.
+/* contexta — reading a source's current saved contents.
  * Pure: bytes and text in, structured content out. No file, network or operating-system access, no libraries.
  * The same file runs inside the Mac app's popover and under the tests.
  * Every call works on what it is handed; nothing is kept between calls. */
@@ -454,7 +454,7 @@ var WorkIndexRead = (function (Core) {
     if (!file || !file.ok) return { status: 'unavailable', reason: fileReason(file, p) };
     var cloud = Core.cloudPlace(p), dated = { title: baseName(p), sourceTime: file.mtimeMs ? localIso(Math.floor(file.mtimeMs)) : null, sourceTimeType: 'modified-only', sourceCreated: null };
     if (Core.isGoogleNative(p)) return { status: 'unreadable', reason: 'a Google ' + ({ gdoc: 'Docs', gsheet: 'Sheets', gslides: 'Slides' }[extName(p).slice(1).toLowerCase()] || 'Drive') + ' file: its text is in Google Drive online, not on this Mac. To include it, download a copy (File › Download as .xlsx, .csv or .txt), tag that copy and look it up again', observed: dated };
-    if (file.online) return { status: 'unreadable', reason: 'online only' + (cloud ? ' in ' + cloud.provider : '') + ': its contents are not on this Mac, and Context does not download them. In Finder choose "Make Available Offline" or "Download Now", then look it up again', observed: dated };
+    if (file.online) return { status: 'unreadable', reason: 'online only' + (cloud ? ' in ' + cloud.provider : '') + ': its contents are not on this Mac, and contexta does not download them. In Finder choose "Make Available Offline" or "Download Now", then look it up again', observed: dated };
     if (file.size > MAX_FILE || !file.bytes) return { status: 'unreadable', reason: 'file is larger than 40 MB', observed: { title: baseName(p), sourceTime: file.mtimeMs ? localIso(Math.floor(file.mtimeMs)) : null, sourceTimeType: 'modified-only', sourceCreated: null } };
     var buf = file.bytes, o, observed;
     try { o = observe(p, buf, file.mtimeMs); } catch (e0) { o = { kind: Core.kindForPath(p), title: baseName(p), sourceTime: file.mtimeMs ? localIso(Math.floor(file.mtimeMs)) : null, sourceTimeType: 'modified-only', sourceCreated: null }; }

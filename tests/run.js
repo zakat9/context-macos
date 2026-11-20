@@ -222,6 +222,7 @@ function count(hay, needle) { return hay.split(needle).length - 1; }
 })();
 
 require('./groups-sync.js')({ t: t, ROOT: ROOT, Core: Core, Read: Read });
+require('./groups-brand.js')({ t: t, ROOT: ROOT });
 
 /* ───────── X. experimental connector (MCP over stdio), H. speed — asynchronous ───────── */
 function mcpSession(home, messages, cb) {

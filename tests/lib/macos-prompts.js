@@ -1,7 +1,7 @@
 /* Test asset: a pretend macOS for the App access window. It keeps, per app, whether it is installed and open and
  * what the person has decided, and it stands in for the macOS permission prompt: when a request needs one, it
  * records it, lets only one be on screen at a time, and takes the person's answer from the test.
- * This is a mock. It shows what Context's own rules do around the prompt; it cannot show what macOS does. */
+ * This is a mock. It shows what contexta's own rules do around the prompt; it cannot show what macOS does. */
 'use strict';
 var ALL = [['com.apple.Notes', 'Notes'], ['com.apple.mail', 'Mail'], ['com.apple.finder', 'Finder'], ['com.microsoft.Excel', 'Microsoft Excel'], ['com.microsoft.Word', 'Microsoft Word'], ['com.microsoft.Powerpoint', 'Microsoft PowerPoint'],
   ['com.apple.iWork.Numbers', 'Numbers'], ['com.apple.iWork.Pages', 'Pages'], ['com.apple.iWork.Keynote', 'Keynote'], ['com.apple.Preview', 'Preview'], ['com.apple.TextEdit', 'TextEdit']];

@@ -1,4 +1,4 @@
-// Context — the menu-bar item's label while the popover is closed.
+// contexta — the menu-bar item's label while the popover is closed.
 // It shows the tags (0 to 2) of the one whole object selected in the app in front. The rules are in core/status.js;
 // this file carries events to them and carries out the few commands they give back.
 //
@@ -8,8 +8,8 @@
 //   · ask the app in front the same read-only "which one object is selected" question the popover asks (giving up
 //     after 1 second), and only after seeing, each time, that the app is running, is in front, and has ALREADY been
 //     allowed in macOS. The question runs on the main thread, as AppleScript must: while it runs, nothing else here does;
-//   · read Context's own index file;
-//   · say when an app Context follows comes to the front or leaves it ("scope"), which is when the Tag current item
+//   · read contexta's own index file;
+//   · say when an app contexta follows comes to the front or leaves it ("scope"), which is when the Tag current item
 //     shortcut, if the person has set one, is registered with macOS or given up.
 // It never lets macOS show a permission prompt (the permission is looked up with askUserIfNeeded = false), never
 // opens an app, never takes the keyboard, and listens to no keys and no pointer.
@@ -62,7 +62,7 @@ final class StatusMonitor: NSObject {
     private var timer: Timer?
     private var popoverOpen = false
     var onShow: (([String: Any]) -> Void)?
-    /// An app Context follows came to the front (true) or left it (false): the Tag current item shortcut is
+    /// An app contexta follows came to the front (true) or left it (false): the Tag current item shortcut is
     /// registered with macOS only in between.
     var onScope: ((Bool) -> Void)?
 

@@ -1,4 +1,4 @@
-// Context — Settings: one small file of settings, and the Settings window (360 × 338, the size of App access).
+// contexta — Settings: one small file of settings, and the Settings window (360 × 338, the size of App access).
 //
 // What can be set: the Tag current item shortcut (HotKey.swift) and Insert context (Composer.swift). Both are off
 // until the person sets them. The window's content is a bundled page (settings.html) whose rules are in
@@ -221,7 +221,7 @@ final class SettingsWindow: NSObject, NSWindowDelegate, WKScriptMessageHandlerWi
     init(page: String, preferences: Preferences) {
         self.preferences = preferences
         super.init()
-        window.title = "Context Settings"
+        window.title = "contexta Settings"
         window.isReleasedWhenClosed = false
         window.delegate = self
         let configuration = WKWebViewConfiguration()

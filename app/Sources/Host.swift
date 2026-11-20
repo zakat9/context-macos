@@ -1,4 +1,4 @@
-// Context — what the popover may ask the Mac for.
+// contexta — what the popover may ask the Mac for.
 // Every function answers with a small dictionary of plain values, which is handed to the page as it is.
 
 import AppKit

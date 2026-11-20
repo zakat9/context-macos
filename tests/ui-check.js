@@ -1,5 +1,5 @@
 #!/usr/bin/env node
-/* Context — page safety checks: the two pages as they are bundled into the Mac app (popover.html at 352 × 440,
+/* contexta — page safety checks: the two pages as they are bundled into the Mac app (popover.html at 352 × 440,
  * access.html at 360 × 338), driven in a real browser against a pretend Mac. These carry over the 0.10 page checks
  * that the five cycles do not repeat: markup is never run, the 900 → 820 acceptance test in the page, nothing is
  * kept after closing, and the pages talk to nothing but the app.

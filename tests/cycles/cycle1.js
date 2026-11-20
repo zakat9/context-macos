@@ -14,7 +14,7 @@ module.exports = async function (S, C) {
   /* ── transitions ── */
   var w = await world(), mac = w.mac, sim = w.sim, wb = path.join(mac.files, 'tooling-budget.xlsx');
   sim.activate(CHROME); sim.advance(600000);
-  S.check('C1.01', 'an app Context does not follow (a browser) in front for ten minutes: the item is dimmed, and no app is asked anything; the timer is not even running', sim.text() === 'off' && sim.counts.asks === 0 && sim.counts.scripts === 0 && sim.counts.ticks === 0 && sim.timerAt === null, sim.text() + ' ' + JSON.stringify(sim.counts));
+  S.check('C1.01', 'an app contexta does not follow (a browser) in front for ten minutes: the item is dimmed, and no app is asked anything; the timer is not even running', sim.text() === 'off' && sim.counts.asks === 0 && sim.counts.scripts === 0 && sim.counts.ticks === 0 && sim.timerAt === null, sim.text() + ' ' + JSON.stringify(sim.counts));
 
   var n0 = sim.shows.length, t0 = sim.now;
   sim.activate(NOTES); var atOnce = sim.text(); sim.advance(1000);
@@ -31,7 +31,7 @@ module.exports = async function (S, C) {
     a === 'none' && b === 'tags:Travel' && c === 'off' && /Select exactly one note/.test(cTip) && sim.text() === 'tags:Cost' && states(sim, n0) === 'none → tags:Travel → off → tags:Cost', states(sim, n0));
   var none = sim.shows.filter(function (s) { return s.state === 'none'; })[0], off = sim.shows.filter(function (s) { return s.state === 'off'; })[0];
   S.check('C1.04', 'no tags and unavailable are told apart three ways: a different state for the icon, a different tooltip, a different accessibility label; neither shows any text in the menu bar',
-    none.title === '' && off.title === '' && none.state !== off.state && /^No tags on this note\. Click to tag it\./.test(none.tooltip) && /^Context\. No tags\. Note in Notes: Lunch order\.$/.test(none.label) && /Nothing to tag in this app/.test(off.tooltip) && none.label !== off.label, JSON.stringify([none, off]));
+    none.title === '' && off.title === '' && none.state !== off.state && /^No tags on this note\. Click to tag it\./.test(none.tooltip) && /^contexta\. No tags\. Note in Notes: Lunch order\.$/.test(none.label) && /Nothing to tag in this app/.test(off.tooltip) && none.label !== off.label, JSON.stringify([none, off]));
 
   /* ── fast switching and answers that come back in the wrong order ── */
   var before = JSON.parse(JSON.stringify(sim.counts)); n0 = sim.shows.length;

@@ -47,7 +47,7 @@ form{flex:1;min-height:0;display:flex;flex-direction:column}
 </head>
 <body>
 <div class="top"><h1 id="title">App access</h1><button type="button" class="link" id="allBtn">Select all</button></div>
-<p class="soft" id="why">macOS asks you once per app, in its own prompt. It says “control”; Context only reads which item is selected.</p>
+<p class="soft" id="why">macOS asks you once per app, in its own prompt. It says “control”; contexta only reads which item is selected.</p>
 <form id="form" novalidate>
   <div id="list" role="group" aria-labelledby="title"></div>
   <p class="soft" id="missing" hidden></p>
@@ -92,7 +92,7 @@ form{flex:1;min-height:0;display:flex;flex-direction:column}
       if (r.settings) { var b = el('button', 'btn small', 'Settings…'); b.type = 'button'; b.setAttribute('data-key', 'settings:' + r.id); b.setAttribute('aria-label', 'Open Automation settings to allow ' + r.name); b.addEventListener('click', function () { call('settings'); }); row.appendChild(b); }
       list.appendChild(row);
     });
-    if (!v.rows.length) list.appendChild(el('p', 'soft', v.loaded ? 'None of the apps Context follows is installed.' : 'Looking at the apps on this Mac…'));
+    if (!v.rows.length) list.appendChild(el('p', 'soft', v.loaded ? 'None of the apps contexta follows is installed.' : 'Looking at the apps on this Mac…'));
     list.scrollTop = top;
     $('missing').hidden = !v.missing.length; $('missing').textContent = 'Not installed: ' + v.missing.join(', '); $('missing').title = v.missing.join(', ');
     $('note').textContent = v.note;

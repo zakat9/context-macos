@@ -1,4 +1,4 @@
-// Context — the bridge between the popover page and the Mac.
+// contexta — the bridge between the popover page and the Mac.
 // The page can only name one of the requests below. It cannot hand over a script, cannot read a file that is
 // neither indexed nor the current selection, and cannot open any address: every navigation is refused.
 
@@ -17,7 +17,7 @@ final class Bridge: NSObject, WKScriptMessageHandlerWithReply, WKNavigationDeleg
     /// The page asks for the App access window (with the app it is about, or "") or for System Settings.
     var onAccess: ((String) -> Void)?
     var onSettings: (() -> Void)?
-    /// The page asks for Context's own Settings window (shortcuts, Insert context).
+    /// The page asks for contexta's own Settings window (shortcuts, Insert context).
     var onPreferences: (() -> Void)?
     /// The page's own height changed: the popover follows it (the width never changes). Answers the height that was
     /// applied and the room there is, so the page can give its list a scroll bar when there is less room than content.

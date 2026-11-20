@@ -40,7 +40,7 @@ module.exports = async function (ctx) {
   mac.select(NOTES, ['x-coredata://FICTIONAL-0001/ICNote/p1']); await pop.opened({ bundleId: NOTES });
   mac.automationDenied[NOTES] = true; v = await pop.save('Budget'); var revoked = v.target.state === 'none' && mac.indexText() === before;
   v = await pop.opened({ bundleId: NOTES }); var deniedMsg = [v.target.reason, v.target.app, v.target.message].join('|'); mac.automationDenied = {};
-  t('PO06', 'two notes selected at Save, or permission withdrawn at Save: nothing is written. Permission refused at the click: the popover names the app and says why (the page then offers Automation settings)', multi && revoked && deniedMsg === 'denied|Notes|Context is not allowed to ask Notes which item is selected.', deniedMsg);
+  t('PO06', 'two notes selected at Save, or permission withdrawn at Save: nothing is written. Permission refused at the click: the popover names the app and says why (the page then offers Automation settings)', multi && revoked && deniedMsg === 'denied|Notes|contexta is not allowed to ask Notes which item is selected.', deniedMsg);
 
   /* one workbook reached through Finder and through Excel */
   var wb = mac.write('maintenance.xlsx', fs.readFileSync(fx('maintenance-900.xlsx')));
@@ -100,10 +100,10 @@ module.exports = async function (ctx) {
   var gone = v.lookup.sources.filter(function (s) { return s.group === 'unavailable'; }), txt = JSON.stringify(v.lookup);
   t('PO15', 'a deleted workbook, a note that is now locked and a Mail permission refusal are each listed as unavailable with the reason, and with none of their contents or dates', gone.length === 3 && /file not found/.test(txt) && /The note is locked/.test(txt) && /Privacy & Security › Automation/.test(txt) && gone.every(function (s) { return s.lines.length === 0 && s.when === ''; }) && !/B2:|820|USD 48,500|Harborline holds/.test(txt) && v.lookup.counts.unavailable === 3, txt.slice(0, 400));
   mac.fileDenied[eml] = true; mac.select(FINDER, [eml]); v = await pop.opened({ bundleId: FINDER });
-  var fileDenied = v.target.state === 'none' && /macOS is not letting Context read that file/.test(v.target.message);
+  var fileDenied = v.target.state === 'none' && /macOS is not letting contexta read that file/.test(v.target.message);
   mac.fileDenied = {}; mac.automationDenied = {}; mac.notes['x-coredata://FICTIONAL-0001/ICNote/p1'].locked = false;
   await pop.closed(); var held = pop.held();
-  t('PO16', 'a file macOS will not let the app read cannot be tagged; and once the popover closes, nothing of the target or the list is held', fileDenied && held === '{"app":"","target":{"state":"none","reason":"other-app","message":"Select one note, mail message or saved file in its app, then click the Context icon."},"tagText":"","tagMessage":"","recent":[],"lookup":null,"copyMessage":""}', held);
+  t('PO16', 'a file macOS will not let the app read cannot be tagged; and once the popover closes, nothing of the target or the list is held', fileDenied && held === '{"app":"","target":{"state":"none","reason":"other-app","message":"Select one note, mail message or saved file in its app, then click the contexta icon."},"tagText":"","tagMessage":"","recent":[],"lookup":null,"copyMessage":""}', held);
 
   /* failures of the index itself */
   mac.select(NOTES, ['x-coredata://FICTIONAL-0001/ICNote/p1']); await pop.opened({ bundleId: NOTES }); mac.failWrite = true; before = mac.indexText();

@@ -1,11 +1,11 @@
-// Context — the App access window: which apps macOS lets Context ask, and one button to request several.
+// contexta — the App access window: which apps macOS lets contexta ask, and one button to request several.
 // The window is the size it was in 0.10.3 (360 × 338). Its content is a bundled page (access.html) whose rules are in
-// core/access.js; this file answers the page's five requests. The page can only name an app Context follows.
+// core/access.js; this file answers the page's five requests. The page can only name an app contexta follows.
 //
 //   apps      what is installed and what is open. Nothing is opened, nothing is asked.
 //   check     what macOS has already decided for one open app. Never shows a prompt.
 //   request   for ONE app: open it in the background if it is closed, then let macOS ask. macOS shows its own
-//             prompt, at most one, and this waits for the person's answer. Context cannot answer or skip it.
+//             prompt, at most one, and this waits for the person's answer. contexta cannot answer or skip it.
 //   settings  open System Settings at Privacy & Security › Automation.
 //   show / close
 
@@ -38,7 +38,7 @@ final class AccessWindow: NSObject, NSWindowDelegate, WKScriptMessageHandlerWith
 
     init(page: String) {
         super.init()
-        window.title = "Context"
+        window.title = "contexta"
         window.isReleasedWhenClosed = false
         window.delegate = self
         let configuration = WKWebViewConfiguration()

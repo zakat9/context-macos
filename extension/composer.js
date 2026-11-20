@@ -1,4 +1,4 @@
-/* Context: Insert context — the page script. It runs on chatgpt.com only and does nothing until the picker asks.
+/* contexta: Insert context — the page script. It runs on chatgpt.com only and does nothing until the picker asks.
  *
  * It answers two requests from the extension's own picker, and none from the page:
  *   capture   Where exactly is the person writing? One message box, the caret in it, the draft as it is, this chat.

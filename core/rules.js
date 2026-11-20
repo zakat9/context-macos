@@ -1,4 +1,4 @@
-/* Context v9 — core rules (pure: no file, network or OS access).
+/* contexta v9 — core rules (pure: no file, network or OS access).
  *
  * Model: a local tag points to a WHOLE source object (one email message, one note, one saved file such
  * as an entire workbook). The index is current-state only:
@@ -11,7 +11,7 @@
 var WorkIndexCore = (function () {
   'use strict';
 
-  var VERSION = '0.12.2';
+  var VERSION = '0.12.3';
   var MAX_TAGS = 2;
   var LOOKUP_PREFIX = '::';
   var NAME_CHAR = /[\p{L}\p{M}\p{N}_-]/u;
@@ -143,7 +143,7 @@ var WorkIndexCore = (function () {
 
   function loadIndex(json) {
     var raw = typeof json === 'string' ? JSON.parse(json) : json;
-    if (!raw || typeof raw !== 'object' || !raw.objects || typeof raw.objects !== 'object') throw new Error('not a Context file');
+    if (!raw || typeof raw !== 'object' || !raw.objects || typeof raw.objects !== 'object') throw new Error('not a contexta file');
     var idx = emptyIndex();
     var seen = new Map(), all = raw.objects;
     for (var k in all) if (Object.prototype.hasOwnProperty.call(all, k)) { var r = sanitizeRecord(all[k], seen); if (r) idx.objects[r.id] = r; }
@@ -355,7 +355,7 @@ var WorkIndexCore = (function () {
 
   /* ───────── cloud folders ─────────
      Google Drive, Dropbox, OneDrive, Box and iCloud Drive keep their files in folders on this Mac (macOS's File
-     Provider: ~/Library/CloudStorage/<Provider>-<account>/, iCloud Drive in ~/Library/Mobile Documents/). Context
+     Provider: ~/Library/CloudStorage/<Provider>-<account>/, iCloud Drive in ~/Library/Mobile Documents/). contexta
      treats them as the saved files they are. Their folder names carry the account (for Google Drive the account's
      email address), so a file there is named by the service and its place inside it, never by that folder.
      → { provider, place, text } or null for a file that is not in a cloud folder. */
@@ -448,7 +448,7 @@ var WorkIndexCore = (function () {
     var readN = 0, notReadN = 0;
     tl.dated.concat(tl.undated).forEach(function (x) { if (x.state.status === 'ok') readN++; else notReadN++; });
     var total = tl.dated.length + tl.undated.length + tl.unavailable.length;
-    L.push('# Context context for ' + tags);
+    L.push('# contexta context for ' + tags);
     L.push('');
     if (!total) {
       L.push('No source is tagged ' + tags + ' in the local index.' + (opts.known && opts.known.length ? ' Tags in use: ' + opts.known.map(function (t) { return LOOKUP_PREFIX + t; }).join(' ') + '.' : ' The index is empty.'));
@@ -458,7 +458,7 @@ var WorkIndexCore = (function () {
     if (opts.scope) L.push('- This copy holds ' + opts.scope.selected + ' of the ' + opts.scope.total + ' sources linked to ' + tags + ', as chosen by the person who copied it. The others are not in it.');
     L.push('- Read at ' + formatWhen(now) + ' from this computer. Each source appears once, in its current saved form. Earlier versions are not kept, not shown and not reconstructed.');
     L.push('- Order: by each source\'s own date. “sent” is the date on a message. “last saved” is the date of the current saved version of a note or file, so its content may be newer than its position among earlier messages suggests. “file date only” means no other date is known.');
-    L.push('- Lines starting with > are quoted from the source. Everything else is written by Context from dates and locators only.');
+    L.push('- Lines starting with > are quoted from the source. Everything else is written by contexta from dates and locators only.');
     sizeNoteAt = L.length;
     function section(item, idx) {
       var head = (idx != null ? (idx + 1) + '. ' : '') + (item.sourceTime ? formatWhen(item.sourceTime) + ' — ' + DATE_LABEL[item.sourceTimeType] : 'Date unknown') + ' — ' + (KIND_LABEL[item.kind] || 'File') + ' [' + item.label + ']';
@@ -618,7 +618,7 @@ var WorkIndexCore = (function () {
     return src ? src.replace('with timeout of 5 seconds', 'with timeout of 2 seconds') : null;
   }
   /* The menu-bar label asks the same read-only question as the popover but gives up after 1 second instead of 2:
-     an app that is stuck must not hold a tag in the menu bar, or Context's own menu item, any longer than that. */
+     an app that is stuck must not hold a tag in the menu bar, or contexta's own menu item, any longer than that. */
   function scriptForWatch(bundleId) { var t = scriptForSelection(bundleId); return t ? t.replace(/timeout of 2 seconds/, 'timeout of 1 seconds') : null; }
 
   /* Message-ID from the first bytes of an .eml file, so a message file gets the same identifier everywhere */

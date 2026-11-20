@@ -4,7 +4,7 @@
 <meta charset="utf-8">
 <meta http-equiv="Content-Security-Policy" content="default-src 'none'; style-src 'unsafe-inline'; script-src 'unsafe-inline'">
 <meta name="viewport" content="width=device-width, initial-scale=1">
-<title>Context</title>
+<title>contexta</title>
 <style>
 /* One popover, 352 points wide, light. Its height is its content's height (the app sizes the popover to it, within the
    screen); only the list of sources or tags scrolls when there is more than fits. Regular weight everywhere: the order
@@ -189,16 +189,16 @@ body[data-mode=tag] #itemLine{display:none}
     <p id="renameTitle"></p>
     <input type="text" id="renameField" autocomplete="off" autocapitalize="off" autocorrect="off" spellcheck="false" placeholder="New name" aria-label="New name for this tag" aria-describedby="renamePlan">
     <div id="renamePlan" role="status"></div>
-    <p class="msg" id="renameNote">Only Context's own index changes. Your files, mail and notes are not touched.</p>
+    <p class="msg" id="renameNote">Only contexta's own index changes. Your files, mail and notes are not touched.</p>
     <div class="acts2"><button type="button" class="btn" id="renameCancel">Cancel</button><button type="submit" class="btn primary" id="renameBtn" disabled>Rename</button></div>
   </form>
 </section>
 </main>
-<footer id="footer" role="toolbar" aria-label="Context" aria-orientation="horizontal">
-  <button type="button" class="tool" id="accessBtn" title="Which apps Context may ask, and macOS permission for each"><svg viewBox="0 0 14 14" aria-hidden="true"><rect x="2.5" y="6.2" width="9" height="6.3" rx="1.4"/><path d="M4.6 6.2V4.4a2.4 2.4 0 0 1 4.8 0v1.8"/></svg>App access</button>
+<footer id="footer" role="toolbar" aria-label="contexta" aria-orientation="horizontal">
+  <button type="button" class="tool" id="accessBtn" title="Which apps contexta may ask, and macOS permission for each"><svg viewBox="0 0 14 14" aria-hidden="true"><rect x="2.5" y="6.2" width="9" height="6.3" rx="1.4"/><path d="M4.6 6.2V4.4a2.4 2.4 0 0 1 4.8 0v1.8"/></svg>App access</button>
   <button type="button" class="tool" id="prefsBtn" title="Shortcut and Insert context"><svg viewBox="0 0 14 14" aria-hidden="true"><circle cx="7" cy="7" r="1.9"/><path d="M7 1.6v1.6M7 10.8v1.6M1.6 7h1.6M10.8 7h1.6M3.2 3.2l1.1 1.1M9.7 9.7l1.1 1.1M3.2 10.8l1.1-1.1M9.7 4.3l1.1-1.1"/></svg>Settings</button>
   <button type="button" class="tool" id="manageBtn" aria-pressed="false" title="Rename or merge a tag everywhere"><svg viewBox="0 0 14 14" aria-hidden="true"><path d="M1.9 2.9a1 1 0 0 1 1-1h3.6a1 1 0 0 1 .7.3l5 5a1 1 0 0 1 0 1.4l-3.6 3.6a1 1 0 0 1-1.4 0l-5-5a1 1 0 0 1-.3-.7z"/><circle cx="4.7" cy="4.7" r=".9"/></svg>Manage tags</button>
-  <button type="button" class="tool quiet" id="quitBtn" aria-label="Quit Context" title="Quit Context">Quit</button>
+  <button type="button" class="tool quiet" id="quitBtn" aria-label="Quit contexta" title="Quit contexta">Quit</button>
 </footer>
 </div>
 
@@ -332,7 +332,7 @@ body[data-mode=tag] #itemLine{display:none}
       var acts = $('noneActs'); acts.textContent = '';
       $('noneMsg').textContent = t.message; $('noneMore').textContent = '';
       if (t.reason === 'denied') {
-        $('noneMore').textContent = 'macOS asks once per app. Turn on ' + t.app + ' under Context in System Settings, then click the icon again.';
+        $('noneMore').textContent = 'macOS asks once per app. Turn on ' + t.app + ' under contexta in System Settings, then click the icon again.';
         acts.appendChild(button('Open Automation settings', 'settingsBtn', function () { call('settings'); }));
       } else if (t.reason === 'not-asked') {
         $('noneMore').textContent = 'macOS asks once per app, in its own prompt. App access starts that; then use the shortcut or the icon again.';
@@ -365,7 +365,7 @@ body[data-mode=tag] #itemLine{display:none}
     } else if (v.indexError && !L) { sum.textContent = v.indexError; sum.className = 'msg on'; }
     else if (!L) {
       sum.textContent = '';
-      list.appendChild(el('p', 'hint', v.recent.length ? 'Look up a tag to list its sources as they are saved now. Tick the ones you want, then copy them for an AI.' : 'No tags yet. Tag an item first: select it in its app, then click the Context icon.'));
+      list.appendChild(el('p', 'hint', v.recent.length ? 'Look up a tag to list its sources as they are saved now. Tick the ones you want, then copy them for an AI.' : 'No tags yet. Tag an item first: select it in its app, then click the contexta icon.'));
     } else if (L.error) { sum.textContent = L.error; sum.className = 'msg on'; }
     else if (!total) { sum.textContent = L.empty + (v.recent.length ? ' Tags in use are listed above.' : ''); sum.className = 'msg on'; }
     else {
@@ -461,7 +461,7 @@ body[data-mode=tag] #itemLine{display:none}
     else if (!M.message) plan.appendChild(el('p', 'msg', 'Type the new name. If it is a tag you already use, the two are merged.'));
     plan.setAttribute('role', M.state === 'stale' || M.state === 'error' ? 'alert' : 'status');
     btn.disabled = !(P && P.ok); btn.textContent = P && P.ok && P.action === 'merge' ? 'Merge' : 'Rename';
-    btn.title = P && P.ok ? (P.action === 'merge' ? 'Join ' + P.from + ' into ' + P.to : 'Rename ' + P.from + ' to ' + P.to) + ' in Context\'s index' : '';
+    btn.title = P && P.ok ? (P.action === 'merge' ? 'Join ' + P.from + ' into ' + P.to : 'Rename ' + P.from + ' to ' + P.to) + ' in contexta\'s index' : '';
   }
 
   function render(v, fields) {
@@ -651,7 +651,7 @@ body[data-mode=tag] #itemLine{display:none}
   var fitting = 0;
   if (typeof ResizeObserver === 'function') new ResizeObserver(function () { if (!fitting) fitting = requestAnimationFrame(function () { fitting = 0; fit(); }); }).observe($('frame'));
   render(pop.view(), true);
-  if (!native && !pretend) $('noneMsg').textContent = 'This is the Context popover. It works inside the Mac app.';
+  if (!native && !pretend) $('noneMsg').textContent = 'This is the contexta popover. It works inside the Mac app.';
 })();
 </script>
 </body>

@@ -1,4 +1,4 @@
-// Context — self-test:  "Context.app/Contents/MacOS/WorkIndex" --self-test
+// contexta — self-test:  "contexta.app/Contents/MacOS/WorkIndex" --self-test
 // Checks the Mac side of this build: the index file, file reading, the script table, the script runner,
 // that the menu-bar label's rules run in this Mac's JavaScriptCore and give the expected commands, the settings
 // file, and the Insert context plumbing (the rules in JavaScriptCore, the message framing, and the app answering
@@ -117,7 +117,7 @@ func runSelfTest() -> Int32 {
     if let rules = loadStatusRules(), let engine = StatusEngine(source: rules) {
         func kinds(_ commands: [[String: Any]]) -> String { return commands.map { ($0["do"] as? String ?? "?") + (($0["state"] as? String).map { ":" + $0 } ?? "") }.joined(separator: " ") }
         let other = engine.step(["type": "app", "bundleId": "com.example.other", "name": "Other", "pid": 11, "now": 1000, "stamp": "none"])
-        check("label rules: an app Context does not follow is asked nothing", kinds(other).contains("show:off") && kinds(other).contains("idle") && !kinds(other).contains("ask"), kinds(other))
+        check("label rules: an app contexta does not follow is asked nothing", kinds(other).contains("show:off") && kinds(other).contains("idle") && !kinds(other).contains("ask"), kinds(other))
         _ = engine.step(["type": "index", "stamp": "none", "missing": true, "now": 1001])
         let notes = engine.step(["type": "app", "bundleId": "com.apple.Notes", "name": "Notes", "pid": 12, "now": 2000, "stamp": "none"])
         func scope(_ commands: [[String: Any]]) -> Bool? { return commands.first { ($0["do"] as? String) == "scope" }?["on"] as? Bool }
@@ -207,8 +207,49 @@ func runSelfTest() -> Int32 {
         close(pipeEnds[1])
         check("a message is framed and read back whole; one over the limit is not read", sent && got == body && tooLong == nil)
     }
-    let registration = Composer.registration(executable: "/Applications/Context.app/Contents/MacOS/WorkIndex").flatMap { try? JSONSerialization.jsonObject(with: $0, options: []) } as? [String: Any]
-    check("the helper's registration names this helper, this executable and the Context extension only", (registration?["name"] as? String) == "local.workindex.composer" && (registration?["type"] as? String) == "stdio" && (registration?["path"] as? String) == "/Applications/Context.app/Contents/MacOS/WorkIndex" && (registration?["allowed_origins"] as? [String] ?? []) == ["chrome-extension://" + Scripts.composerExtensionId + "/"])
+    let registration = Composer.registration(executable: "/Applications/contexta.app/Contents/MacOS/WorkIndex").flatMap { try? JSONSerialization.jsonObject(with: $0, options: []) } as? [String: Any]
+    check("the helper's registration names this helper, this executable and the contexta extension only", (registration?["name"] as? String) == "local.workindex.composer" && (registration?["type"] as? String) == "stdio" && (registration?["path"] as? String) == "/Applications/contexta.app/Contents/MacOS/WorkIndex" && (registration?["allowed_origins"] as? [String] ?? []) == ["chrome-extension://" + Scripts.composerExtensionId + "/"])
+
+    // 0.12.3: Context.app became contexta.app. What a person set up under the old name keeps working: same bundle ID,
+    // executable, settings and index; and at launch each helper registration they had is pointed at this executable.
+    let plist = Bundle.main.infoDictionary ?? [:]
+    check("the app is called contexta (name and display name) and keeps its bundle ID local.workindex.app and executable WorkIndex",
+          (plist["CFBundleName"] as? String) == "contexta" && (plist["CFBundleDisplayName"] as? String) == "contexta" &&
+          Bundle.main.bundleIdentifier == "local.workindex.app" && (plist["CFBundleExecutable"] as? String) == "WorkIndex",
+          String(describing: plist["CFBundleName"]) + " " + String(describing: Bundle.main.bundleIdentifier))
+    let upgrade = temp.appendingPathComponent("upgrade", isDirectory: true)
+    let hostFile = Scripts.composerHostName + ".json"
+    let oldExecutable = "/Users/someone/Applications/Context.app/Contents/MacOS/WorkIndex"
+    func hostsFolder(_ name: String) -> URL {
+        let folder = upgrade.appendingPathComponent(name + "/NativeMessagingHosts", isDirectory: true)
+        try? manager.createDirectory(at: folder, withIntermediateDirectories: true, attributes: nil)
+        return folder
+    }
+    let staleFolder = hostsFolder("Chrome"), currentFolder = hostsFolder("Chromium"), removedFolder = hostsFolder("Brave"), unlistedFolder = hostsFolder("Edge")
+    let ownExecutable = Bundle.main.executablePath ?? ""
+    try? Composer.registration(executable: oldExecutable)?.write(to: staleFolder.appendingPathComponent(hostFile))
+    try? Composer.registration(executable: ownExecutable)?.write(to: currentFolder.appendingPathComponent(hostFile))
+    try? Composer.registration(executable: oldExecutable)?.write(to: unlistedFolder.appendingPathComponent(hostFile))
+    let unlistedBefore = manager.contents(atPath: unlistedFolder.appendingPathComponent(hostFile).path)
+    // settings.json exactly as 0.12.2 (named Context) wrote it, read by this build from the same place
+    let upgradeHome = upgrade.appendingPathComponent("home", isDirectory: true)
+    try? manager.createDirectory(at: upgradeHome, withIntermediateDirectories: true, attributes: nil)
+    let oldSettings = "{\"insert\":{\"browsers\":[" + [("Google Chrome", "com.google.Chrome", staleFolder), ("Chromium", "org.chromium.Chromium", currentFolder), ("Brave Browser", "com.brave.Browser", removedFolder)]
+        .map { "{\"bundleId\":\"" + $0.1 + "\",\"manifest\":\"" + $0.2.appendingPathComponent(hostFile).path + "\",\"name\":\"" + $0.0 + "\"}" }.joined(separator: ",") +
+        "],\"on\":true},\"tagShortcut\":{\"key\":\"T\",\"keyCode\":17,\"modifiers\":[\"control\",\"option\"]},\"version\":1}"
+    try? Data(oldSettings.utf8).write(to: upgradeHome.appendingPathComponent("settings.json"))
+    let carried = SettingsStore(home: upgradeHome).read()
+    check("upgrade: the settings 0.12.2 wrote are read unchanged (Insert context on for its three browsers, the shortcut ⌃⌥T)",
+          carried.insertOn && carried.browsers.count == 3 && carried.tagShortcut?.keyCode == 17)
+    let upgradeComposer = Composer(home: upgradeHome, engine: nil)
+    let outcome = upgradeComposer.refresh(carried.browsers)
+    let repaired = manager.contents(atPath: staleFolder.appendingPathComponent(hostFile).path).flatMap { try? JSONSerialization.jsonObject(with: $0, options: []) } as? [String: Any]
+    check("upgrade: a registration still naming Context.app is pointed at this executable; one already right is left; a removed one is not made again",
+          outcome == ["repaired", "current", "absent"] && (repaired?["path"] as? String) == ownExecutable &&
+          (repaired?["name"] as? String) == "local.workindex.composer" && (repaired?["allowed_origins"] as? [String]) == ["chrome-extension://" + Scripts.composerExtensionId + "/"] &&
+          !manager.fileExists(atPath: removedFolder.appendingPathComponent(hostFile).path), outcome.joined(separator: ",") + " " + String(describing: repaired?["path"]))
+    check("upgrade: a browser that is not in the settings is not touched, and refreshing opens no socket",
+          manager.contents(atPath: unlistedFolder.appendingPathComponent(hostFile).path) == unlistedBefore && unlistedBefore != nil && !upgradeComposer.isAnswering)
     let ownPath = executablePath(of: getpid()) ?? ""
     if ownPath.contains(".app/") {
         check("a running program's application is found from its place on disk (as the helper finds the browser)", bundleIdOfApp(containing: ownPath) == Bundle.main.bundleIdentifier, ownPath)
@@ -258,7 +299,7 @@ func runSelfTest() -> Int32 {
             }
             let deadline = Date().addingTimeInterval(8)
             while !finished && Date() < deadline { RunLoop.main.run(mode: .default, before: Date().addingTimeInterval(0.05)) }
-            check("over the socket file the app answers this same executable naming the Context extension", answered.contains("\"ok\":true") && answered.contains("\"id\":9") && answered.contains("\"name\":\"Cost\""), answered)
+            check("over the socket file the app answers this same executable naming the contexta extension", answered.contains("\"ok\":true") && answered.contains("\"id\":9") && answered.contains("\"name\":\"Cost\""), answered)
             check("a hello that names another extension gets no answer", stranger == "no answer", stranger)
             composer.stopAnswering()
             check("switched off, the socket file is gone", !manager.fileExists(atPath: socketFile) && !composer.isAnswering)

@@ -1,4 +1,4 @@
-/* Context: Insert context — the small pure parts shared by the page script and the picker.
+/* contexta: Insert context — the small pure parts shared by the page script and the picker.
  * No access to anything: text in, text out. Also run by the tests in Node. */
 var ContextComposerLib = (function () {
   'use strict';

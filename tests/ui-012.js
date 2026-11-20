@@ -1,5 +1,5 @@
 #!/usr/bin/env node
-/* Context 0.12 — page checks for what is new: Manage tags › Rename everywhere, the tag editor opened by the
+/* contexta 0.12 — page checks for what is new: Manage tags › Rename everywhere, the tag editor opened by the
  * Tag current item shortcut, Return with an input method that is still composing, and the Settings window.
  * The pages are the ones bundled into the Mac app (popover.html at 352 × 440, settings.html at 360 × 338), driven in a
  * real browser against a pretend Mac.
@@ -88,7 +88,7 @@ var NOTES = 'com.apple.Notes', MAIL = 'com.apple.mail', FINDER = 'com.apple.find
   await open({ bundleId: NOTES, name: 'Notes', captured: { ok: false, code: -1744 }, via: 'shortcut' });
   var na = await pg.evaluate(function () { var b = document.getElementById('settingsBtn'); return { text: document.body.innerText, button: b ? b.textContent : '', focus: document.activeElement.id, field: !!document.getElementById('tagField') && document.getElementById('tagField').offsetParent !== null }; });
   await shot('shortcut-2-not-asked.png'); await pg.click('#settingsBtn'); await pg.waitForTimeout(60);
-  t('S03', 'macOS has never been asked about Notes: the editor says Context is not allowed to ask Notes yet, shows no tag field, and offers one button, Open App access, which asks the app for that window with Notes in view; Notes itself was asked nothing', /Not allowed to ask Notes/.test(na.text) && /has not been allowed to ask Notes yet/.test(na.text) && na.button === 'Open App access' && na.focus === 'settingsBtn' && !na.field && asked.join() === 'readIndex,access:' + NOTES || (asked.filter(function (a) { return /^selection|^readNote/.test(a); }).length === 0 && asked[asked.length - 1] === 'access:' + NOTES && /has not been allowed to ask Notes yet/.test(na.text) && na.button === 'Open App access' && !na.field), JSON.stringify([na, asked]));
+  t('S03', 'macOS has never been asked about Notes: the editor says contexta is not allowed to ask Notes yet, shows no tag field, and offers one button, Open App access, which asks the app for that window with Notes in view; Notes itself was asked nothing', /Not allowed to ask Notes/.test(na.text) && /has not been allowed to ask Notes yet/.test(na.text) && na.button === 'Open App access' && na.focus === 'settingsBtn' && !na.field && asked.join() === 'readIndex,access:' + NOTES || (asked.filter(function (a) { return /^selection|^readNote/.test(a); }).length === 0 && asked[asked.length - 1] === 'access:' + NOTES && /has not been allowed to ask Notes yet/.test(na.text) && na.button === 'Open App access' && !na.field), JSON.stringify([na, asked]));
   await close();
 
   /* ── Return while an input method is still composing ── */
@@ -185,7 +185,7 @@ var NOTES = 'com.apple.Notes', MAIL = 'com.apple.mail', FINDER = 'com.apple.find
   await shot('settings-4-insert-on.png', ps);
   await ps.click('#folderBtn'); await ps.waitForTimeout(40); var revealed = calls.indexOf('reveal') >= 0;
   await ps.click('#offBtn'); await ps.waitForTimeout(120); var v6 = await sstate();
-  t('P05', '"Use ⌃⌥T" sets the suggestion with one press. Set up for Google Chrome registers the helper for the Context extension only, switches Insert context on and shows the three steps (still fitting the window); Show extension asks the app to reveal the folder; Turn off removes the registration and says so', v4.chord === '⌃⌥T' && v5.insert === 'On for Google Chrome' && v5.steps && v5.off && !v5.chrome && fitS3 && manifest.name === 'local.workindex.composer' && manifest.type === 'stdio' && JSON.stringify(manifest.allowed_origins) === '["chrome-extension://oendmnmglkecffebbhkecfhobmphjapb/"]' && revealed &&
+  t('P05', '"Use ⌃⌥T" sets the suggestion with one press. Set up for Google Chrome registers the helper for the contexta extension only, switches Insert context on and shows the three steps (still fitting the window); Show extension asks the app to reveal the folder; Turn off removes the registration and says so', v4.chord === '⌃⌥T' && v5.insert === 'On for Google Chrome' && v5.steps && v5.off && !v5.chrome && fitS3 && manifest.name === 'local.workindex.composer' && manifest.type === 'stdio' && JSON.stringify(manifest.allowed_origins) === '["chrome-extension://oendmnmglkecffebbhkecfhobmphjapb/"]' && revealed &&
     v6.insert === 'Off' && !v6.steps && v6.chrome && !fs.existsSync(reg) && /Insert context is off/.test(v6.imsg) && mos.read().insert.on === false && JSON.stringify(mos.read().tagShortcut) === '{"keyCode":17,"modifiers":["control","option"],"key":"T"}', JSON.stringify([v4.chord, fitS3, revealed, fs.existsSync(reg), v6.imsg, mos.read(), calls]));
   fs.mkdirSync(path.join(TMP, 'os2'), { recursive: true });
   var mos2 = Standin.create(path.join(TMP, 'os2'), { chromeInstalled: false }); mos2.picked = { name: '<img src=x onerror="window.__q=1">Browser', bundleId: 'com.example.browser', folder: path.join(TMP, 'os2') };

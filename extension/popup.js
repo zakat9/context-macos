@@ -1,5 +1,5 @@
-/* Context: Insert context — the picker. It opens from the toolbar button or the shortcut the person set for it.
- * It asks the page script where the person is writing, asks the Context Mac app (through the local helper the
+/* contexta: Insert context — the picker. It opens from the toolbar button or the shortcut the person set for it.
+ * It asks the page script where the person is writing, asks the contexta Mac app (through the local helper the
  * person set up) for tags and sources, and, only when Insert is pressed, hands the text to the page script.
  * It never sends a message, and writes the clipboard only when "Copy instead" is pressed. */
 (function () {
@@ -17,7 +17,7 @@
     'no-script': 'This ChatGPT tab was open before the extension was. Reload the tab once.',
     'no-composer': 'The ChatGPT message box was not found on this page.',
     ambiguous: 'More than one message box was found, so it is not clear where to insert.',
-    unsupported: 'This message box is of a kind Context does not know.',
+    unsupported: 'This message box is of a kind contexta does not know.',
     'not-in-composer': 'The caret is not in the message box. Click in the message box where the evidence should go, then open this again.',
     selection: 'Text is selected in the message box. Click where the evidence should go, so that nothing is replaced, then open this again.'
   };
@@ -34,16 +34,16 @@
     error: 'The page could not be reached.'
   };
   var HOSTWHY = {
-    'not-found': 'Context is not connected to this browser. In the Context Mac app, open Settings and set up Insert context for this browser.',
-    forbidden: 'This browser is not allowed to reach Context. In the Context Mac app, open Settings and set up Insert context again.',
-    exited: 'The Context helper stopped. Open the Context Mac app and try again.',
-    'not-running': 'The Context Mac app is not running. Open it, then open this again.',
-    off: 'Insert context is switched off in the Context Mac app. It is switched on in its Settings.',
-    'not-paired': 'Context was not set up for this browser. In the Context Mac app, open Settings and set up Insert context for this browser.',
-    timeout: 'Context did not answer.'
+    'not-found': 'contexta is not connected to this browser. In the contexta Mac app, open Settings and set up Insert context for this browser.',
+    forbidden: 'This browser is not allowed to reach contexta. In the contexta Mac app, open Settings and set up Insert context again.',
+    exited: 'The contexta helper stopped. Open the contexta Mac app and try again. If you renamed or moved the app (Context became contexta in 0.12.3), opening it once updates the helper; if this message stays, turn Insert context off in its Settings and set it up again.',
+    'not-running': 'The contexta Mac app is not running. Open it, then open this again.',
+    off: 'Insert context is switched off in the contexta Mac app. It is switched on in its Settings.',
+    'not-paired': 'contexta was not set up for this browser. In the contexta Mac app, open Settings and set up Insert context for this browser.',
+    timeout: 'contexta did not answer.'
   };
 
-  /* ── the Context app, through the local helper ── */
+  /* ── the contexta app, through the local helper ── */
   function connect() {
     try { S.port = chrome.runtime.connectNative(Lib.HOST); } catch (e) { S.hostWhy = 'not-found'; return; }
     S.port.onMessage.addListener(function (m) { var w = m && S.waiting[m.id]; if (w) { delete S.waiting[m.id]; w(m); } });
@@ -110,7 +110,7 @@
       $('insert').disabled = !n || !canInsert || S.busy; $('copy').disabled = !n || S.busy;
     } else { $('insert').textContent = 'Insert'; $('insert').disabled = true; $('copy').disabled = true; }
     var text = S.hostWhy ? HOSTWHY[S.hostWhy] : S.said || (S.look ? (S.look.sources.length ? (canInsert ? 'Untick what should stay out, then press Insert.' : 'Untick what should stay out. You can copy; nothing can be inserted from here.') : S.look.empty)
-      : S.tags.length ? (matches.length ? 'Type to search your tags. Return chooses.' : 'No tag matches “' + $('tag').value + '”.') : S.loaded ? 'No tags yet. Tag something with the Context Mac app first.' : 'Asking Context…');
+      : S.tags.length ? (matches.length ? 'Type to search your tags. Return chooses.' : 'No tag matches “' + $('tag').value + '”.') : S.loaded ? 'No tags yet. Tag something with the contexta Mac app first.' : 'Asking contexta…');
     $('msg').textContent = text; $('msg').className = S.hostWhy || S.saidOn ? 'on' : '';
     document.body.setAttribute('data-ready', String(Date.now()));
   }
@@ -184,7 +184,7 @@
   $('none').addEventListener('click', function () { if (S.look) S.look.sources.forEach(function (s) { S.off[s.id] = true; }); say(''); render(); });
   window.addEventListener('pagehide', function () { if (S.tab && S.cap) { try { chrome.tabs.sendMessage(S.tab.id, { to: 'context-composer', op: 'release' }).catch(function () {}); } catch (e) { /* closing */ } } });
 
-  /* ── start: where is the person writing, and what does Context have ── */
+  /* ── start: where is the person writing, and what does contexta have ── */
   render();
   chrome.tabs.getCurrent().then(function (own) {
     if (own) { S.capWhy = 'not-a-popup'; return null; }                       /* opened as a page, not as the picker */
@@ -202,7 +202,7 @@
   }).then(function (r) {
     S.loaded = true;
     if (!hostTrouble(r) && r.ok) S.tags = r.tags || [];
-    else if (!S.hostWhy && r && !r.ok) say(r.message || 'Context could not open its index.', true);
+    else if (!S.hostWhy && r && !r.ok) say(r.message || 'contexta could not open its index.', true);
     render(); $('tag').focus();
   });
 })();
