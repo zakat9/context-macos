@@ -226,7 +226,7 @@ final class StatusMonitor: NSObject {
         var isDirectory: ObjCBool = false
         guard FileManager.default.fileExists(atPath: real, isDirectory: &isDirectory), !isDirectory.boolValue else { return }
         answer["realPath"] = real
-        if real.lowercased().hasSuffix(".eml"), let handle = FileHandle(forReadingAtPath: real) {
+        if real.lowercased().hasSuffix(".eml"), !isOnlineOnly(real), let handle = FileHandle(forReadingAtPath: real) {
             let head = handle.readData(ofLength: 16384)
             handle.closeFile()
             answer["emlHead"] = String(data: head, encoding: .isoLatin1) ?? ""

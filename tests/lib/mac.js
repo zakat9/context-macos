@@ -14,7 +14,7 @@ function create(dir) {
     dir: dir, home: path.join(dir, 'home'), files: path.join(dir, 'files'),
     notes: {}, mails: {},                      /* id → { id, title, text, modified, created, locked } ; numericId → { messageId, subject, sent, account, mailbox, from, text } */
     selected: { 'com.apple.Notes': [], 'com.apple.mail': [], 'com.apple.finder': [] }, openDocument: {},     /* bundle id → path of the saved document that is open */
-    automationDenied: {}, fileDenied: {}, failWrite: false, failCopy: false,
+    automationDenied: {}, fileDenied: {}, cloud: {}, failWrite: false, failCopy: false,
     clipboard: null, requests: [], counts: {}
   };
   fs.mkdirSync(mac.files, { recursive: true });
@@ -66,6 +66,13 @@ function create(dir) {
     readFile: function (p) {
       note('readFile', p);
       if (mac.fileDenied[p]) return ({ ok: false, reason: 'denied' });
+      /* fictional files in cloud folders (paths that do not exist on this machine), answered as the app answers:
+         an online-only placeholder with its name, size and date and "online", never its contents */
+      if (Object.prototype.hasOwnProperty.call(mac.cloud, p)) {
+        var c = mac.cloud[p];
+        if (c.online) return ({ ok: true, realPath: p, mtimeMs: c.mtimeMs, size: c.size, online: true });
+        return ({ ok: true, realPath: p, bytes: c.bytes, mtimeMs: c.mtimeMs, size: c.bytes.length });
+      }
       var real, st;
       try { real = fs.realpathSync(p); st = fs.statSync(real); }
       catch (e) { return ({ ok: false, reason: e.code === 'ENOENT' || e.code === 'ENOTDIR' ? 'missing' : e.code === 'ELOOP' ? 'link' : e.code === 'EACCES' ? 'denied' : 'error', detail: e.code }); }

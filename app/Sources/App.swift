@@ -60,11 +60,12 @@ final class AppDelegate: NSObject, NSApplicationDelegate, NSPopoverDelegate {
             AccessWindow.openSettings()
         }
         bridge.onPreferences = { [weak self] in self?.showSettings() }
+        bridge.onSize = { [weak self] height in self?.fitPopover(height: height) ?? ["ok": false] }
         self.bridge = bridge
 
         let configuration = WKWebViewConfiguration()
         configuration.userContentController.addScriptMessageHandler(bridge, contentWorld: .page, name: "workindex")
-        let size = NSSize(width: 352, height: 440)
+        let size = NSSize(width: AppDelegate.popoverWidth, height: AppDelegate.popoverStartHeight)
         let webView = WKWebView(frame: NSRect(origin: .zero, size: size), configuration: configuration)
         webView.navigationDelegate = bridge
         webView.loadHTMLString(page, baseURL: nil)
@@ -115,6 +116,38 @@ final class AppDelegate: NSObject, NSApplicationDelegate, NSPopoverDelegate {
         if let settingsPage = loadSettingsPage() {
             settingsWindow = SettingsWindow(page: settingsPage, preferences: preferences)
         }
+    }
+
+    /// The popover is always 352 points wide. Its height is the page's height, between a floor and the room on the
+    /// screen the menu-bar item is on (below the menu bar, above the Dock, less a margin for the arrow), and never
+    /// more than a comfortable maximum. The page measures its content, not the window, so this cannot start a loop.
+    static let popoverWidth: CGFloat = 352
+    static let popoverStartHeight: CGFloat = 300
+    static let popoverMinHeight: CGFloat = 160
+    static let popoverMaxHeight: CGFloat = 720
+
+    /// The room for the popover on a screen whose visible part (below the menu bar, above the Dock) is this tall.
+    static func popoverRoom(visibleHeight: CGFloat) -> CGFloat {
+        max(popoverMinHeight, min(popoverMaxHeight, floor(visibleHeight - 28)))
+    }
+
+    /// The popover's height for a page this tall, in this much room. nil for a height that is not a height.
+    static func popoverHeight(content: Double, room: CGFloat) -> CGFloat? {
+        guard content.isFinite, content > 0 else { return nil }
+        return min(room, max(popoverMinHeight, CGFloat(content.rounded(.up))))
+    }
+
+    private func popoverRoom() -> CGFloat {
+        let screen = statusItem?.button?.window?.screen ?? NSScreen.main
+        return AppDelegate.popoverRoom(visibleHeight: screen?.visibleFrame.height ?? 800)
+    }
+
+    private func fitPopover(height: Double) -> [String: Any] {
+        let room = popoverRoom()
+        guard let applied = AppDelegate.popoverHeight(content: height, room: room) else { return ["ok": false, "room": Double(room)] }
+        let size = NSSize(width: AppDelegate.popoverWidth, height: applied)
+        if popover.contentSize != size { popover.contentSize = size }
+        return ["ok": true, "height": Double(applied), "room": Double(room)]
     }
 
     private func showSettings() {
@@ -201,7 +234,8 @@ final class AppDelegate: NSObject, NSApplicationDelegate, NSPopoverDelegate {
         if let front = NSWorkspace.shared.frontmostApplication, front.bundleIdentifier != Bundle.main.bundleIdentifier {
             previousApp = front
         }
-        var info: [String: Any] = ["bundleId": previousApp?.bundleIdentifier ?? "", "name": previousApp?.localizedName ?? ""]
+        var info: [String: Any] = ["bundleId": previousApp?.bundleIdentifier ?? "", "name": previousApp?.localizedName ?? "",
+                                   "room": Double(popoverRoom())]
         if let captured = captured {
             info["captured"] = captured
             info["via"] = "shortcut"

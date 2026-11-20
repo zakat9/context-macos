@@ -281,7 +281,8 @@ function mcpSession(home, messages, cb) {
     t('X09', 'unknown tool, unknown method and malformed input get proper errors and the session carries on', by[10].error && by[10].error.code === -32602 && by[11].error && by[11].error.code === -32601 && by['null'] && by['null'].error.code === -32700 && by[12] && JSON.stringify(by[12].result) === '{}', JSON.stringify([by[10], by[11], by['null'], by[12]]).slice(0, 300));
     t('X10', 'the notification got no reply: 13 replies to 13 requests', r.length === 13, r.length);
     require('./groups-popover.js')({ t: t, fresh: fresh, fx: fx, demoFx: demoFx, Core: Core, Popover: Popover }).then(null, function (e) { t('PO00', 'the popover group ran to the end', false, e && e.stack); })
-      .then(function () { return require('./groups-012.js')({ t: t, fresh: fresh, ROOT: ROOT, Core: Core, Popover: Popover }); }).then(null, function (e) { t('N1200', 'the 0.12 groups ran to the end', false, e && e.stack); }).then(speedTests);
+      .then(function () { return require('./groups-012.js')({ t: t, fresh: fresh, ROOT: ROOT, Core: Core, Popover: Popover }); }).then(null, function (e) { t('N1200', 'the 0.12 groups ran to the end', false, e && e.stack); })
+      .then(function () { return require('./groups-cloud.js')({ t: t, fresh: fresh, ROOT: ROOT, Core: Core, Popover: Popover }); }).then(null, function (e) { t('CL00', 'the cloud-folder group ran to the end', false, e && e.stack); }).then(speedTests);
   });
 })();
 

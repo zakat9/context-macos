@@ -128,7 +128,12 @@ module.exports = async function (S, C) {
     S.measure('copy seven of eight sources, keyboard only: keys after (4 typed + keys)', H.total() + ' (Tab, Tab, 4 typed, Return, Down ×3, Space, Right, Left, ⌘↩)');
     vis = await visible();
     S.measure('list of sources: height (px) and rows fully visible without scrolling, after', vis.height + ' px, ' + vis.full + ' of ' + vis.rows + ' rows; ' + vis.screens + ' screens to see them all');
-    S.check('C4.17', 'at 352 × 440 with an item selected, the list shows at least four whole source rows without scrolling, and the page had no errors', vis.full >= 4 && pg.errors.length === 0, JSON.stringify(vis) + ' ' + pg.errors.join());
+    /* 0.12.1: the popover's height follows its content within the room the app reports. At the old fixed 440 (a small
+       screen now) the taller bottom toolbar costs one row (4 → 3); in a 720-point room the popover grows and shows about twice as many rows. */
+    await pg.evaluate(function () { return window.workIndexOpened({ bundleId: 'com.apple.Notes', name: 'Notes', room: 720 }); }); await pg.waitForTimeout(60);
+    await look('Cost'); var visRoom = await visible();
+    S.check('C4.17', 'with an item selected: in a 440-point room (the old fixed size) the list shows at least three whole source rows and scrolls for the rest; in a 720-point room the popover grows and the list shows at least six whole rows; the page had no errors', vis.full >= 3 && visRoom.full >= 6 && visRoom.height > vis.height && visRoom.rows === 8 && pg.errors.length === 0, JSON.stringify([vis, visRoom]) + ' ' + pg.errors.join());
+    await pg.evaluate(function () { return window.workIndexOpened({ bundleId: 'com.apple.Notes', name: 'Notes', room: 440 }); }); await pg.waitForTimeout(60);  /* back to the browser's 440 */
 
     /* ── the same lookup on 0.10.3 ── */
     var base = C.baseline();

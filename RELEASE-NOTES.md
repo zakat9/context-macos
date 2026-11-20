@@ -1,67 +1,60 @@
-# Context 0.12.0 (prerelease)
+# Context 0.12.2 (prerelease)
 
 A macOS menu bar app that brings the latest notes, emails, and files you choose into an AI draft, with dates and
 sources attached.
 
-> **Prerelease.** Ad-hoc signed, not notarized. The app compiles and passes its self-test on one Mac, and the rules,
-> pages and browser extension pass their automated tests. The menu bar item, popover, macOS prompts, shortcut and
-> Insert context have not yet been checked by a person with real apps. Please test with fictional notes, messages
-> and files, and report what you find with the step numbers in `LIVE-CHECKS.md`.
+> **Prerelease.** Ad-hoc signed, not notarized. The app compiles and passes its self-test on one Mac. The cloud-folder
+> handling is tested with fictional paths against a stand-in for the app; it has not yet been tried with a real Google
+> Drive, Dropbox or iCloud Drive folder (see `LIVE-CHECKS.md`, section K). Please test with fictional files.
 
-## New in 0.12
+A small update to 0.12.1. Everything else works as before: the popover sizes itself to its content, there are at most
+two tags per item, and the Tag current item shortcut, Insert context and Manage tags are unchanged. Your tags,
+settings and index format are unchanged.
 
-### Manage tags › Rename everywhere
-- Rename a tag on every source in one step, or merge it into a tag that already exists (the existing spelling is kept).
-- Before anything is written you see how many sources change and how many already have the new name.
-- One save: every entry changes or none does. A source that had both tags keeps the tag once; other tags, the
-  two-tag limit, dates and order stay as they were.
-- Only Context's index changes. No note, message or file is opened or edited.
-- If the index changed after the numbers were shown, nothing is written and the numbers are shown again.
+## New in 0.12.2: cloud folders
 
-### Settings › Shortcuts › Tag current item (off until you set it)
-- "Use ⌃⌥T", or record your own chord (it must include Control or Option).
-- With one item selected in an app Context follows, the chord opens the tag editor on that item. Return tags,
-  Escape returns you to your app.
-- The chord is registered with macOS as a hot key only while such an app is in front. Context installs no key
-  monitor and needs no Input Monitoring or Accessibility permission. A chord that macOS itself uses is refused; a
-  chord that cannot be registered or saved leaves the previous one in place.
+Files in the folders that Google Drive, Dropbox, OneDrive, Box and iCloud Drive keep on your Mac can be tagged, looked
+up and copied like any other saved file. Context does not sign in to any service and opens no network connection.
 
-### Insert context (off until you set it up)
-- A small Chromium extension (bundled; you load it unpacked) puts the cited, dated text of a tag's sources into the
-  ChatGPT message box at the caret. It never presses Send.
-- On Insert it checks that the chat, tab, message box, draft and caret are unchanged and that no source was saved
-  again since it was listed. Otherwise nothing is inserted, the picker says why and offers "Copy instead".
-- The extension runs on `chatgpt.com` only, has one permission (native messaging), no background script and makes
-  no web requests. Settings › Turn off removes the helper registration.
-
-## Fixes in this build
-- **Self-test abort.** Earlier self-tests (0.10, 0.11) could end with `abort()` when the build was run without a
-  login session: the AppleScript check used `ASCII character`, a scripting-addition command that sends an Apple Event,
-  which makes macOS register the process with the window server. The app's scripts and the self-test now use
-  AppleScript's built-in `character id`, which sends no Apple Event. The hot key part of the self-test runs in a
-  separate process and is reported as `NOT RUN` if macOS ends it, instead of ending the whole self-test.
-- **Test harness on macOS.** Two cycle checks failed on macOS because the temporary folder is behind a link
-  (`/var` → `/private/var`). The pretend Mac now uses the resolved path.
+- **Named by service, not by account.** In the popover, the lookup list and the copied text, such a file appears as
+  `Google Drive › My Drive › Reports › q3.xlsx` or `Dropbox › Team › list.csv`. The account folder on disk is left
+  out; for Google Drive, that folder's name contains your email address.
+- **Online-only files are never downloaded.** A file that is still in the cloud (it has a cloud icon in Finder) can be
+  tagged by name and date. A lookup lists it as not read and says what to do: in Finder, choose "Make Available
+  Offline" or "Download Now", then look the tag up again. Context does not open its contents, so the cloud app does
+  not start a download.
+- **Google Docs, Sheets and Slides** (`.gdoc`, `.gsheet`, `.gslides`, and similar) are only links on your Mac; their
+  text is online. They can be tagged and are listed by name and date, with how to include them: download a copy (for
+  example as `.xlsx` or `.csv`), tag that copy and look the tag up again. The account email and document address
+  inside the link file are never used.
+- Files opened in a web browser (drive.google.com, dropbox.com) still cannot be tagged.
 
 ## Tested for this release
-- Swift: compiled with `swiftc` (Swift 6.4.2, Swift 5 language mode) on macOS 27.2.1, Apple silicon. Self-test:
-  45 of 45 checks pass, with no Apple Event sent.
-- `node tests/run.js`: 188 of 188. Page tests in Chromium: 6 of 6 and 20 of 20. Cycles: 87 of 87 (14 need a person
-  and are listed as blocked). Extension in a real Chromium against a fixture chat page with a stand-in Mac side:
-  21 of 21 (4 not run).
-- All tests use fictional data. Nothing was run against real Notes, Mail, accounts, or the real ChatGPT page.
+- **Native, on this Mac:** compiled with `swiftc` (Swift 6.4.2, Swift 5 language mode) on macOS 27.2.1, Apple silicon,
+  with no warnings. Self-test: 50 of 50 checks pass. The new check confirms that a file stored on this Mac is not
+  mistaken for an online-only placeholder and that its contents are read.
+- **Simulated (fictional data, a stand-in for the Mac app):**
+  - `node tests/run.js`: 196 of 196, including 8 new cloud-folder checks with made-up Google Drive, Dropbox, OneDrive,
+    Box and iCloud Drive paths. They run from Finder all the way to the copied text and confirm no email address or home
+    folder appears in it.
+  - Page tests in Chrome: 6 of 6, 20 of 20 and 14 of 14.
+  - Cycles: 87 of 87 (14 need a person). Rounds: 39 of 39 (7 need a person).
+  - Browser extension in a real Chromium: 21 of 21 (4 not run).
+- Not tested: a real online-only file. Only the cloud app can create one, and no real cloud folder or account on this
+  Mac was opened.
 
 ## Known limitations
-- Ad-hoc signature only: Gatekeeper blocks the downloaded app until you choose "Open Anyway"; macOS may ask for
+- Ad-hoc signature only. Gatekeeper blocks the downloaded app until you choose "Open Anyway", and macOS may ask for
   Automation permission again after every rebuild. Building from source is recommended.
 - The prebuilt zip is for Apple silicon. On an Intel Mac, build from source.
-- Insert context is ChatGPT-in-Chromium only and untested against the real ChatGPT page.
+- A file that the cloud app moves or renames is a different file to Context: tag it again.
+- Insert context works with ChatGPT in a Chromium-family browser only and is untested against the real ChatGPT page.
 - Word, PowerPoint, PDF and iWork files can be tagged but are listed by name and date only; their text is not read.
 - English interface only.
 
 ## Assets
-- `Context-0.12.0-source.zip`: the source, tests and fictional fixtures.
-- `Context-0.12.0-macOS-arm64-adhoc.zip`: the app built from that source (ad hoc signed).
+- `Context-0.12.2-source.zip`: the source, tests and fictional fixtures.
+- `Context-0.12.2-macOS-arm64-adhoc.zip`: the app built from that source (ad hoc signed).
 - `SHA256SUMS.txt`: checksums. Verify with `shasum -a 256 -c SHA256SUMS.txt`.
 
 No license has been chosen yet; until one is added, all rights are reserved.

@@ -36,6 +36,42 @@ func runSelfTest() -> Int32 {
     let page = loadPopoverPage() ?? ""
     check("the popover page is in the app and carries its rules", page.contains("WorkIndexPopover") && page.contains("WorkIndexRead") && !page.contains("/*__RULES__*/"), String(page.count) + " characters")
 
+    check("the popover page sends its own height and sizes nothing from the window", page.contains("call('size'") && page.contains("ResizeObserver") && !page.contains("height:100%"))
+
+    // The popover's size, by the same functions the app uses: 352 points wide always; the page's height within a
+    // floor and the room on the screen; a screen too small or a nonsense height cannot produce a bad size.
+    let roomTall = AppDelegate.popoverRoom(visibleHeight: 1415), roomLow = AppDelegate.popoverRoom(visibleHeight: 600),
+        roomTiny = AppDelegate.popoverRoom(visibleHeight: 90)
+    check("the popover is 352 points wide and its room is the screen less a margin, at most 720 and at least 160",
+          AppDelegate.popoverWidth == 352 && roomTall == 720 && roomLow == 572 && roomTiny == 160,
+          "\(roomTall) \(roomLow) \(roomTiny)")
+    let grown = AppDelegate.popoverHeight(content: 517.2, room: roomTall), shrunk = AppDelegate.popoverHeight(content: 233, room: roomTall),
+        clamped = AppDelegate.popoverHeight(content: 2400, room: roomLow), floor = AppDelegate.popoverHeight(content: 40, room: roomLow)
+    check("the popover's height follows the page up and down, rounded up, kept within the floor and the room",
+          grown == 518 && shrunk == 233 && clamped == 572 && floor == 160 &&
+          AppDelegate.popoverHeight(content: .nan, room: roomLow) == nil && AppDelegate.popoverHeight(content: -5, room: roomLow) == nil,
+          "\(String(describing: grown)) \(String(describing: shrunk)) \(String(describing: clamped)) \(String(describing: floor))")
+
+    // The application icon: named by Info.plist, inside the app, an .icns with every standard size up to 1024 pixels.
+    let iconName = Bundle.main.object(forInfoDictionaryKey: "CFBundleIconFile") as? String ?? ""
+    let iconData = Bundle.main.url(forResource: iconName, withExtension: "icns").flatMap { try? Data(contentsOf: $0) } ?? Data()
+    var iconTypes: [String] = []
+    if iconData.count > 8, String(decoding: iconData.prefix(4), as: UTF8.self) == "icns" {
+        var at = 8
+        while at + 8 <= iconData.count {
+            let type = String(decoding: iconData[at..<at + 4], as: UTF8.self)
+            let length = iconData[at + 4..<at + 8].reduce(0) { $0 << 8 | Int($1) }
+            if length < 8 { break }
+            iconTypes.append(type)
+            at += length
+        }
+    }
+    // 16 and 32 pixels are ic04/ic05 (as iconutil writes them) or icp4/icp5; 16@2x ic11, 32@2x ic12, 128 ic07,
+    // 128@2x ic13, 256 ic08, 256@2x ic14, 512 ic09, 512@2x (1024 pixels) ic10.
+    let iconSizes = [["ic04", "icp4"], ["ic05", "icp5"], ["ic11"], ["ic12"], ["ic07"], ["ic13"], ["ic08"], ["ic14"], ["ic09"], ["ic10"]]
+    check("the app icon is named in Info.plist and is an .icns with 16, 32, 128, 256 and 512 points at 1x and 2x (1024 pixels)",
+          iconName == "AppIcon" && iconSizes.allSatisfy { $0.contains(where: iconTypes.contains) }, iconName + ": " + iconTypes.joined(separator: " "))
+
     let store = IndexStore(home: temp.appendingPathComponent("home", isDirectory: true))
     check("no index yet reads as missing", (store.read()["missing"] as? Bool) == true)
     let workbook = temp.appendingPathComponent("fictional costs.xlsx")
@@ -43,6 +79,8 @@ func runSelfTest() -> Int32 {
     manager.createFile(atPath: workbook.path, contents: bytes, attributes: nil)
     let info = readFile(workbook.path)
     let real = info["realPath"] as? String ?? ""
+    check("a file that is on this Mac is not taken for an online-only cloud placeholder, and its contents are read",
+          !isOnlineOnly(real) && info["online"] == nil && info["base64"] != nil)
     let indexText = "{\"schema\":1,\"app\":\"work-index\",\"objects\":{\"file:x\":{\"locator\":{\"type\":\"file\",\"value\":\"" + real + "\"}}}}"
     let stampBefore = store.stamp()["stamp"] as? String ?? ""
     let wrote = store.write(indexText)

@@ -10,6 +10,7 @@ cd "$(dirname "$0")"
 
 if [ "$(uname -s)" != "Darwin" ]; then echo "This builds a macOS app. Run it on a Mac."; exit 1; fi
 if ! command -v swiftc >/dev/null 2>&1; then echo "The Swift compiler was not found. Install Apple's Command Line Tools:  xcode-select --install"; exit 1; fi
+if [ ! -f AppIcon.icns ]; then echo "AppIcon.icns is missing. It is made by: swift ../dev/make-app-icon.swift <folder>, then iconutil (see that file)"; exit 1; fi
 for made in popover.html access.html settings.html status.js insert.js composer-extension/manifest.json; do
   if [ ! -f "Resources/$made" ]; then echo "Resources/$made is missing. It is made by: node ../dev/build-popover.js"; exit 1; fi
 done
@@ -26,6 +27,7 @@ swiftc -O -swift-version 5 -parse-as-library \
   Sources/Settings.swift Sources/HotKey.swift Sources/Composer.swift Sources/ComposerHost.swift Sources/SelfTest.swift
 
 cp Info.plist "$APP/Contents/Info.plist"
+cp AppIcon.icns "$APP/Contents/Resources/AppIcon.icns"
 cp Resources/popover.html Resources/access.html Resources/settings.html Resources/status.js Resources/insert.js "$APP/Contents/Resources/"
 cp -R Resources/composer-extension "$APP/Contents/Resources/composer-extension"
 codesign --force --sign - "$APP" >/dev/null

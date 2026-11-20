@@ -6,19 +6,24 @@
 <meta name="viewport" content="width=device-width, initial-scale=1">
 <title>Context</title>
 <style>
-/* One popover, 352 × 440, light. Regular weight everywhere: the order of things, size and two greys carry the hierarchy. */
+/* One popover, 352 points wide, light. Its height is its content's height (the app sizes the popover to it, within the
+   screen); only the list of sources or tags scrolls when there is more than fits. Regular weight everywhere: the order
+   of things, size and two greys carry the hierarchy. */
 :root{color-scheme:light;--paper:#fafafa;--sheet:#fff;--ink:#313438;--soft:#61666b;--rule:#e2e4e6;--rule-strong:#c9cdd0;--field:#878d93;--accent:#33566a;--tint:#eef3f5;
   --sans:-apple-system,BlinkMacSystemFont,"Helvetica Neue","Apple SD Gothic Neo","Segoe UI","Noto Sans","Noto Sans CJK KR","DejaVu Sans",sans-serif}
 *{box-sizing:border-box}
-html,body{margin:0;height:100%}
-body{background:var(--paper);color:var(--ink);font:400 13px/1.4 var(--sans);overflow:hidden;overflow-wrap:anywhere;display:flex;flex-direction:column;cursor:default;-webkit-user-select:none;user-select:none}
+html,body{margin:0;background:var(--paper)}
+html{overflow:hidden}
+body{color:var(--ink);font:400 13px/1.4 var(--sans);overflow:hidden;overflow-wrap:anywhere;cursor:default;-webkit-user-select:none;user-select:none}
+#frame{display:flex;flex-direction:column;width:100%}
 p,h2{margin:0;padding:0;font:inherit}
 button,input{font:inherit;color:inherit;margin:0}
 [hidden]{display:none!important}
 :focus{outline:none}
 :focus-visible{outline:2px solid var(--accent);outline-offset:1px;border-radius:4px}
 .vh{position:absolute;width:1px;height:1px;overflow:hidden;clip-path:inset(50%);white-space:nowrap}
-main{flex:1;min-height:0;display:flex;flex-direction:column}
+main{flex:none;display:flex;flex-direction:column;overflow-x:hidden}
+main.clamped{overflow-y:auto}
 
 /* the selected item */
 #item{padding:9px 12px 8px;border-bottom:1px solid var(--rule)}
@@ -39,9 +44,9 @@ input[type=text]:disabled{background:transparent;border-color:var(--rule-strong)
 .btn.primary{background:var(--accent);border-color:var(--accent);color:#fff}
 .btn.primary:disabled{background:var(--tint);border-color:var(--rule);color:var(--soft)}
 .btn .key{margin-left:8px;font-size:11.5px;opacity:.85}
-.chips{display:flex;flex-wrap:wrap;gap:5px;align-items:center;margin-top:6px;max-height:53px;overflow:hidden}
+.chips{display:flex;flex-wrap:wrap;gap:5px;align-items:center;margin-top:6px}
 .chips .lead{font-size:11.5px;color:var(--soft);margin-right:1px}
-.chip{border:1px solid var(--rule-strong);background:var(--sheet);border-radius:12px;padding:0 9px;height:24px;max-width:150px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;font-size:12px;cursor:pointer}
+.chip{border:1px solid var(--rule-strong);background:var(--sheet);border-radius:12px;padding:0 9px;height:24px;max-width:100%;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;font-size:12px;cursor:pointer}
 .chip:hover{border-color:var(--field)}
 .chip[aria-pressed=true]{border-color:var(--accent);background:var(--tint);color:var(--accent)}
 .msg{font-size:12px;line-height:16px;color:var(--soft)}
@@ -54,19 +59,20 @@ input[type=text]:disabled{background:transparent;border-color:var(--rule-strong)
 #itemLine .k{font-size:11.5px;color:var(--soft);flex:none}
 #itemLine .t{flex:1;min-width:0;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
 #itemLine .tg{flex:none;max-width:90px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;font-size:11.5px;color:var(--accent);background:var(--tint);border-radius:4px;padding:1px 6px}
-#itemLine .go{flex:none;font-size:11.5px;color:var(--soft);text-decoration:underline;text-underline-offset:2px}
+#itemLine .go{flex:none;font-size:11.5px;color:var(--accent)}
+#itemLine:hover .go{text-decoration:underline;text-underline-offset:2px}
 
 /* find context */
-#find{flex:1;min-height:0;display:flex;flex-direction:column;padding:8px 12px 0}
+#find{display:flex;flex-direction:column;padding:8px 12px 0}
 .row{display:flex;gap:6px}
 #summaryRow{display:flex;align-items:center;gap:8px;margin-top:4px;min-height:22px}
 #summary{flex:1}
-.link{border:0;background:none;padding:0 2px;min-height:22px;min-width:24px;color:var(--soft);cursor:pointer;font-size:11.5px;text-decoration:underline;text-underline-offset:2px}
-.link:hover{color:var(--ink)}
+.link{border:0;border-radius:4px;background:none;padding:0 5px;min-height:22px;min-width:24px;color:var(--accent);cursor:pointer;font-size:11.5px}
+.link:hover{background:var(--tint)}
 progress{display:block;width:100%;height:3px;margin-top:2px;border:0;border-radius:2px;background:var(--rule);-webkit-appearance:none;appearance:none}
 progress::-webkit-progress-bar{background:var(--rule);border-radius:2px}
 progress::-webkit-progress-value{background:var(--accent);border-radius:2px}
-#sources{flex:1;min-height:0;overflow-y:auto;margin:3px -12px 0;padding:0 12px;border-top:1px solid var(--rule)}
+#sources{overflow-y:auto;overscroll-behavior:contain;margin:3px -12px 0;padding:0 12px;border-top:1px solid var(--rule)}
 #sources:empty,#sources.bare{border-top-color:transparent}
 .hint{padding:8px 0;font-size:12px;color:var(--soft)}
 .group{padding:7px 0 3px;font-size:11.5px;color:var(--soft);border-top:1px solid var(--rule)}
@@ -87,27 +93,38 @@ progress::-webkit-progress-value{background:var(--accent);border-radius:2px}
 .quote + .link{margin-left:22px}
 .copybar{display:flex;gap:10px;align-items:center;padding:5px 0 6px;border-top:1px solid var(--rule)}
 .copybar .msg{flex:1;font-size:11.5px;line-height:15px}
-footer{flex:none;display:flex;justify-content:space-between;align-items:center;height:23px;padding:0 12px;border-top:1px solid var(--rule)}
+/* the toolbar along the bottom: borderless buttons, a highlight on hover, the same focus ring as everything else,
+   drawn inside the button so the popover's rounded corners never cut it. Quit is the quiet one, at the far end. */
+footer{flex:none;display:flex;align-items:center;gap:2px;padding:5px 7px 7px;border-top:1px solid var(--rule);background:var(--paper)}
+.tool{display:inline-flex;align-items:center;gap:5px;height:26px;padding:0 8px;border:0;border-radius:6px;background:transparent;color:var(--ink);font-size:12px;line-height:1;white-space:nowrap;cursor:pointer}
+.tool svg{flex:none;width:13px;height:13px;fill:none;stroke:currentColor;stroke-width:1.3;stroke-linecap:round;stroke-linejoin:round;color:var(--soft)}
+.tool:hover{background:#ebedef}
+.tool:active{background:#e1e4e7}
+.tool[aria-pressed=true]{background:var(--tint);color:var(--accent)}
+.tool[aria-pressed=true] svg{color:var(--accent)}
+.tool:focus-visible{outline:2px solid var(--accent);outline-offset:-2px;border-radius:6px}
+.tool.quiet{margin-left:auto;padding:0 7px;color:var(--soft)}
+.tool.quiet:hover{color:var(--ink)}
 /* manage tags */
-#manage{display:none;flex:1;min-height:0;flex-direction:column;padding:9px 12px 8px}
+#manage{display:none;flex-direction:column;padding:9px 12px 8px}
 body[data-mode=manage] #manage{display:flex}
 body[data-mode=manage] #item,body[data-mode=manage] #find{display:none}
 .mhead{display:flex;justify-content:space-between;align-items:center;margin-bottom:6px}
-#managePick{flex:1;min-height:0;display:flex;flex-direction:column}
+#managePick{display:flex;flex-direction:column}
 #managePick input,#renameForm input{flex:none;width:100%}
-#manageList{flex:1;min-height:0;overflow-y:auto;margin-top:6px;border-top:1px solid var(--rule);border-bottom:1px solid var(--rule)}
+#manageList{overflow-y:auto;overscroll-behavior:contain;margin-top:6px;border-top:1px solid var(--rule);border-bottom:1px solid var(--rule)}
 .tagrow{display:flex;justify-content:space-between;align-items:center;gap:10px;width:100%;min-height:26px;padding:0 2px;border:0;border-top:1px solid var(--rule);background:none;text-align:left;cursor:pointer}
 .tagrow:first-child{border-top:0}
 .tagrow:hover{background:var(--tint)}
 .tagrow .n{min-width:0;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
 .tagrow .c{flex:none;font-size:12px;color:var(--soft)}
 #manageMsg{margin-top:6px;min-height:16px}
-#renameForm{flex:1;min-height:0;display:flex;flex-direction:column}
+#renameForm{display:flex;flex-direction:column}
 #renameTitle{margin-bottom:6px}
-#renamePlan{margin-top:8px;min-height:64px;font-size:12px;line-height:16px}
+#renamePlan{margin-top:8px;font-size:12px;line-height:16px}
 #renamePlan p+p{margin-top:3px}
 #renamePlan .warn{color:var(--ink)}
-#renameNote{margin-top:auto;padding-top:8px}
+#renameNote{padding-top:10px}
 .acts2{display:flex;justify-content:space-between;gap:8px;margin-top:8px}
 body[data-mode=find] #itemFull,body[data-mode=find] #itemNone{display:none}
 body[data-mode=find] #item{padding:6px 12px 5px}
@@ -116,7 +133,8 @@ body[data-mode=tag] #itemLine{display:none}
 </style>
 </head>
 <body data-mode="tag">
-<main>
+<div id="frame">
+<main id="main">
 <section id="item" aria-labelledby="hItem">
   <h2 class="vh" id="hItem">Selected item</h2>
   <div id="itemFull">
@@ -155,7 +173,7 @@ body[data-mode=tag] #itemLine{display:none}
   </div>
   <progress id="progress" max="1" value="0" hidden aria-label="Reading sources"></progress>
   <div id="sources" role="group" aria-label="Sources for this tag, oldest first"></div>
-  <div class="copybar">
+  <div class="copybar" id="copybar">
     <button class="btn primary" type="button" id="copyBtn" disabled aria-keyshortcuts="Meta+Enter">Copy</button>
     <p class="msg" id="copyMsg" role="status">Nothing is sent. You paste it.</p>
   </div>
@@ -176,12 +194,13 @@ body[data-mode=tag] #itemLine{display:none}
   </form>
 </section>
 </main>
-<footer>
-  <button type="button" class="link" id="accessBtn">App access</button>
-  <button type="button" class="link" id="prefsBtn">Settings</button>
-  <button type="button" class="link" id="manageBtn">Manage tags</button>
-  <button type="button" class="link" id="quitBtn">Quit</button>
+<footer id="footer" role="toolbar" aria-label="Context" aria-orientation="horizontal">
+  <button type="button" class="tool" id="accessBtn" title="Which apps Context may ask, and macOS permission for each"><svg viewBox="0 0 14 14" aria-hidden="true"><rect x="2.5" y="6.2" width="9" height="6.3" rx="1.4"/><path d="M4.6 6.2V4.4a2.4 2.4 0 0 1 4.8 0v1.8"/></svg>App access</button>
+  <button type="button" class="tool" id="prefsBtn" title="Shortcut and Insert context"><svg viewBox="0 0 14 14" aria-hidden="true"><circle cx="7" cy="7" r="1.9"/><path d="M7 1.6v1.6M7 10.8v1.6M1.6 7h1.6M10.8 7h1.6M3.2 3.2l1.1 1.1M9.7 9.7l1.1 1.1M3.2 10.8l1.1-1.1M9.7 4.3l1.1-1.1"/></svg>Settings</button>
+  <button type="button" class="tool" id="manageBtn" aria-pressed="false" title="Rename or merge a tag everywhere"><svg viewBox="0 0 14 14" aria-hidden="true"><path d="M1.9 2.9a1 1 0 0 1 1-1h3.6a1 1 0 0 1 .7.3l5 5a1 1 0 0 1 0 1.4l-3.6 3.6a1 1 0 0 1-1.4 0l-5-5a1 1 0 0 1-.3-.7z"/><circle cx="4.7" cy="4.7" r=".9"/></svg>Manage tags</button>
+  <button type="button" class="tool quiet" id="quitBtn" aria-label="Quit Context" title="Quit Context">Quit</button>
 </footer>
+</div>
 
 <script>
 /* Context v9 — core rules (pure: no file, network or OS access).
@@ -197,7 +216,7 @@ body[data-mode=tag] #itemLine{display:none}
 var WorkIndexCore = (function () {
   'use strict';
 
-  var VERSION = '0.12.0';
+  var VERSION = '0.12.2';
   var MAX_TAGS = 2;
   var LOOKUP_PREFIX = '::';
   var NAME_CHAR = /[\p{L}\p{M}\p{N}_-]/u;
@@ -539,9 +558,32 @@ var WorkIndexCore = (function () {
     return { dated: dated, undated: undated, unavailable: unavailable };
   }
 
+  /* ───────── cloud folders ─────────
+     Google Drive, Dropbox, OneDrive, Box and iCloud Drive keep their files in folders on this Mac (macOS's File
+     Provider: ~/Library/CloudStorage/<Provider>-<account>/, iCloud Drive in ~/Library/Mobile Documents/). Context
+     treats them as the saved files they are. Their folder names carry the account (for Google Drive the account's
+     email address), so a file there is named by the service and its place inside it, never by that folder.
+     → { provider, place, text } or null for a file that is not in a cloud folder. */
+  var CLOUD_NAMES = { googledrive: 'Google Drive', dropbox: 'Dropbox', onedrive: 'OneDrive', box: 'Box', icloud: 'iCloud Drive' };
+  function cloudPlace(p) {
+    var s = String(p == null ? '' : p), m, provider, rest;
+    if ((m = /^\/Users\/[^\/]+\/Library\/CloudStorage\/([^\/]+)\/(.*)$/.exec(s))) {
+      var folder = m[1], key = folder.replace(/-.*$/, '').replace(/[^A-Za-z]/g, '').toLowerCase();
+      provider = CLOUD_NAMES[key] || folder.replace(/-.*$/, '') || 'Cloud storage'; rest = m[2];
+    } else if ((m = /^\/Users\/[^\/]+\/Library\/Mobile Documents\/com~apple~CloudDocs\/(.*)$/.exec(s))) { provider = 'iCloud Drive'; rest = m[1]; }
+    else if ((m = /^\/Users\/[^\/]+\/Library\/Mobile Documents\/[^\/]+\/(.*)$/.exec(s))) { provider = 'iCloud Drive'; rest = m[1]; }
+    else if ((m = /^\/Users\/[^\/]+\/Dropbox(?: \([^\/)]*\))?\/(.*)$/.exec(s))) { provider = 'Dropbox'; rest = m[1]; }
+    else return null;
+    var place = rest.split('/').filter(Boolean).join(' › ');
+    return { provider: provider, place: place, text: provider + ' › ' + place };
+  }
+  /* Google Docs, Sheets, Slides… files: in a Google Drive folder they are only pointers; their text is online. */
+  var GOOGLE_NATIVE = /\.(gdoc|gsheet|gslides|gdraw|gform|gmap|gsite|gjam|gtable|gscript)$/i;
+  function isGoogleNative(p) { return GOOGLE_NATIVE.test(String(p == null ? '' : p)); }
+
   function locatorText(loc) {
     if (!loc) return '';
-    if (loc.type === 'file') return loc.value;
+    if (loc.type === 'file') { var c = cloudPlace(loc.value); return c ? c.text + ' (cloud folder on this Mac)' : loc.value; }
     if (loc.type === 'apple-notes') return 'Apple Notes note ' + loc.value;
     if (loc.type === 'apple-mail') return 'Apple Mail message <' + loc.value + '>';
     return loc.value;
@@ -804,7 +846,7 @@ var WorkIndexCore = (function () {
     tagKey: tagKey, cleanTag: cleanTag, parseTagInput: parseTagInput, parseLookup: parseLookup,
     describeUrl: describeUrl, kindForPath: kindForPath, fileId: fileId, messageId: messageId, cleanTitle: cleanTitle, oneLine: oneLine,
     emptyIndex: emptyIndex, loadIndex: loadIndex, dumpIndex: dumpIndex, bind: bind, unbind: unbind, planRename: planRename, applyRename: applyRename, refresh: refresh, resolve: resolve, tagSummary: tagSummary,
-    formatWhen: formatWhen, toLocalIso: toLocalIso, buildTimeline: buildTimeline, renderContext: renderContext, renderList: renderList, locatorText: locatorText,
+    formatWhen: formatWhen, toLocalIso: toLocalIso, buildTimeline: buildTimeline, renderContext: renderContext, renderList: renderList, locatorText: locatorText, cloudPlace: cloudPlace, isGoogleNative: isGoogleNative,
     scriptForApp: scriptForApp, scriptForRead: scriptForRead, parseActive: parseActive, isotToIso: isotToIso,
     APPLESCRIPT: APPLESCRIPT, SELECTION_APPS: SELECTION_APPS, scriptForSelection: scriptForSelection, scriptForWatch: scriptForWatch, emlMessageId: emlMessageId, fileDesc: fileDesc, MAX_TAG_LENGTH: MAX_TAG_LENGTH
   };
@@ -1220,6 +1262,7 @@ var WorkIndexRead = (function (Core) {
   /* why a file could not be opened, in words. file.reason: missing | folder | not-a-file | denied | link | too-large | error */
   function fileReason(file, p) {
     var r = file && file.reason;
+    p = Core.locatorText({ type: 'file', value: p });
     if (r === 'missing') return 'file not found at ' + p + ' (moved, renamed or deleted)';
     if (r === 'denied') return 'no permission to read ' + p;
     if (r === 'folder') return p + ' is a folder now, not a file';
@@ -1253,7 +1296,10 @@ var WorkIndexRead = (function (Core) {
       return { ok: false, reason: r === 'folder' ? 'only a saved file can be tagged; ' + shownPath + ' is a folder' : fileReason(file, shownPath) };
     }
     if (file.size > MAX_FILE) return { ok: false, reason: 'file is larger than 40 MB' };
-    var o = observe(file.realPath, file.bytes, file.mtimeMs);
+    /* online only (its contents are still in the cloud) or a Google Docs pointer: named and dated by the file itself;
+       nothing inside it is looked at, so tagging never makes the cloud app download it */
+    var o = file.online || Core.isGoogleNative(file.realPath) ? { kind: Core.kindForPath(file.realPath), title: baseName(file.realPath), sourceTime: file.mtimeMs ? localIso(Math.floor(file.mtimeMs)) : null, sourceTimeType: file.mtimeMs ? 'modified-only' : 'unknown', sourceCreated: null, messageId: null }
+      : observe(file.realPath, file.bytes, file.mtimeMs);
     var id = (o.kind === 'email' && o.messageId) ? Core.messageId(o.messageId) : Core.fileId(file.realPath);
     return { ok: true, desc: { id: id, kind: o.kind, title: o.title, locator: { type: 'file', value: file.realPath }, sourceTime: o.sourceTime, sourceTimeType: o.sourceTimeType, sourceCreated: o.sourceCreated } };
   }
@@ -1263,6 +1309,9 @@ var WorkIndexRead = (function (Core) {
     opts = opts || {};
     var p = record.locator.value;
     if (!file || !file.ok) return { status: 'unavailable', reason: fileReason(file, p) };
+    var cloud = Core.cloudPlace(p), dated = { title: baseName(p), sourceTime: file.mtimeMs ? localIso(Math.floor(file.mtimeMs)) : null, sourceTimeType: 'modified-only', sourceCreated: null };
+    if (Core.isGoogleNative(p)) return { status: 'unreadable', reason: 'a Google ' + ({ gdoc: 'Docs', gsheet: 'Sheets', gslides: 'Slides' }[extName(p).slice(1).toLowerCase()] || 'Drive') + ' file: its text is in Google Drive online, not on this Mac. To include it, download a copy (File › Download as .xlsx, .csv or .txt), tag that copy and look it up again', observed: dated };
+    if (file.online) return { status: 'unreadable', reason: 'online only' + (cloud ? ' in ' + cloud.provider : '') + ': its contents are not on this Mac, and Context does not download them. In Finder choose "Make Available Offline" or "Download Now", then look it up again', observed: dated };
     if (file.size > MAX_FILE || !file.bytes) return { status: 'unreadable', reason: 'file is larger than 40 MB', observed: { title: baseName(p), sourceTime: file.mtimeMs ? localIso(Math.floor(file.mtimeMs)) : null, sourceTimeType: 'modified-only', sourceCreated: null } };
     var buf = file.bytes, o, observed;
     try { o = observe(p, buf, file.mtimeMs); } catch (e0) { o = { kind: Core.kindForPath(p), title: baseName(p), sourceTime: file.mtimeMs ? localIso(Math.floor(file.mtimeMs)) : null, sourceTimeType: 'modified-only', sourceCreated: null }; }
@@ -1355,6 +1404,13 @@ var WorkIndexPopover = (function (Core, Read) {
   var RECENT = 8;
 
   /* a recent-tag button was pressed: put the tag into the field, or take it out if it is there */
+  /* the folder of a saved file, as shown under its title: a cloud folder by its service and place, never by the
+     account folder on disk (which for Google Drive carries the email address) */
+  function folderText(p) {
+    var c = Core.cloudPlace(p);
+    if (c) { var parts = c.place.split(' › '); parts.pop(); return c.provider + (parts.length ? ' › ' + parts.join(' › ') : ''); }
+    return String(p).replace(/\/[^\/]*$/, '') || '/';
+  }
   function toggleTag(fieldText, name) {
     var p = Core.parseTagInput(fieldText), key = Core.tagKey(name);
     var names = p.tags.map(function (t) { return t.name; });
@@ -1692,7 +1748,7 @@ var WorkIndexPopover = (function (Core, Read) {
       var t = st.target, v = {
         target: t.state === 'object' ? { state: 'object', kind: Core.KIND_LABEL[t.desc.kind] || 'File', title: Core.oneLine(t.desc.title), tags: (t.tags || []).slice(), app: t.app || '', appId: st.app, reason: '', message: '',
             when: t.desc.sourceTime ? Core.formatWhen(t.desc.sourceTime) : '', dateLabel: t.desc.sourceTime ? (Core.DATE_LABEL[t.desc.sourceTimeType] || '') : '',
-            folder: t.desc.locator && t.desc.locator.type === 'file' ? String(t.desc.locator.value).replace(/\/[^\/]*$/, '') || '/' : '' }
+            folder: t.desc.locator && t.desc.locator.type === 'file' ? folderText(t.desc.locator.value) : '' }
           : { state: 'none', kind: '', title: '', tags: [], app: t.app || '', appId: st.app, reason: t.reason || 'other-app', message: t.message || NOTHING },
         tagText: st.tagText, tagMessage: st.tagMessage, tagState: st.tagMessage ? (st.tagState || '') : '', recent: st.recent.slice(),
         tags: st.recent.map(function (n) { return { name: n, count: st.counts[n] || 0 }; }), indexError: st.indexError, maxTags: Core.MAX_TAGS,
@@ -1906,6 +1962,7 @@ if (typeof module !== 'undefined' && module.exports) module.exports = WorkIndexP
     }
     $('summaryRow').hidden = !sum.textContent && !ui.reading;
     list.className = list.firstChild && list.firstChild.className === 'hint' ? 'bare' : '';
+    $('copybar').hidden = !L || !!L.error || (!total && !ui.reading);
     var n = L && !L.error ? L.selectedCount : 0, btn = $('copyBtn');
     btn.disabled = !n || !!ui.reading || ui.copying;
     btn.textContent = ui.copying ? 'Checking…' : !n ? 'Copy' : n === total ? 'Copy ' + plural(n, 'source') : 'Copy ' + n + ' of ' + total;
@@ -1990,10 +2047,48 @@ if (typeof module !== 'undefined' && module.exports) module.exports = WorkIndexP
     renderItem(v); renderFind(v); renderManage(v);
     document.body.setAttribute('data-mode', v.manage ? 'manage' : ui.mode);
     $('sources').scrollTop = top;
+    fit();
     if (key && document.activeElement !== byKey(key)) focusOn(key);
     document.body.setAttribute('data-ready', String(++tick));
   }
   function redraw() { render(pop.view(), false); }
+
+  /* The popover's height is the page's own height. The page is laid out at its natural height whatever the window's
+     height is (nothing here is sized from the window), and it is measured, never the window: so resizing the popover
+     cannot change what is measured, and there is no loop. Only the width is fixed (352 points, by the app).
+     When the content is taller than the room the app reports (the screen below the menu bar), the list of sources (or
+     of tags, in Manage tags) gets a scroll bar first; if that is still not enough, the whole content scrolls above the
+     toolbar. The size is sent only when it changes. */
+  var WIDTH = 352, MIN_LIST = 96, room = 0, sentHeight = 0;
+  function roomNow() { return room > 0 ? room : native ? 600 : (window.innerHeight || 440); }
+  function fit() {
+    var main = $('main'), frame = $('frame'), limit = roomNow();
+    var list = document.body.getAttribute('data-mode') === 'manage' ? (!$('managePick').hidden ? $('manageList') : null) : ($('sources').querySelector('.src') ? $('sources') : null);
+    var lists = [$('sources'), $('manageList')], tops = lists.map(function (l) { return l.scrollTop; }), mainTop = main.scrollTop;
+    lists.forEach(function (l) { l.style.maxHeight = ''; });
+    main.style.maxHeight = ''; main.classList.remove('clamped');
+    var natural = Math.ceil(frame.getBoundingClientRect().height);
+    if (natural > limit && list) {
+      var keep = Math.max(MIN_LIST, Math.floor(list.getBoundingClientRect().height - (natural - limit)));
+      list.style.maxHeight = keep + 'px';
+      natural = Math.ceil(frame.getBoundingClientRect().height);
+    }
+    if (natural > limit) {
+      main.style.maxHeight = Math.max(0, limit - Math.ceil($('footer').getBoundingClientRect().height)) + 'px'; main.classList.add('clamped');
+      natural = Math.ceil(frame.getBoundingClientRect().height);
+    }
+    lists.forEach(function (l, i) { l.scrollTop = tops[i]; }); main.scrollTop = mainTop;
+    var h = Math.min(natural, limit);
+    document.body.setAttribute('data-height', String(h));
+    document.body.setAttribute('data-room', String(limit));
+    if (h === sentHeight) return;
+    sentHeight = h;
+    if (native) call('size', { width: WIDTH, height: h }).then(function (r) {
+      /* the app answers with the room it has now; if that differs (another screen), lay out again for it once */
+      if (r && r.room > 0 && r.room !== room) { room = r.room; fit(); }
+    }, function () {});
+    else if (typeof window.__workIndexTestSize === 'function') window.__workIndexTestSize(WIDTH, h);
+  }
   /* run one action; while it runs, other actions wait their turn by being ignored */
   function act(promise, focusAfter) {
     ui.busy = true;
@@ -2113,6 +2208,10 @@ if (typeof module !== 'undefined' && module.exports) module.exports = WorkIndexP
       else if (key === 'Enter') { e.preventDefault(); a.click(); }
     } else if (a.id === 'copyBtn' && key === 'ArrowUp') { e.preventDefault(); focusOn('tick:' + ui.cur); }
     else if (a.id === 'manageSearch' && key === 'ArrowDown') { var first = $('manageList').querySelector('.tagrow'); if (first) { e.preventDefault(); first.focus(); } }
+    else if (a.parentNode && a.parentNode.id === 'footer' && (key === 'ArrowLeft' || key === 'ArrowRight' || key === 'Home' || key === 'End')) {
+      var tools = siblings(a, '.tool'); e.preventDefault();
+      if (key === 'Home') tools[0].focus(); else if (key === 'End') tools[tools.length - 1].focus(); else step(tools, a, key === 'ArrowLeft' ? -1 : 1);
+    }
     else if (a.classList.contains('tagrow')) {
       var rowsM = siblings(a, '.tagrow');
       if (key === 'ArrowDown') { e.preventDefault(); step(rowsM, a, 1); }
@@ -2121,9 +2220,13 @@ if (typeof module !== 'undefined' && module.exports) module.exports = WorkIndexP
   });
 
   /* called by the Mac app each time the icon is clicked, with the app that was in front; and when the popover closes */
-  window.workIndexOpened = function (info) { forgetReturn.forEach(function (f) { f(); }); return opened(info); };
+  window.workIndexOpened = function (info) { forgetReturn.forEach(function (f) { f(); }); if (info && info.room > 0) room = info.room; return opened(info); };
   window.workIndexClosed = function () { forgetReturn.forEach(function (f) { f(); }); ui = fresh(); $('lookupField').value = ''; $('tagField').value = ''; $('manageSearch').value = ''; $('renameField').value = ''; return pop.closed().then(function (v) { render(v, true); return v; }); };
   window.workIndexPreview = function () { return pop.preview(); };
+  /* anything that changes the page's own height between renders (a message, a font) is fitted once per frame.
+     What fit() does to the lists leaves the page at the size it measured, so this does not call itself again. */
+  var fitting = 0;
+  if (typeof ResizeObserver === 'function') new ResizeObserver(function () { if (!fitting) fitting = requestAnimationFrame(function () { fitting = 0; fit(); }); }).observe($('frame'));
   render(pop.view(), true);
   if (!native && !pretend) $('noneMsg').textContent = 'This is the Context popover. It works inside the Mac app.';
 })();

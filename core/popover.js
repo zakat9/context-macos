@@ -34,6 +34,13 @@ var WorkIndexPopover = (function (Core, Read) {
   var RECENT = 8;
 
   /* a recent-tag button was pressed: put the tag into the field, or take it out if it is there */
+  /* the folder of a saved file, as shown under its title: a cloud folder by its service and place, never by the
+     account folder on disk (which for Google Drive carries the email address) */
+  function folderText(p) {
+    var c = Core.cloudPlace(p);
+    if (c) { var parts = c.place.split(' › '); parts.pop(); return c.provider + (parts.length ? ' › ' + parts.join(' › ') : ''); }
+    return String(p).replace(/\/[^\/]*$/, '') || '/';
+  }
   function toggleTag(fieldText, name) {
     var p = Core.parseTagInput(fieldText), key = Core.tagKey(name);
     var names = p.tags.map(function (t) { return t.name; });
@@ -371,7 +378,7 @@ var WorkIndexPopover = (function (Core, Read) {
       var t = st.target, v = {
         target: t.state === 'object' ? { state: 'object', kind: Core.KIND_LABEL[t.desc.kind] || 'File', title: Core.oneLine(t.desc.title), tags: (t.tags || []).slice(), app: t.app || '', appId: st.app, reason: '', message: '',
             when: t.desc.sourceTime ? Core.formatWhen(t.desc.sourceTime) : '', dateLabel: t.desc.sourceTime ? (Core.DATE_LABEL[t.desc.sourceTimeType] || '') : '',
-            folder: t.desc.locator && t.desc.locator.type === 'file' ? String(t.desc.locator.value).replace(/\/[^\/]*$/, '') || '/' : '' }
+            folder: t.desc.locator && t.desc.locator.type === 'file' ? folderText(t.desc.locator.value) : '' }
           : { state: 'none', kind: '', title: '', tags: [], app: t.app || '', appId: st.app, reason: t.reason || 'other-app', message: t.message || NOTHING },
         tagText: st.tagText, tagMessage: st.tagMessage, tagState: st.tagMessage ? (st.tagState || '') : '', recent: st.recent.slice(),
         tags: st.recent.map(function (n) { return { name: n, count: st.counts[n] || 0 }; }), indexError: st.indexError, maxTags: Core.MAX_TAGS,

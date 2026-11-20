@@ -77,7 +77,19 @@ final class IndexStore {
     }
 }
 
+/// A file in a cloud folder (Google Drive, Dropbox, OneDrive, Box, iCloud Drive) can be "online only": a placeholder
+/// whose contents are still in the cloud. Opening it would make the cloud app download it. lstat only looks at the
+/// placeholder (SF_DATALESS in its flags) and downloads nothing.
+let datalessFlag: UInt32 = 0x40000000
+func isOnlineOnly(_ path: String) -> Bool {
+    var info = stat()
+    guard lstat(path, &info) == 0 else { return false }
+    return info.st_flags & datalessFlag != 0
+}
+
 /// One saved file as it is on disk now: its resolved path, its bytes (base64) and its file date.
+/// An online-only file is answered with its name, size and date and "online": its contents are not read, so nothing is
+/// downloaded.
 /// Folders, and documents saved as folders, are not files.
 func readFile(_ path: String) -> [String: Any] {
     let expanded = (path as NSString).expandingTildeInPath
@@ -97,6 +109,9 @@ func readFile(_ path: String) -> [String: Any] {
     let modified = (attributes[.modificationDate] as? Date)?.timeIntervalSince1970 ?? 0
     let size = (attributes[.size] as? NSNumber)?.intValue ?? 0
     let milliseconds = (modified * 1000).rounded(.down)
+    if isOnlineOnly(real) {
+        return ["ok": true, "realPath": real, "mtimeMs": milliseconds, "size": size, "online": true]
+    }
     if size > 40 * 1024 * 1024 {
         return ["ok": true, "realPath": real, "mtimeMs": milliseconds, "size": size]
     }

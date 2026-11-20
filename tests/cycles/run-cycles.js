@@ -28,6 +28,7 @@ process.on('beforeExit', function () { if (!finished) { console.log('Cycle ' + r
     fails.forEach(function (c) { console.log('  FAIL ' + c.id + '  ' + c.text + '\n       → ' + c.detail.split('\n').join('\n         ')); });
   }
   finished = true;
+  fs.mkdirSync(path.dirname(file), { recursive: true });   /* results/ is not in the published tree */
   fs.writeFileSync(file, JSON.stringify(out, null, 1));
   console.log('build ' + out.build + ' → ' + path.relative(C.ROOT, file));
   process.exit(bad ? 1 : 0);

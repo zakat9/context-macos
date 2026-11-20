@@ -1,6 +1,6 @@
 # Checks that need a Mac and a person
 
-Steps A.1 and A.2 have been run on one Mac for this release (see the release notes). Everything else needs a person at a
+Steps A.1 and A.2 have been run on one Mac for 0.12.1 (see the release notes). Section J is new in 0.12.1. Everything else needs a person at a
 Mac and is unverified. Use fictional notes, messages and files. Tick each line as you see it; anything that
 does not happen as written is a defect to report with the line's letter and number.
 
@@ -108,3 +108,38 @@ does not happen as written is a defect to report with the line's letter and numb
 5. Quit and start Context: the rename is still there.
 6. The notes, messages and files themselves keep their dates.
 
+## J. Popover size, toolbar and icon (0.12.1)
+
+1. Open the popover with an untagged note selected and no tags in use: it is only as tall as its content; there is no
+   empty pane above the Copy line (expected around 240 points; the Copy line appears only after a lookup).
+2. The popover is the same width (352 points) in every state below. Only its height changes, and it changes at once,
+   without flicker, a jump of the arrow away from the menu-bar item, or repeated resizing.
+3. Look up a tag with several sources: the popover grows. Close it and open it again: it is short again.
+4. Look up a tag with 40 or more sources (fictional notes): the popover stops below the menu bar and above the Dock,
+   the list of sources scrolls, Copy and the bottom toolbar stay in view. Try it with the Dock at the bottom and on a
+   small display (or a scaled resolution): nothing is cut off at the bottom of the screen.
+5. Manage tags with many tags: the popover grows for the list, then scrolls; Done brings back the shorter tag view.
+6. With 8 recent tags, some long Korean names among them: the chips wrap onto more rows and none is cut off.
+7. The toolbar at the bottom (App access, Settings, Manage tags, Quit): no underlines; the buttons are evenly spaced, clear
+   of the rounded bottom corners; each highlights on hover. Quit is greyer, at the far right.
+8. Keyboard: Tab reaches each toolbar button and the focus ring is fully visible (not clipped by the corners); Left and
+   Right arrows, Home and End move along the toolbar; Return or Space presses the button.
+9. VoiceOver: the toolbar is announced as a toolbar named Context; Quit is read as "Quit Context"; the icons are not read.
+10. Finder › Applications (or wherever the app is): Context shows a teal-to-green rounded square with a white tag, sharp
+    in list view (16 points) and in Quick Look / Get Info (512 points). The menu-bar item is still the monochrome tag
+    symbol that follows light and dark menu bars.
+11. Light and dark mode, Increase Contrast: the popover stays light (as in 0.12.0) and the toolbar text stays readable.
+
+## K. Cloud folders (0.12.2; use a test account or fictional files only)
+
+1. In Finder, select a file in Google Drive (My Drive) that is downloaded: tag it. The popover shows
+   "Google Drive › My Drive › …" under the title, with no email address.
+2. Look the tag up and Copy: the text quotes the file and cites "Google Drive › My Drive › … (cloud folder on this Mac)".
+   Paste it somewhere private: no email address and no `/Users/…/Library/CloudStorage` in it.
+3. Make a file online only (Finder › Remove Download). Tag it. Does the cloud icon stay, with no download started? Look
+   the tag up: it is listed as "online only in Google Drive". Choose "Download Now", look up again: now it is read.
+4. Do the same in Dropbox and in iCloud Drive (if you use them).
+5. A Google Sheets file (`.gsheet`) in Google Drive: it can be tagged and is listed as a Google Sheets file that is not
+   read.
+6. With the network off: tagging and looking up downloaded cloud files still work, and online-only ones are listed
+   at once (no wait).

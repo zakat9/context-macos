@@ -2,7 +2,7 @@
 
 - 2 linked sources: 2 read just now, 0 linked but not read here, 0 unavailable.
 - This copy holds 2 of the 3 sources linked to ::Cost, as chosen by the person who copied it. The others are not in it.
-- Read at Nov 20, 2026 07:27 (+09:00) from this computer. Each source appears once, in its current saved form. Earlier versions are not kept, not shown and not reconstructed.
+- Read at Nov 20, 2026 10:52 (+09:00) from this computer. Each source appears once, in its current saved form. Earlier versions are not kept, not shown and not reconstructed.
 - Order: by each source's own date. “sent” is the date on a message. “last saved” is the date of the current saved version of a note or file, so its content may be newer than its position among earlier messages suggests. “file date only” means no other date is known.
 - Lines starting with > are quoted from the source. Everything else is written by Context from dates and locators only.
 

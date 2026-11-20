@@ -11,7 +11,7 @@
 var WorkIndexCore = (function () {
   'use strict';
 
-  var VERSION = '0.12.0';
+  var VERSION = '0.12.2';
   var MAX_TAGS = 2;
   var LOOKUP_PREFIX = '::';
   var NAME_CHAR = /[\p{L}\p{M}\p{N}_-]/u;
@@ -353,9 +353,32 @@ var WorkIndexCore = (function () {
     return { dated: dated, undated: undated, unavailable: unavailable };
   }
 
+  /* ───────── cloud folders ─────────
+     Google Drive, Dropbox, OneDrive, Box and iCloud Drive keep their files in folders on this Mac (macOS's File
+     Provider: ~/Library/CloudStorage/<Provider>-<account>/, iCloud Drive in ~/Library/Mobile Documents/). Context
+     treats them as the saved files they are. Their folder names carry the account (for Google Drive the account's
+     email address), so a file there is named by the service and its place inside it, never by that folder.
+     → { provider, place, text } or null for a file that is not in a cloud folder. */
+  var CLOUD_NAMES = { googledrive: 'Google Drive', dropbox: 'Dropbox', onedrive: 'OneDrive', box: 'Box', icloud: 'iCloud Drive' };
+  function cloudPlace(p) {
+    var s = String(p == null ? '' : p), m, provider, rest;
+    if ((m = /^\/Users\/[^\/]+\/Library\/CloudStorage\/([^\/]+)\/(.*)$/.exec(s))) {
+      var folder = m[1], key = folder.replace(/-.*$/, '').replace(/[^A-Za-z]/g, '').toLowerCase();
+      provider = CLOUD_NAMES[key] || folder.replace(/-.*$/, '') || 'Cloud storage'; rest = m[2];
+    } else if ((m = /^\/Users\/[^\/]+\/Library\/Mobile Documents\/com~apple~CloudDocs\/(.*)$/.exec(s))) { provider = 'iCloud Drive'; rest = m[1]; }
+    else if ((m = /^\/Users\/[^\/]+\/Library\/Mobile Documents\/[^\/]+\/(.*)$/.exec(s))) { provider = 'iCloud Drive'; rest = m[1]; }
+    else if ((m = /^\/Users\/[^\/]+\/Dropbox(?: \([^\/)]*\))?\/(.*)$/.exec(s))) { provider = 'Dropbox'; rest = m[1]; }
+    else return null;
+    var place = rest.split('/').filter(Boolean).join(' › ');
+    return { provider: provider, place: place, text: provider + ' › ' + place };
+  }
+  /* Google Docs, Sheets, Slides… files: in a Google Drive folder they are only pointers; their text is online. */
+  var GOOGLE_NATIVE = /\.(gdoc|gsheet|gslides|gdraw|gform|gmap|gsite|gjam|gtable|gscript)$/i;
+  function isGoogleNative(p) { return GOOGLE_NATIVE.test(String(p == null ? '' : p)); }
+
   function locatorText(loc) {
     if (!loc) return '';
-    if (loc.type === 'file') return loc.value;
+    if (loc.type === 'file') { var c = cloudPlace(loc.value); return c ? c.text + ' (cloud folder on this Mac)' : loc.value; }
     if (loc.type === 'apple-notes') return 'Apple Notes note ' + loc.value;
     if (loc.type === 'apple-mail') return 'Apple Mail message <' + loc.value + '>';
     return loc.value;
@@ -618,7 +641,7 @@ var WorkIndexCore = (function () {
     tagKey: tagKey, cleanTag: cleanTag, parseTagInput: parseTagInput, parseLookup: parseLookup,
     describeUrl: describeUrl, kindForPath: kindForPath, fileId: fileId, messageId: messageId, cleanTitle: cleanTitle, oneLine: oneLine,
     emptyIndex: emptyIndex, loadIndex: loadIndex, dumpIndex: dumpIndex, bind: bind, unbind: unbind, planRename: planRename, applyRename: applyRename, refresh: refresh, resolve: resolve, tagSummary: tagSummary,
-    formatWhen: formatWhen, toLocalIso: toLocalIso, buildTimeline: buildTimeline, renderContext: renderContext, renderList: renderList, locatorText: locatorText,
+    formatWhen: formatWhen, toLocalIso: toLocalIso, buildTimeline: buildTimeline, renderContext: renderContext, renderList: renderList, locatorText: locatorText, cloudPlace: cloudPlace, isGoogleNative: isGoogleNative,
     scriptForApp: scriptForApp, scriptForRead: scriptForRead, parseActive: parseActive, isotToIso: isotToIso,
     APPLESCRIPT: APPLESCRIPT, SELECTION_APPS: SELECTION_APPS, scriptForSelection: scriptForSelection, scriptForWatch: scriptForWatch, emlMessageId: emlMessageId, fileDesc: fileDesc, MAX_TAG_LENGTH: MAX_TAG_LENGTH
   };

@@ -19,6 +19,9 @@ final class Bridge: NSObject, WKScriptMessageHandlerWithReply, WKNavigationDeleg
     var onSettings: (() -> Void)?
     /// The page asks for Context's own Settings window (shortcuts, Insert context).
     var onPreferences: (() -> Void)?
+    /// The page's own height changed: the popover follows it (the width never changes). Answers the height that was
+    /// applied and the room there is, so the page can give its list a scroll bar when there is less room than content.
+    var onSize: ((Double) -> [String: Any])?
 
     init(store: IndexStore, scripts: ScriptRunner) {
         self.store = store
@@ -77,6 +80,9 @@ final class Bridge: NSObject, WKScriptMessageHandlerWithReply, WKNavigationDeleg
         case "preferences":
             replyHandler(["ok": true], nil)
             onPreferences?()
+        case "size":
+            let height = (fields["height"] as? NSNumber)?.doubleValue ?? 0
+            replyHandler(onSize?(height) ?? ["ok": false], nil)
         default:
             replyHandler(["ok": false], nil)
         }
