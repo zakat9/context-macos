@@ -1,14 +1,20 @@
 # contexta for Mac
 
-Tag Apple Notes, Mail messages and saved files from the macOS menu bar. Look up a tag to copy current source material into an AI draft with its dates and citations. contexta never presses Send.
+Prepare for a seed-round meeting by bringing the runway figures, investor questions and next steps into one brief with dates and sources.
+
+<img src="demo/contexta-investor-demo.gif" width="720" alt="A fictional founder checks FY27 base-case runway against questions from two investors and prepares a sourced meeting brief.">
+
+[Watch the investor meeting demo (MP4, English open captions)](demo/contexta-investor-demo.mp4)
+
+In the fictional Ember Loom seed round, five sources shape the brief. Alder Vale asks about downside runway: the FY27 projections XLSX workbook shows 18 months in the base case and 12 months in the downside case. Birch Quay’s separate email asks for the latest pitch deck; contexta lists its filename and date without reading the slides. The meeting note calls for a revised model before Tuesday.
+
+Both the GIF and MP4 have English open captions. The bundled app UI runs in Chromium with a simulated Mac host. This is not a macOS screen recording. The draft stays local: no real investor data, live AI session or message sent.
 
 **[Download for Mac · Mac용 앱 다운로드 (ZIP)](https://github.com/zakat9/context-macos/releases/download/v0.12.3/contexta-0.12.3-macOS-arm64-adhoc.zip)** · [SHA-256 checksums](https://github.com/zakat9/context-macos/releases/download/v0.12.3/SHA256SUMS.txt) · [Product page &amp; help](https://zakat9.github.io/context-macos/) · [한국어 안내](https://zakat9.github.io/context-macos/#ko) · [Release notes](https://github.com/zakat9/context-macos/releases/tag/v0.12.3)
 
-Upgrading from Context 0.12.2? Quit `Context.app`, install **contexta.app**, then open the new app once before removing the old one. Keep `~/WorkIndex/` in place to retain your tags and settings. Your existing shortcut stays the same. The app bundle ID, Chrome extension ID and helper ID have not changed.
+**Apple silicon only · 0.12.3 prerelease · not Apple-notarized.**
 
-If you use **Insert context**, opening contexta once updates the existing Chrome helper registration. Reload the extension in Chrome. If the helper still stops, open **Settings → Insert context** in contexta, turn it off and set it up again. Do not reopen the old app: it can point the helper back to itself.
-
-**0.12.3 prerelease (build 9).** The prebuilt app is for Apple silicon (M-series). The build targets macOS 12 or later. On macOS 27.2.1, 54/54 native self-tests passed. The upgrade was tested with temporary folders, not a real user profile or a live ChatGPT session. It is ad-hoc signed, not Apple-notarized; Gatekeeper may block it. No Intel binary is provided.
+Tag Apple Notes, Mail messages and saved files from the macOS menu bar. Look up a tag to copy current source material into an AI draft with its dates and citations. contexta never presses Send.
 
 ## Install and try it
 
@@ -18,7 +24,15 @@ If you use **Insert context**, opening contexta once updates the existing Chrome
 
 [See the walkthrough (0.12.0 example screens)](https://zakat9.github.io/context-macos/) · [Installation help](https://zakat9.github.io/context-macos/#help)
 
+## Upgrading from Context 0.12.2
+
+Upgrading from Context 0.12.2? Quit `Context.app`, install **contexta.app**, then open the new app once before removing the old one. Keep `~/WorkIndex/` in place to retain your tags and settings. Your existing shortcut stays the same. The app bundle ID, Chrome extension ID and helper ID have not changed.
+
+If you use **Insert context**, opening contexta once updates the existing Chrome helper registration. Reload the extension in Chrome. If the helper still stops, open **Settings → Insert context** in contexta, turn it off and set it up again. Do not reopen the old app: it can point the helper back to itself.
+
 ## Features and limits
+
+**0.12.3 prerelease (build 9).** The prebuilt app is for Apple silicon (M-series). The build targets macOS 12 or later. On macOS 27.2.1, 54/54 native self-tests passed. The upgrade was tested with temporary folders, not a real user profile or a live ChatGPT session. It is ad-hoc signed, not Apple-notarized; Gatekeeper may block it. No Intel binary is provided.
 
 - **Tag current item:** assign a shortcut in Settings to open the editor for the selected item.
 - **Manage tags:** preview the number of affected sources before renaming or merging a tag. Originals are never edited.
