@@ -1,0 +1,69 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<title>Insert context</title>
+<style>
+:root{color-scheme:light;--paper:#fafafa;--sheet:#fff;--ink:#313438;--soft:#61666b;--rule:#e2e4e6;--rule-strong:#c9cdd0;--field:#878d93;--accent:#33566a;--tint:#eef3f5;
+  --sans:-apple-system,BlinkMacSystemFont,"Helvetica Neue","Apple SD Gothic Neo","Segoe UI","Noto Sans","Noto Sans CJK KR","DejaVu Sans",sans-serif}
+*{box-sizing:border-box}
+html,body{margin:0}
+body{width:344px;background:var(--paper);color:var(--ink);font:400 13px/1.4 var(--sans);padding:10px 12px 8px;overflow-wrap:anywhere}
+p{margin:0}
+button,input{font:inherit;color:inherit;margin:0}
+[hidden]{display:none!important}
+:focus{outline:none}
+:focus-visible{outline:2px solid var(--accent);outline-offset:1px;border-radius:4px}
+.soft{font-size:12px;line-height:16px;color:var(--soft)}
+#target{color:var(--ink)}
+#chat{white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+#tag{display:block;width:100%;height:28px;margin-top:8px;padding:3px 8px;border:1px solid var(--field);border-radius:5px;background:var(--sheet)}
+#tag::placeholder{color:var(--soft);opacity:1}
+#tags{margin-top:6px;max-height:182px;overflow-y:auto;border-top:1px solid var(--rule);border-bottom:1px solid var(--rule)}
+#tags:empty{border:0}
+.tagrow{display:flex;justify-content:space-between;align-items:center;gap:10px;width:100%;min-height:26px;padding:0 4px;border:0;border-top:1px solid var(--rule);background:none;text-align:left;cursor:pointer}
+.tagrow:first-child{border-top:0}
+.tagrow.hi,.tagrow:hover{background:var(--tint)}
+.tagrow .n{min-width:0;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.tagrow .c{flex:none;font-size:12px;color:var(--soft)}
+.head{display:flex;align-items:center;gap:8px;margin-top:8px;min-height:22px}
+#summary{flex:1}
+.link{border:0;background:none;padding:0 2px;min-height:22px;min-width:24px;color:var(--soft);cursor:pointer;font-size:11.5px;text-decoration:underline;text-underline-offset:2px}
+#list{max-height:236px;overflow-y:auto;overflow-x:hidden;border-top:1px solid var(--rule);border-bottom:1px solid var(--rule)}
+.src{display:flex;gap:6px;align-items:flex-start;padding:4px 0;border-top:1px solid var(--rule);cursor:pointer}
+.src:first-child{border-top:0}
+.src input{flex:none;width:14px;height:14px;margin:3px 2px 0 0;accent-color:var(--accent)}
+.src .w{flex:1;min-width:0}
+.src .l1{display:flex;gap:6px;align-items:center}
+.badge{flex:none;min-width:22px;text-align:center;font-size:11px;line-height:15px;border:1px solid var(--field);border-radius:3px;padding:0 3px}
+.src .t{flex:1;min-width:0;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.src .flag{flex:none;font-size:11px;line-height:15px;border:1px dashed var(--ink);border-radius:3px;padding:0 4px}
+.src .m{font-size:12px;line-height:15px;color:var(--soft);overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.src.off .t{color:var(--soft)}
+#msg{margin-top:8px;min-height:16px;font-size:12px;line-height:16px;color:var(--soft)}
+#msg.on{color:var(--ink)}
+.bar{display:flex;justify-content:space-between;gap:8px;margin-top:8px}
+.btn{height:28px;padding:0 10px;border-radius:5px;border:1px solid var(--field);background:var(--sheet);cursor:pointer;white-space:nowrap}
+.btn:disabled{border-color:var(--rule-strong);color:var(--soft);cursor:default}
+.btn.primary{background:var(--accent);border-color:var(--accent);color:#fff}
+.btn.primary:disabled{background:var(--tint);border-color:var(--rule);color:var(--soft)}
+.foot{margin-top:7px;font-size:11.5px;color:var(--soft)}
+@media (prefers-contrast:more){:root{--soft:#43474b;--rule:#b9bdc1;--rule-strong:#878d93;--field:#5c6166}}
+</style>
+</head>
+<body>
+<p id="target" role="status"></p>
+<p id="chat" class="soft"></p>
+<input type="text" id="tag" autocomplete="off" autocapitalize="off" autocorrect="off" spellcheck="false" placeholder="Tag" aria-label="Tag whose sources to insert" aria-controls="tags">
+<div id="tags" role="group" aria-label="Your tags, most recently used first, with the number of sources on each"></div>
+<div id="sources" hidden>
+  <div class="head"><p id="summary" class="soft"></p><button type="button" class="link" id="all">All</button><button type="button" class="link" id="none">None</button></div>
+  <div id="list" role="group" aria-label="Sources of this tag. Untick one to leave it out."></div>
+</div>
+<p id="msg" role="status"></p>
+<div class="bar"><button type="button" class="btn" id="copy" disabled>Copy instead</button><button type="button" class="btn primary" id="insert" disabled>Insert</button></div>
+<p class="foot">Nothing is sent. You press Send yourself.</p>
+<script src="lib.js"></script>
+<script src="popup.js"></script>
+</body>
+</html>

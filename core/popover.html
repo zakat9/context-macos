@@ -1,0 +1,592 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta http-equiv="Content-Security-Policy" content="default-src 'none'; style-src 'unsafe-inline'; script-src 'unsafe-inline'">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Context</title>
+<style>
+/* One popover, 352 × 440, light. Regular weight everywhere: the order of things, size and two greys carry the hierarchy. */
+:root{color-scheme:light;--paper:#fafafa;--sheet:#fff;--ink:#313438;--soft:#61666b;--rule:#e2e4e6;--rule-strong:#c9cdd0;--field:#878d93;--accent:#33566a;--tint:#eef3f5;
+  --sans:-apple-system,BlinkMacSystemFont,"Helvetica Neue","Apple SD Gothic Neo","Segoe UI","Noto Sans","Noto Sans CJK KR","DejaVu Sans",sans-serif}
+*{box-sizing:border-box}
+html,body{margin:0;height:100%}
+body{background:var(--paper);color:var(--ink);font:400 13px/1.4 var(--sans);overflow:hidden;overflow-wrap:anywhere;display:flex;flex-direction:column;cursor:default;-webkit-user-select:none;user-select:none}
+p,h2{margin:0;padding:0;font:inherit}
+button,input{font:inherit;color:inherit;margin:0}
+[hidden]{display:none!important}
+:focus{outline:none}
+:focus-visible{outline:2px solid var(--accent);outline-offset:1px;border-radius:4px}
+.vh{position:absolute;width:1px;height:1px;overflow:hidden;clip-path:inset(50%);white-space:nowrap}
+main{flex:1;min-height:0;display:flex;flex-direction:column}
+
+/* the selected item */
+#item{padding:9px 12px 8px;border-bottom:1px solid var(--rule)}
+.cap{font-size:11.5px;line-height:15px;color:var(--soft);white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+#itemTitle{margin-top:1px;display:-webkit-box;-webkit-box-orient:vertical;-webkit-line-clamp:2;overflow:hidden;line-height:18px;-webkit-user-select:text;user-select:text}
+#itemPath{margin-top:1px}
+.tokens{display:flex;flex-wrap:wrap;gap:5px;align-items:center;margin-top:7px}
+#tagTokens{display:contents}
+.token{display:inline-flex;align-items:center;max-width:100%;min-height:24px;border-radius:5px;background:var(--tint);color:var(--accent);padding-left:8px;font-size:12.5px}
+.token .name{overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.token .rm{border:0;background:none;width:22px;height:24px;padding:0;font-size:14px;line-height:1;color:var(--accent);cursor:pointer;border-radius:0 5px 5px 0}
+.token .rm:hover{background:#dde7ec}
+input[type=text]{flex:1;min-width:96px;height:28px;padding:3px 8px;border:1px solid var(--field);border-radius:5px;background:var(--sheet);-webkit-user-select:text;user-select:text;cursor:text}
+input[type=text]::placeholder{color:var(--soft);opacity:1}
+input[type=text]:disabled{background:transparent;border-color:var(--rule-strong)}
+.btn{height:28px;padding:0 10px;border-radius:5px;border:1px solid var(--field);background:var(--sheet);cursor:pointer;white-space:nowrap}
+.btn:disabled{border-color:var(--rule-strong);color:var(--soft);cursor:default}
+.btn.primary{background:var(--accent);border-color:var(--accent);color:#fff}
+.btn.primary:disabled{background:var(--tint);border-color:var(--rule);color:var(--soft)}
+.btn .key{margin-left:8px;font-size:11.5px;opacity:.85}
+.chips{display:flex;flex-wrap:wrap;gap:5px;align-items:center;margin-top:6px;max-height:53px;overflow:hidden}
+.chips .lead{font-size:11.5px;color:var(--soft);margin-right:1px}
+.chip{border:1px solid var(--rule-strong);background:var(--sheet);border-radius:12px;padding:0 9px;height:24px;max-width:150px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;font-size:12px;cursor:pointer}
+.chip:hover{border-color:var(--field)}
+.chip[aria-pressed=true]{border-color:var(--accent);background:var(--tint);color:var(--accent)}
+.msg{font-size:12px;line-height:16px;color:var(--soft)}
+.msg.on{color:var(--ink)}
+#tagMsg{margin-top:6px;min-height:16px}
+#itemNone .lead{color:var(--ink)}
+#itemNone .more{margin-top:2px}
+.acts{display:flex;gap:6px;margin-top:7px}
+#itemLine{display:flex;align-items:center;gap:6px;width:100%;height:26px;margin:-3px 0 -2px;padding:0;border:0;background:none;text-align:left;cursor:pointer}
+#itemLine .k{font-size:11.5px;color:var(--soft);flex:none}
+#itemLine .t{flex:1;min-width:0;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+#itemLine .tg{flex:none;max-width:90px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;font-size:11.5px;color:var(--accent);background:var(--tint);border-radius:4px;padding:1px 6px}
+#itemLine .go{flex:none;font-size:11.5px;color:var(--soft);text-decoration:underline;text-underline-offset:2px}
+
+/* find context */
+#find{flex:1;min-height:0;display:flex;flex-direction:column;padding:8px 12px 0}
+.row{display:flex;gap:6px}
+#summaryRow{display:flex;align-items:center;gap:8px;margin-top:4px;min-height:22px}
+#summary{flex:1}
+.link{border:0;background:none;padding:0 2px;min-height:22px;min-width:24px;color:var(--soft);cursor:pointer;font-size:11.5px;text-decoration:underline;text-underline-offset:2px}
+.link:hover{color:var(--ink)}
+progress{display:block;width:100%;height:3px;margin-top:2px;border:0;border-radius:2px;background:var(--rule);-webkit-appearance:none;appearance:none}
+progress::-webkit-progress-bar{background:var(--rule);border-radius:2px}
+progress::-webkit-progress-value{background:var(--accent);border-radius:2px}
+#sources{flex:1;min-height:0;overflow-y:auto;margin:3px -12px 0;padding:0 12px;border-top:1px solid var(--rule)}
+#sources:empty,#sources.bare{border-top-color:transparent}
+.hint{padding:8px 0;font-size:12px;color:var(--soft)}
+.group{padding:7px 0 3px;font-size:11.5px;color:var(--soft);border-top:1px solid var(--rule)}
+.src{padding:3px 0 4px;border-top:1px solid var(--rule)}
+.src:first-child,.group:first-child{border-top:0}
+.src .pick{display:flex;align-items:center;gap:6px;height:21px;cursor:pointer}
+.src .pick input{flex:none;width:14px;height:14px;margin:0 2px 0 0;accent-color:var(--accent)}
+.badge{flex:none;min-width:22px;text-align:center;font-size:11px;line-height:15px;border:1px solid var(--field);color:var(--ink);border-radius:3px;padding:0 3px}
+.src .t{flex:1;min-width:0;line-height:19px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.src .flag{flex:none;font-size:11px;line-height:15px;border:1px dashed var(--ink);border-radius:3px;padding:0 4px}
+.src .more{display:block;position:relative;width:calc(100% - 22px);margin-left:22px;padding:0 16px 0 0;border:0;background:none;text-align:left;cursor:pointer;font-size:12px;line-height:15px;color:var(--soft)}
+.src .more span{display:block;height:15px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.src .more .ex{color:var(--ink)}
+.src .more .chev{position:absolute;right:0;top:0;width:14px;text-align:right;overflow:visible}
+.src.off .t,.src.off .more .ex{color:var(--soft)}
+.src.gone .more .ex{color:var(--soft)}
+.quote{margin:4px 0 2px 22px;border-left:2px solid var(--accent);padding-left:8px;font-size:12px;line-height:1.45;white-space:pre-wrap;-webkit-user-select:text;user-select:text}
+.quote + .link{margin-left:22px}
+.copybar{display:flex;gap:10px;align-items:center;padding:5px 0 6px;border-top:1px solid var(--rule)}
+.copybar .msg{flex:1;font-size:11.5px;line-height:15px}
+footer{flex:none;display:flex;justify-content:space-between;align-items:center;height:23px;padding:0 12px;border-top:1px solid var(--rule)}
+/* manage tags */
+#manage{display:none;flex:1;min-height:0;flex-direction:column;padding:9px 12px 8px}
+body[data-mode=manage] #manage{display:flex}
+body[data-mode=manage] #item,body[data-mode=manage] #find{display:none}
+.mhead{display:flex;justify-content:space-between;align-items:center;margin-bottom:6px}
+#managePick{flex:1;min-height:0;display:flex;flex-direction:column}
+#managePick input,#renameForm input{flex:none;width:100%}
+#manageList{flex:1;min-height:0;overflow-y:auto;margin-top:6px;border-top:1px solid var(--rule);border-bottom:1px solid var(--rule)}
+.tagrow{display:flex;justify-content:space-between;align-items:center;gap:10px;width:100%;min-height:26px;padding:0 2px;border:0;border-top:1px solid var(--rule);background:none;text-align:left;cursor:pointer}
+.tagrow:first-child{border-top:0}
+.tagrow:hover{background:var(--tint)}
+.tagrow .n{min-width:0;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.tagrow .c{flex:none;font-size:12px;color:var(--soft)}
+#manageMsg{margin-top:6px;min-height:16px}
+#renameForm{flex:1;min-height:0;display:flex;flex-direction:column}
+#renameTitle{margin-bottom:6px}
+#renamePlan{margin-top:8px;min-height:64px;font-size:12px;line-height:16px}
+#renamePlan p+p{margin-top:3px}
+#renamePlan .warn{color:var(--ink)}
+#renameNote{margin-top:auto;padding-top:8px}
+.acts2{display:flex;justify-content:space-between;gap:8px;margin-top:8px}
+body[data-mode=find] #itemFull,body[data-mode=find] #itemNone{display:none}
+body[data-mode=find] #item{padding:6px 12px 5px}
+body[data-mode=tag] #itemLine{display:none}
+@media (prefers-contrast:more){:root{--soft:#43474b;--rule:#b9bdc1;--rule-strong:#878d93;--field:#5c6166}}
+</style>
+</head>
+<body data-mode="tag">
+<main>
+<section id="item" aria-labelledby="hItem">
+  <h2 class="vh" id="hItem">Selected item</h2>
+  <div id="itemFull">
+    <div id="object">
+      <p class="cap" id="itemCap"></p>
+      <p id="itemTitle" dir="auto"></p>
+      <p class="cap" id="itemPath"></p>
+    </div>
+    <form id="tagForm" class="tokens" novalidate>
+      <span id="tagTokens" role="list" aria-label="Tags on this item"></span>
+      <input type="text" id="tagField" autocomplete="off" autocapitalize="off" autocorrect="off" spellcheck="false" placeholder="Add a tag" aria-label="Add a tag to this item" aria-describedby="tagMsg">
+      <button class="btn" type="submit" id="addBtn" disabled>Add</button>
+    </form>
+    <div class="chips" id="tagChips" role="group" aria-label="Tag this item as one of the recent tags"></div>
+    <p class="msg" id="tagMsg" role="status"></p>
+  </div>
+  <div id="itemNone" hidden>
+    <p class="lead" id="noneMsg" role="status"></p>
+    <p class="msg more" id="noneMore"></p>
+    <div class="acts" id="noneActs"></div>
+  </div>
+  <button type="button" id="itemLine" aria-expanded="false" aria-controls="itemFull"></button>
+</section>
+
+<section id="find" aria-labelledby="hFind">
+  <h2 class="vh" id="hFind">Find context</h2>
+  <form id="lookupForm" class="row" novalidate>
+    <input type="text" id="lookupField" autocomplete="off" autocapitalize="off" autocorrect="off" spellcheck="false" placeholder="Look up a tag to copy its sources" aria-label="Look up a tag to copy its sources">
+    <button class="btn" type="submit" id="findBtn">Find</button>
+  </form>
+  <div class="chips" id="lookupChips" role="group" aria-label="Look up one of the tags in use"></div>
+  <div id="summaryRow">
+    <p class="msg" id="summary" role="status"></p>
+    <button type="button" class="link" id="allBtn" hidden>All</button>
+    <button type="button" class="link" id="noneBtn" hidden>None</button>
+  </div>
+  <progress id="progress" max="1" value="0" hidden aria-label="Reading sources"></progress>
+  <div id="sources" role="group" aria-label="Sources for this tag, oldest first"></div>
+  <div class="copybar">
+    <button class="btn primary" type="button" id="copyBtn" disabled aria-keyshortcuts="Meta+Enter">Copy</button>
+    <p class="msg" id="copyMsg" role="status">Nothing is sent. You paste it.</p>
+  </div>
+</section>
+<section id="manage" aria-labelledby="hManage">
+  <div class="mhead"><h2 id="hManage">Manage tags</h2><button type="button" class="link" id="manageDone">Done</button></div>
+  <div id="managePick">
+    <input type="text" id="manageSearch" autocomplete="off" autocapitalize="off" autocorrect="off" spellcheck="false" placeholder="Search tags" aria-label="Search tags">
+    <div id="manageList" role="group" aria-label="Tags, with the number of sources each one is on. Press one to rename it everywhere."></div>
+    <p class="msg" id="manageMsg" role="status"></p>
+  </div>
+  <form id="renameForm" novalidate hidden>
+    <p id="renameTitle"></p>
+    <input type="text" id="renameField" autocomplete="off" autocapitalize="off" autocorrect="off" spellcheck="false" placeholder="New name" aria-label="New name for this tag" aria-describedby="renamePlan">
+    <div id="renamePlan" role="status"></div>
+    <p class="msg" id="renameNote">Only Context's own index changes. Your files, mail and notes are not touched.</p>
+    <div class="acts2"><button type="button" class="btn" id="renameCancel">Cancel</button><button type="submit" class="btn primary" id="renameBtn" disabled>Rename</button></div>
+  </form>
+</section>
+</main>
+<footer>
+  <button type="button" class="link" id="accessBtn">App access</button>
+  <button type="button" class="link" id="prefsBtn">Settings</button>
+  <button type="button" class="link" id="manageBtn">Manage tags</button>
+  <button type="button" class="link" id="quitBtn">Quit</button>
+</footer>
+
+<script>
+/*__RULES__*/
+</script>
+<script>
+/*__READ__*/
+</script>
+<script>
+/*__POPOVER__*/
+</script>
+<script>
+(function () {
+  'use strict';
+  var Core = WorkIndexCore;
+  function $(id) { return document.getElementById(id); }
+  function el(tag, cls, text) { var e = document.createElement(tag); if (cls) e.className = cls; if (text != null) e.textContent = text; return e; }
+  function plural(n, word) { return n + ' ' + word + (n === 1 ? '' : 's'); }
+
+  /* the bridge to the Mac app. In the tests the same calls go to a pretend Mac. Every answer is plain data. */
+  var native = window.webkit && window.webkit.messageHandlers && window.webkit.messageHandlers.workindex;
+  var pretend = typeof window.__workIndexTestCall === 'function' ? window.__workIndexTestCall : null;
+  function call(op, arg) {
+    if (native) return native.postMessage({ op: op, arg: arg == null ? '' : arg });
+    if (pretend) return pretend(op, arg == null ? '' : arg);
+    return Promise.resolve({ ok: false, message: 'not inside the app' });
+  }
+  var host = {
+    selection: function (bundleId) { return call('selection', bundleId); },
+    readNote: function (id) { return call('readNote', id); },
+    readMail: function (where) { return call('readMail', where); },
+    readFile: function (path) { return call('readFile', path).then(function (r) { if (r && r.ok && typeof r.base64 === 'string') { r.bytes = WorkIndexRead.base64Bytes(r.base64); delete r.base64; } return r; }); },
+    readIndex: function () { return call('readIndex'); },
+    indexStamp: function () { return call('indexStamp'); },
+    writeIndex: function (text) { return call('writeIndex', text); },
+    copyText: function (text) { return call('copyText', text); }
+  };
+  var pop = WorkIndexPopover.create(host);
+
+  /* what only this page knows; all of it is dropped when the popover closes */
+  var ui = fresh();
+  function fresh() { return { mode: 'tag', open: {}, all: {}, cur: '', busy: false, opening: '', reading: null, copying: false, info: {} }; }
+  var tick = 0, LINES = 12;
+
+  /* a time is shown without its offset when the offset is this Mac's own */
+  var OWN = (function () {
+    function f(min) { var a = Math.abs(min); return (min < 0 ? '-' : '+') + ('0' + Math.floor(a / 60)).slice(-2) + ':' + ('0' + a % 60).slice(-2); }
+    var y = new Date().getFullYear(), out = [f(-new Date().getTimezoneOffset()), f(-new Date(y, 0, 1).getTimezoneOffset()), f(-new Date(y, 6, 1).getTimezoneOffset())];
+    if (out.indexOf('+00:00') >= 0) out.push('UTC');
+    return out;
+  })();
+  function when(text) { var m = /^(.*) \(([^)]+)\)$/.exec(text || ''); return m && OWN.indexOf(m[2]) >= 0 ? m[1] : (text || ''); }
+  function shortPath(p) { if (p.length <= 46) return p; var tail = p.slice(-44), cut = tail.indexOf('/'); return '…' + (cut >= 0 ? tail.slice(cut) : tail); }
+  function tagNames(query) { return String(query || '').split(/\s+/).filter(Boolean).map(function (x) { return x.replace(/^::/, ''); }); }
+
+  /* one line of a source for the list: its own words, without the mail headers or a repeat of its title */
+  function excerpt(s) {
+    if (s.status === 'too-long') return 'Readable, but left out for size. Untick other sources to make room.';
+    if (s.status !== 'read') return (s.status === 'unavailable' ? 'Unavailable: ' : 'Not read here: ') + s.reason + '.';
+    var lines = s.lines.slice();
+    if (s.kind === 'Email') { var gap = lines.indexOf(''); if (gap >= 0) lines = lines.slice(gap + 1); }
+    lines = lines.map(function (l) { return l.replace(/^L\d+: /, ''); }).filter(function (l) { return l && l !== s.title && !/^Sheet “/.test(l); });
+    return lines.join('  ').slice(0, 240) || 'Read. Nothing but its title.';
+  }
+
+  /* focus is kept across a redraw by a key on every control */
+  function focusKey() { var a = document.activeElement; return a && a !== document.body ? (a.getAttribute('data-key') || a.id || '') : ''; }
+  function byKey(key) {
+    if (!key) return null;
+    var all = document.querySelectorAll('[data-key]');
+    for (var i = 0; i < all.length; i++) if (all[i].getAttribute('data-key') === key) return all[i];
+    return $(key);
+  }
+  function focusOn(key) { var e = byKey(key); if (e && !e.disabled && e.offsetParent !== null) { e.focus(); return true; } return false; }
+
+  function chips(box, names, lead, opts) {
+    box.textContent = '';
+    box.hidden = !names.length;
+    if (!names.length) return;
+    box.appendChild(el('span', 'lead', lead));
+    names.forEach(function (name, i) {
+      var b = el('button', 'chip', name); b.type = 'button'; b.dir = 'auto'; b.title = opts.title(name);
+      b.setAttribute('data-key', opts.key + name); b.tabIndex = i === 0 ? 0 : -1;
+      if (opts.pressed) b.setAttribute('aria-pressed', opts.pressed(name) ? 'true' : 'false');
+      b.addEventListener('click', function () { opts.press(name); });
+      box.appendChild(b);
+    });
+  }
+
+  function renderItem(v) {
+    var t = v.target, obj = t.state === 'object', line = $('itemLine');
+    $('itemFull').hidden = !obj || !!ui.opening; $('itemNone').hidden = obj && !ui.opening;
+    line.textContent = '';
+    if (ui.opening) {
+      $('noneMsg').textContent = 'Checking what is selected in ' + ui.opening + '…'; $('noneMore').textContent = ''; $('noneActs').textContent = '';
+      line.appendChild(el('span', 't', 'Checking what is selected…'));
+      return;
+    }
+    if (obj) {
+      var capText = t.kind + ' in ' + t.app + (t.when ? ', ' + t.dateLabel + ' ' + when(t.when) : '');
+      $('itemCap').textContent = capText;
+      $('itemTitle').textContent = t.title; $('itemTitle').title = t.title;
+      $('itemPath').hidden = !t.folder; $('itemPath').textContent = t.folder ? shortPath(t.folder) : ''; $('itemPath').title = t.folder || '';
+      var box = $('tagTokens'); box.textContent = '';
+      t.tags.forEach(function (name) {
+        var tok = el('span', 'token'); tok.setAttribute('role', 'listitem');
+        var nm = el('span', 'name', name); nm.dir = 'auto'; nm.title = name; tok.appendChild(nm);
+        var rm = el('button', 'rm', '×'); rm.type = 'button'; rm.title = 'Remove ' + name; rm.setAttribute('aria-label', 'Remove tag ' + name); rm.setAttribute('data-key', 'rm:' + name);
+        rm.addEventListener('click', function () { act(pop.removeTag(name), 'tagField'); });
+        tok.appendChild(rm); box.appendChild(tok);
+      });
+      var full = t.tags.length >= v.maxTags, field = $('tagField');
+      field.disabled = !!v.indexError;
+      field.placeholder = full ? t.tags.length + ' of ' + v.maxTags + ' tags' : t.tags.length ? 'Add another tag' : 'Add a tag';
+      $('addBtn').disabled = !!v.indexError || !field.value.trim();
+      var have = t.tags.map(Core.tagKey);
+      chips($('tagChips'), full || v.indexError ? [] : v.recent.filter(function (n) { return have.indexOf(Core.tagKey(n)) < 0; }), 'Tag as',
+        { key: 'chip:tag:', title: function (n) { return 'Tag this item ' + n; }, press: function (name) { act(pop.addTag(name), 'tagField'); } });
+      var said = v.indexError || v.tagMessage;
+      $('tagMsg').textContent = said ? (v.tagState === 'saved' ? '✓ ' : '') + said
+        : full ? 'Remove a tag to add another.' : t.tags.length ? t.tags.length + ' of ' + v.maxTags + ' tags.' : v.recent.length ? 'No tags yet. Type one and press Return, or pick a recent tag.' : 'No tags yet. Type a short name and press Return.';
+      $('tagMsg').className = 'msg' + (said ? ' on' : '');
+      line.appendChild(el('span', 'k', t.kind));
+      var lt = el('span', 't', t.title); lt.dir = 'auto'; line.appendChild(lt);
+      t.tags.forEach(function (name) { var g = el('span', 'tg', name); g.dir = 'auto'; line.appendChild(g); });
+      line.appendChild(el('span', 'go', t.tags.length ? 'Edit' : 'Tag'));
+      line.setAttribute('aria-label', 'Selected item: ' + t.kind + ', ' + t.title + '. ' + (t.tags.length ? 'Tags: ' + t.tags.join(', ') : 'No tags') + '. Show tagging.');
+      line.title = t.title;
+    } else {
+      var acts = $('noneActs'); acts.textContent = '';
+      $('noneMsg').textContent = t.message; $('noneMore').textContent = '';
+      if (t.reason === 'denied') {
+        $('noneMore').textContent = 'macOS asks once per app. Turn on ' + t.app + ' under Context in System Settings, then click the icon again.';
+        acts.appendChild(button('Open Automation settings', 'settingsBtn', function () { call('settings'); }));
+      } else if (t.reason === 'not-asked') {
+        $('noneMore').textContent = 'macOS asks once per app, in its own prompt. App access starts that; then use the shortcut or the icon again.';
+        acts.appendChild(button('Open App access', 'settingsBtn', function () { call('access', t.appId); }));
+      } else if (t.reason === 'changed') acts.appendChild(button('Show what is selected now', 'retryBtn', retry));
+      else if (t.reason === 'no-answer') acts.appendChild(button('Try again', 'retryBtn', retry));
+      acts.hidden = !acts.firstChild; $('noneMore').hidden = !$('noneMore').textContent;
+      line.appendChild(el('span', 't', t.reason === 'denied' || t.reason === 'not-asked' ? 'Not allowed to ask ' + t.app : t.reason === 'changed' ? 'Selection changed. Nothing was tagged' : 'Nothing selected to tag'));
+      line.appendChild(el('span', 'go', 'Show'));
+      line.setAttribute('aria-label', t.message + ' Show details.'); line.title = t.message;
+    }
+    line.setAttribute('aria-expanded', ui.mode === 'tag' ? 'true' : 'false');
+  }
+  function button(text, id, fn) { var b = el('button', 'btn', text); b.type = 'button'; b.id = id; b.addEventListener('click', fn); return b; }
+
+  function renderFind(v) {
+    var L = v.lookup, list = $('sources'), names = L ? tagNames(L.query) : [], keys = names.map(Core.tagKey);
+    $('lookupField').disabled = !!v.indexError; $('findBtn').disabled = !!v.indexError;
+    chips($('lookupChips'), v.indexError ? [] : v.recent, 'Look up',
+      { key: 'chip:find:', title: function (n) { var c = (v.tags.filter(function (x) { return x.name === n; })[0] || {}).count || 0; return 'Look up ' + n + ' (' + plural(c, 'source') + ')'; },
+        pressed: function (n) { return keys.length === 1 && keys[0] === Core.tagKey(n); }, press: function (name) { $('lookupField').value = name; look(name); } });
+    list.textContent = '';
+    var sum = $('summary'), total = L && !L.error ? L.sources.length : 0;
+    $('progress').hidden = !ui.reading; $('allBtn').hidden = $('noneBtn').hidden = total < 2 || !!ui.reading;
+    list.setAttribute('aria-busy', ui.reading ? 'true' : 'false');
+    sum.className = 'msg';
+    if (ui.reading) {
+      sum.textContent = ui.reading.n ? 'Reading ' + Math.min(ui.reading.i + 1, ui.reading.n) + ' of ' + ui.reading.n + ' as saved now…' : 'Looking up ' + ui.reading.name + '…';
+      $('progress').max = ui.reading.n || 1; $('progress').value = ui.reading.i;
+    } else if (v.indexError && !L) { sum.textContent = v.indexError; sum.className = 'msg on'; }
+    else if (!L) {
+      sum.textContent = '';
+      list.appendChild(el('p', 'hint', v.recent.length ? 'Look up a tag to list its sources as they are saved now. Tick the ones you want, then copy them for an AI.' : 'No tags yet. Tag an item first: select it in its app, then click the Context icon.'));
+    } else if (L.error) { sum.textContent = L.error; sum.className = 'msg on'; }
+    else if (!total) { sum.textContent = L.empty + (v.recent.length ? ' Tags in use are listed above.' : ''); sum.className = 'msg on'; }
+    else {
+      var c = L.counts, extra = [];
+      if (c.unavailable) extra.push(c.unavailable + ' unavailable');
+      if (c.notRead) extra.push(c.notRead + ' not read here');
+      if (c.listedWithoutContents) extra.push(c.listedWithoutContents + ' left out for size');
+      sum.textContent = plural(total, 'source') + ', oldest first.' + (extra.length ? ' ' + extra.join(', ') + '.' : '');
+      sum.title = 'Sources tagged ' + names.join(' and ') + ', each as it is saved now, in the order of their own dates.';
+      if (!ui.cur || !L.sources.some(function (s) { return s.id === ui.cur; })) ui.cur = L.sources[0].id;
+      var last = 'timeline';
+      L.sources.forEach(function (s) {
+        if (s.group !== last) list.appendChild(el('p', 'group', s.group === 'undated' ? 'Date unknown' : 'Could not be read now. Listed by name only.'));
+        last = s.group;
+        list.appendChild(row(s));
+      });
+    }
+    $('summaryRow').hidden = !sum.textContent && !ui.reading;
+    list.className = list.firstChild && list.firstChild.className === 'hint' ? 'bare' : '';
+    var n = L && !L.error ? L.selectedCount : 0, btn = $('copyBtn');
+    btn.disabled = !n || !!ui.reading || ui.copying;
+    btn.textContent = ui.copying ? 'Checking…' : !n ? 'Copy' : n === total ? 'Copy ' + plural(n, 'source') : 'Copy ' + n + ' of ' + total;
+    if (n && !ui.copying) { var k = el('span', 'key', '⌘↩'); k.setAttribute('aria-hidden', 'true'); btn.appendChild(k); }
+    btn.title = 'Copy the ticked sources as text (Command-Return). Nothing is sent.';
+    var cm = $('copyMsg');
+    cm.textContent = v.copyMessage ? (v.copyState === 'copied' ? '✓ ' : '') + v.copyMessage : total && !n ? 'Tick at least one source to copy.' : 'Nothing is sent. You paste it.';
+    cm.className = 'msg' + (v.copyMessage ? ' on' : '');
+    cm.setAttribute('role', v.copyState === 'stale' || v.copyState === 'error' ? 'alert' : 'status');
+  }
+
+  function row(s) {
+    var open = !!ui.open[s.id], card = el('div', 'src' + (s.selected ? '' : ' off') + (s.group === 'unavailable' ? ' gone' : '') + (s.changed ? ' changed' : ''));
+    var lab = el('label', 'pick'), box = el('input'); box.type = 'checkbox'; box.checked = s.selected;
+    box.setAttribute('data-id', s.id); box.setAttribute('data-key', 'tick:' + s.id); box.tabIndex = s.id === ui.cur ? 0 : -1;
+    box.setAttribute('aria-label', 'Include ' + s.label + ', ' + s.kind + ': ' + s.title + (s.changed ? ' (changed since it was shown)' : ''));
+    box.setAttribute('aria-keyshortcuts', 'ArrowRight ArrowLeft');
+    box.addEventListener('change', function () { ui.cur = s.id; act(pop.setSelected(s.id, box.checked)); });
+    box.addEventListener('focus', function () { ui.cur = s.id; });
+    lab.appendChild(box);
+    var badge = el('span', 'badge', s.label); badge.title = 'Cited as ' + s.label + ' in the copied text'; lab.appendChild(badge);
+    var ti = el('span', 't', s.title); ti.dir = 'auto'; ti.title = s.title; lab.appendChild(ti);
+    if (s.changed) lab.appendChild(el('span', 'flag', 'Changed'));
+    card.appendChild(lab);
+    var more = el('button', 'more'); more.type = 'button'; more.tabIndex = -1; more.setAttribute('data-key', 'more:' + s.id);
+    more.setAttribute('aria-expanded', open ? 'true' : 'false');
+    more.setAttribute('aria-label', (open ? 'Hide' : 'Show') + ' what will be copied from ' + s.label);
+    more.title = s.where;
+    more.appendChild(el('span', 'meta', s.kind + ', ' + (s.group === 'unavailable' ? 'unavailable' : s.when ? s.dateLabel + ' ' + when(s.when) : 'date unknown')));
+    var ex = el('span', 'ex', excerpt(s)); ex.dir = 'auto'; more.appendChild(ex);
+    var chev = el('span', 'chev', open ? '▾' : '▸'); chev.setAttribute('aria-hidden', 'true'); more.appendChild(chev);
+    more.addEventListener('click', function () { ui.cur = s.id; ui.open[s.id] = !open; redraw(); });
+    card.appendChild(more);
+    if (open) {
+      var all = !!ui.all[s.id] || s.lines.length <= LINES;
+      var text = s.status === 'read' ? (all ? s.lines : s.lines.slice(0, LINES)).join('\n') : excerpt(s);
+      var q = el('div', 'quote', text + '\n' + s.where); q.dir = 'auto'; card.appendChild(q);
+      if (s.status === 'read' && s.lines.length > LINES) {
+        var b = el('button', 'link', all ? 'Show fewer lines' : 'Show all ' + s.lines.length + ' lines'); b.type = 'button'; b.tabIndex = -1; b.setAttribute('data-key', 'lines:' + s.id);
+        b.addEventListener('click', function () { ui.all[s.id] = !ui.all[s.id]; redraw(); });
+        card.appendChild(b);
+      }
+    }
+    return card;
+  }
+
+  /* Manage tags: the list of tags with their counts, or the rename form for the one that was chosen */
+  function renderManage(v) {
+    var M = v.manage, list = $('manageList'), top = list.scrollTop;
+    $('manageBtn').setAttribute('aria-pressed', M ? 'true' : 'false');
+    if (!M) return;
+    var renaming = !!M.from;
+    $('managePick').hidden = renaming; $('renameForm').hidden = !renaming;
+    list.textContent = '';
+    M.tags.forEach(function (t, i) {
+      var b = el('button', 'tagrow'); b.type = 'button'; b.setAttribute('data-key', 'mtag:' + t.name); b.tabIndex = i === 0 ? 0 : -1;
+      var n = el('span', 'n', t.name); n.dir = 'auto'; n.title = t.name; b.appendChild(n); b.appendChild(el('span', 'c', plural(t.count, 'source')));
+      b.setAttribute('aria-label', t.name + ', on ' + plural(t.count, 'source') + '. Rename everywhere.');
+      b.addEventListener('click', function () { $('renameField').value = ''; act(pop.renameChoose(t.name), 'renameField'); });
+      list.appendChild(b);
+    });
+    if (!M.tags.length) list.appendChild(el('p', 'hint', M.total ? 'No tag matches “' + M.query + '”.' : 'No tags yet. Tag an item first.'));
+    list.scrollTop = top;
+    var mm = $('manageMsg');
+    mm.textContent = M.message ? (M.state === 'done' ? '✓ ' : '') + M.message : M.total ? plural(M.total, 'tag') + '. Press one to rename it everywhere, or to merge it into another.' : '';
+    mm.className = 'msg' + (M.message ? ' on' : '');
+    if (!renaming) return;
+    $('renameTitle').textContent = 'Rename ' + M.from + ' everywhere (' + plural(M.fromCount, 'source') + ')';
+    var plan = $('renamePlan'), P = M.plan, btn = $('renameBtn'); plan.textContent = '';
+    if (M.message) { var w = el('p', 'warn', M.message); plan.appendChild(w); }
+    if (P && P.ok) P.lines.forEach(function (line) { plan.appendChild(el('p', '', line)); });
+    else if (P) plan.appendChild(el('p', 'warn', P.message));
+    else if (!M.message) plan.appendChild(el('p', 'msg', 'Type the new name. If it is a tag you already use, the two are merged.'));
+    plan.setAttribute('role', M.state === 'stale' || M.state === 'error' ? 'alert' : 'status');
+    btn.disabled = !(P && P.ok); btn.textContent = P && P.ok && P.action === 'merge' ? 'Merge' : 'Rename';
+    btn.title = P && P.ok ? (P.action === 'merge' ? 'Join ' + P.from + ' into ' + P.to : 'Rename ' + P.from + ' to ' + P.to) + ' in Context\'s index' : '';
+  }
+
+  function render(v, fields) {
+    var key = focusKey(), top = $('sources').scrollTop;
+    if (fields) $('tagField').value = v.tagText;
+    renderItem(v); renderFind(v); renderManage(v);
+    document.body.setAttribute('data-mode', v.manage ? 'manage' : ui.mode);
+    $('sources').scrollTop = top;
+    if (key && document.activeElement !== byKey(key)) focusOn(key);
+    document.body.setAttribute('data-ready', String(++tick));
+  }
+  function redraw() { render(pop.view(), false); }
+  /* run one action; while it runs, other actions wait their turn by being ignored */
+  function act(promise, focusAfter) {
+    ui.busy = true;
+    return promise.then(function (v) { ui.busy = false; render(v, true); if (focusAfter) focusOn(focusAfter); return v; }, function () { ui.busy = false; redraw(); });
+  }
+  function look(text) {
+    if (ui.busy) return;
+    ui.mode = 'find'; ui.open = {}; ui.all = {}; ui.cur = '';
+    ui.reading = { i: 0, n: 0, name: tagNames(WorkIndexPopover.lookupQuery(text).tags.map(function (t) { return t.name; }).join(' ')).join(' and ') || 'that tag' };
+    ui.busy = true; redraw();
+    pop.lookup(text, function (i, n) { ui.reading.i = i; ui.reading.n = n; redraw(); }).then(function (v) {
+      ui.busy = false; ui.reading = null; if (!v.lookup || v.lookup.error) ui.mode = byMode(v); render(v, false);
+    }, function () { ui.busy = false; ui.reading = null; redraw(); });
+  }
+  function byMode(v) { return v.lookup && !v.lookup.error && v.lookup.sources.length ? 'find' : 'tag'; }
+  function copy() {
+    if (ui.busy || $('copyBtn').disabled) return;
+    ui.copying = true; ui.busy = true; redraw();
+    pop.copy().then(function (v) {
+      ui.busy = false; ui.copying = false;
+      var first = v.lookup ? v.lookup.sources.filter(function (s) { return s.changed; })[0] : null;
+      if (first) { ui.cur = first.id; ui.open[first.id] = true; }
+      render(v, false);
+      if (first) { var r = byKey('tick:' + first.id); if (r) { r.focus(); r.closest('.src').scrollIntoView({ block: 'nearest' }); } } else focusOn('copyBtn');
+    }, function () { ui.busy = false; ui.copying = false; redraw(); });
+  }
+  function retry() { if (!ui.busy) opened(ui.info); }
+  function opened(info) {
+    var keep = info || {};
+    ui = fresh(); ui.info = keep; ui.opening = keep.name || Core.SELECTION_APPS[keep.bundleId] || 'the app you were in';
+    $('lookupField').value = ''; $('tagField').value = ''; ui.busy = true; redraw();
+    return pop.opened(keep).then(function (v) {
+      ui.busy = false; ui.opening = '';
+      render(v, true);
+      if (!(v.target.state === 'object' && focusOn('tagField')) && !focusOn('settingsBtn') && !focusOn('retryBtn')) focusOn('lookupField');
+      return 'ok';
+    });
+  }
+
+  /* typing and pointing */
+  /* Return, and an input method that is still composing (Korean, Japanese, Chinese): the Return that ends a syllable
+     may reach the form before or after the syllable is final, depending on the browser engine. Whichever comes
+     first, the form's action runs once, after the composition has ended, with the whole text. */
+  var forgetReturn = [];                  /* a Return that was waiting for a composition is forgotten when the popover opens or closes */
+  function whenComposed(field, form, action) {
+    var composing = false, waiting = false;
+    field.addEventListener('compositionstart', function () { composing = true; });
+    field.addEventListener('compositionend', function () { composing = false; if (waiting) { waiting = false; setTimeout(action, 0); } });
+    form.addEventListener('submit', function (e) { e.preventDefault(); if (composing) { waiting = true; return; } action(e); });
+    forgetReturn.push(function () { composing = false; waiting = false; });
+  }
+  whenComposed($('tagField'), $('tagForm'), function () { if (!ui.busy && $('tagField').value.trim()) act(pop.addTag($('tagField').value), 'tagField'); });
+  $('tagField').addEventListener('input', function () { $('addBtn').disabled = !$('tagField').value.trim(); });
+  whenComposed($('lookupField'), $('lookupForm'), function () { look($('lookupField').value); });
+  $('copyBtn').addEventListener('click', copy);
+  $('allBtn').addEventListener('click', function () { if (!ui.busy) act(pop.setAllSelected(true)); });
+  $('noneBtn').addEventListener('click', function () { if (!ui.busy) act(pop.setAllSelected(false)); });
+  $('itemLine').addEventListener('click', function () { ui.mode = 'tag'; redraw(); if (!focusOn('tagField') && !focusOn('settingsBtn')) focusOn('retryBtn'); });
+  $('manageBtn').addEventListener('click', function () {
+    if (ui.busy) return;
+    if (pop.view().manage) { act(pop.manageClose()); return; }
+    $('manageSearch').value = ''; $('renameField').value = ''; act(pop.manageOpen(), 'manageSearch');
+  });
+  $('manageDone').addEventListener('click', function () { if (!ui.busy) act(pop.manageClose(), 'manageBtn'); });
+  $('manageSearch').addEventListener('input', function () { pop.manageSearch($('manageSearch').value).then(function (v) { render(v, false); }); });
+  var planTurn = 0;
+  $('renameField').addEventListener('input', function () { var mine = ++planTurn; pop.renamePreview($('renameField').value).then(function (v) { if (mine === planTurn) render(v, false); }); });
+  $('renameCancel').addEventListener('click', function () { planTurn++; $('renameField').value = ''; act(pop.renameCancel(), 'manageSearch'); });
+  /* Return in the name field only moves to the button, so that the numbers are in view when Rename or Merge is pressed */
+  whenComposed($('renameField'), $('renameForm'), function () {
+    var m = pop.view().manage;
+    if (ui.busy || !m) return;
+    if (document.activeElement && document.activeElement.id === 'renameField') {
+      /* Return in the field: the numbers for exactly what the field holds now, then on to the button. Nothing is renamed here. */
+      var mine = ++planTurn;
+      pop.renamePreview($('renameField').value).then(function (v) { if (mine !== planTurn) return; render(v, false); if (v.manage && v.manage.plan && v.manage.plan.ok) $('renameBtn').focus(); });
+      return;
+    }
+    if (!m.plan || !m.plan.ok) return;
+    planTurn++;
+    act(pop.renameCommit(m.plan.action)).then(function (v) { if (v && v.manage && !v.manage.from) { $('renameField').value = ''; $('manageSearch').value = ''; focusOn('manageSearch'); } else focusOn('renameBtn') || focusOn('renameField'); });
+  });
+  $('prefsBtn').addEventListener('click', function () { call('preferences'); });
+  $('accessBtn').addEventListener('click', function () { call('access', pop.view().target.reason === 'denied' ? pop.view().target.appId : ''); });
+  $('quitBtn').addEventListener('click', function () { call('quit'); });
+
+  /* keys. Nothing here is heard unless the popover is open and has the keyboard. */
+  function composing(e) { return e.isComposing || e.keyCode === 229; }
+  function siblings(node, sel) { return Array.prototype.slice.call(node.parentNode.querySelectorAll(sel)); }
+  function step(list, from, by) { var i = list.indexOf(from) + by; if (i < 0 || i >= list.length) return false; list[i].focus(); if (list[i].scrollIntoView) list[i].scrollIntoView({ block: 'nearest' }); return true; }
+  document.addEventListener('keydown', function (e) {
+    var a = document.activeElement, key = e.key;
+    if (key === 'Escape' && !composing(e)) { e.preventDefault(); call('close'); return; }
+    if (key === 'Enter' && (e.metaKey || e.ctrlKey)) { e.preventDefault(); copy(); return; }
+    if (!a || composing(e) || e.metaKey || e.ctrlKey || e.altKey) return;
+    if (a.id === 'tagField') {
+      var rms = document.querySelectorAll('#tagTokens .rm');
+      if (key === 'Backspace' && !a.value && rms.length) { e.preventDefault(); rms[rms.length - 1].focus(); }
+      else if (key === 'ArrowDown' && $('tagChips').querySelector('.chip')) { e.preventDefault(); $('tagChips').querySelector('.chip').focus(); }
+    } else if (a.classList.contains('rm')) {
+      if (key === 'Backspace' || key === 'Delete') { e.preventDefault(); a.click(); }
+      else if (key === 'ArrowLeft' || key === 'ArrowRight') { e.preventDefault(); if (!step(siblings(a.parentNode, '.rm'), a, key === 'ArrowLeft' ? -1 : 1) && key === 'ArrowRight') focusOn('tagField'); }
+    } else if (a.classList.contains('chip')) {
+      var group = siblings(a, '.chip');
+      if (key === 'ArrowLeft' || key === 'ArrowRight') { e.preventDefault(); step(group, a, key === 'ArrowLeft' ? -1 : 1); }
+      else if (key === 'ArrowUp') { e.preventDefault(); focusOn(a.parentNode.id === 'tagChips' ? 'tagField' : 'lookupField'); }
+      else if (key === 'ArrowDown' && a.parentNode.id === 'lookupChips') { e.preventDefault(); focusOn('tick:' + ui.cur); }
+    } else if (a.id === 'lookupField') {
+      if (key === 'ArrowDown') { e.preventDefault(); if (!focusOn('tick:' + ui.cur)) { var c = $('lookupChips').querySelector('.chip'); if (c) c.focus(); } }
+    } else if (a.type === 'checkbox') {
+      var ticks = Array.prototype.slice.call(document.querySelectorAll('#sources input[type=checkbox]')), id = a.getAttribute('data-id');
+      if (key === 'ArrowDown') { e.preventDefault(); if (!step(ticks, a, 1)) focusOn('copyBtn'); }
+      else if (key === 'ArrowUp') { e.preventDefault(); if (!step(ticks, a, -1)) focusOn('lookupField'); }
+      else if (key === 'Home') { e.preventDefault(); ticks[0].focus(); ticks[0].scrollIntoView({ block: 'nearest' }); }
+      else if (key === 'End') { e.preventDefault(); ticks[ticks.length - 1].focus(); ticks[ticks.length - 1].scrollIntoView({ block: 'nearest' }); }
+      else if ((key === 'ArrowRight' && !ui.open[id]) || (key === 'ArrowLeft' && ui.open[id])) { e.preventDefault(); ui.cur = id; ui.open[id] = !ui.open[id]; redraw(); var r = byKey('tick:' + id); if (r) r.closest('.src').scrollIntoView({ block: 'nearest' }); }
+      else if (key === 'Enter') { e.preventDefault(); a.click(); }
+    } else if (a.id === 'copyBtn' && key === 'ArrowUp') { e.preventDefault(); focusOn('tick:' + ui.cur); }
+    else if (a.id === 'manageSearch' && key === 'ArrowDown') { var first = $('manageList').querySelector('.tagrow'); if (first) { e.preventDefault(); first.focus(); } }
+    else if (a.classList.contains('tagrow')) {
+      var rowsM = siblings(a, '.tagrow');
+      if (key === 'ArrowDown') { e.preventDefault(); step(rowsM, a, 1); }
+      else if (key === 'ArrowUp') { e.preventDefault(); if (!step(rowsM, a, -1)) focusOn('manageSearch'); }
+    }
+  });
+
+  /* called by the Mac app each time the icon is clicked, with the app that was in front; and when the popover closes */
+  window.workIndexOpened = function (info) { forgetReturn.forEach(function (f) { f(); }); return opened(info); };
+  window.workIndexClosed = function () { forgetReturn.forEach(function (f) { f(); }); ui = fresh(); $('lookupField').value = ''; $('tagField').value = ''; $('manageSearch').value = ''; $('renameField').value = ''; return pop.closed().then(function (v) { render(v, true); return v; }); };
+  window.workIndexPreview = function () { return pop.preview(); };
+  render(pop.view(), true);
+  if (!native && !pretend) $('noneMsg').textContent = 'This is the Context popover. It works inside the Mac app.';
+})();
+</script>
+</body>
+</html>

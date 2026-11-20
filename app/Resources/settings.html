@@ -1,0 +1,272 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta http-equiv="Content-Security-Policy" content="default-src 'none'; style-src 'unsafe-inline'; script-src 'unsafe-inline'">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Settings</title>
+<style>
+/* The Settings window's content, 360 × 338: the size of the App access window. Same type and greys. */
+:root{color-scheme:light;--paper:#fafafa;--sheet:#fff;--ink:#313438;--soft:#61666b;--rule:#e2e4e6;--rule-strong:#c9cdd0;--field:#878d93;--accent:#33566a;--tint:#eef3f5;
+  --sans:-apple-system,BlinkMacSystemFont,"Helvetica Neue","Apple SD Gothic Neo","Segoe UI","Noto Sans","Noto Sans CJK KR","DejaVu Sans",sans-serif}
+*{box-sizing:border-box}
+html,body{margin:0;height:100%}
+body{background:var(--paper);color:var(--ink);font:400 13px/1.4 var(--sans);overflow:hidden;display:flex;flex-direction:column;padding:11px 12px 12px;cursor:default;-webkit-user-select:none;user-select:none}
+h1,h2,p,ol,li{margin:0;padding:0;font:inherit}
+button{font:inherit;color:inherit;margin:0}
+body>*{flex:none}
+[hidden]{display:none!important}
+:focus{outline:none}
+:focus-visible{outline:2px solid var(--accent);outline-offset:1px;border-radius:4px}
+.head{display:flex;align-items:center;justify-content:space-between;min-height:24px}
+h1{font-size:15px;line-height:20px}
+h2{font-size:12px;line-height:16px;color:var(--soft);margin-top:9px;padding-top:8px;border-top:1px solid var(--rule)}
+.head+h2{margin-top:4px}
+.soft{font-size:12px;line-height:16px;color:var(--soft)}
+.line{display:flex;align-items:center;gap:6px;margin-top:5px;min-height:26px}
+.line .what{flex:1;min-width:0}
+.chord{font-size:13px;min-width:44px;text-align:center;border:1px solid var(--rule-strong);border-radius:5px;background:var(--sheet);padding:2px 8px;line-height:18px}
+.chord.none{border-style:dashed;color:var(--soft)}
+.btn{height:24px;padding:0 9px;border-radius:5px;border:1px solid var(--field);background:var(--sheet);cursor:pointer;white-space:nowrap;font-size:12px}
+.btn:disabled{border-color:var(--rule-strong);color:var(--soft);cursor:default}
+.btn.rec{border-color:var(--accent);background:var(--tint);color:var(--accent)}
+.msg{font-size:12px;line-height:16px;min-height:16px;margin-top:3px;color:var(--soft)}
+.msg.on{color:var(--ink)}
+ol{list-style:none;margin-top:4px;counter-reset:s}
+ol li{font-size:12px;line-height:16px;color:var(--soft);padding-left:16px;position:relative}
+ol li::before{counter-increment:s;content:counter(s) ".";position:absolute;left:0}
+code{font:inherit;color:var(--ink);-webkit-user-select:text;user-select:text}
+@media (prefers-contrast:more){:root{--soft:#43474b;--rule:#b9bdc1;--rule-strong:#878d93;--field:#5c6166}}
+</style>
+</head>
+<body>
+<div class="head"><h1 id="title">Settings</h1><button type="button" class="btn" id="doneBtn">Done</button></div>
+<h2 id="hShort">Shortcuts</h2>
+<div class="line" role="group" aria-labelledby="hShort">
+  <span class="what" id="shortName">Tag current item</span>
+  <span class="chord none" id="chord" aria-live="off">Not set</span>
+  <button type="button" class="btn" id="setBtn" aria-describedby="shortHelp">Set…</button>
+  <button type="button" class="btn" id="suggestBtn"></button>
+  <button type="button" class="btn" id="clearBtn" hidden>Clear</button>
+</div>
+<p class="soft" id="shortHelp">Opens the tag editor for the item selected in Notes, Mail, Finder or a document app, while that app is in front.</p>
+<p class="msg" id="shortMsg" role="status"></p>
+<h2 id="hInsert">Insert context</h2>
+<p class="soft" id="insertHelp">Puts tagged sources into the ChatGPT message box, from a Chromium browser, through an extension you load yourself. Off until you set it up.</p>
+<div class="line" id="insertLine" role="group" aria-labelledby="hInsert">
+  <span class="what" id="insertState">Off</span>
+  <button type="button" class="btn" id="chromeBtn">Set up for Google Chrome</button>
+  <button type="button" class="btn" id="otherBtn">Other…</button>
+  <button type="button" class="btn" id="folderBtn" hidden>Show extension</button>
+  <button type="button" class="btn" id="offBtn" hidden>Turn off</button>
+</div>
+<ol id="steps" hidden>
+  <li><code>chrome://extensions</code>: Developer mode on, Load unpacked, then the folder that Show extension opens.</li>
+  <li><code>chrome://extensions/shortcuts</code>: give “Insert context at the caret” a key.</li>
+  <li>In ChatGPT, click the message box and press that key.</li>
+</ol>
+<p class="msg" id="insertMsg" role="status"></p>
+<script>
+/* Context — Settings: the rules of the Settings window.
+ *
+ * Two things can be set, and they have nothing to do with each other:
+ *
+ *   Shortcuts › Tag current item   A key chord of the person's choosing. Nothing is set until they set it. The Mac
+ *                                  app registers it with macOS as a hot key (macOS then tells the app when it is
+ *                                  pressed; the app listens to no other key) and only while an app Context follows is
+ *                                  in front. A chord that is refused here, or that macOS does not accept, changes
+ *                                  nothing: the chord that was set before stays set.
+ *   Insert context                 Whether the browser extension may ask this app for tags and sources, and for
+ *                                  which browser the local helper is registered. Off until switched on.
+ *
+ * host (promises of plain objects; in the app these are answered by Settings.swift):
+ *   state()            → { ok, tagShortcut: chord | null, insert: { on, browsers: [name] }, extensionFolder }
+ *   setShortcut(chord) → { ok } | { ok:false, code, reason }      macOS registers the new chord before the old one is given up
+ *   clearShortcut()    → { ok }
+ *   insertEnable(which) / insertDisable() → { ok, insert } | { ok:false, reason }        reveal() → shows the extension folder
+ *
+ * A chord is { keyCode, modifiers: [...], key }: keyCode is the Mac's number for the key's position, key its label.
+ */
+var ContextSettings = (function () {
+  'use strict';
+  /* KeyboardEvent.code → the Mac's virtual key code (positions on an ANSI keyboard) */
+  var CODES = { KeyA: 0, KeyS: 1, KeyD: 2, KeyF: 3, KeyH: 4, KeyG: 5, KeyZ: 6, KeyX: 7, KeyC: 8, KeyV: 9, KeyB: 11, KeyQ: 12, KeyW: 13, KeyE: 14, KeyR: 15, KeyY: 16, KeyT: 17,
+    Digit1: 18, Digit2: 19, Digit3: 20, Digit4: 21, Digit6: 22, Digit5: 23, Equal: 24, Digit9: 25, Digit7: 26, Minus: 27, Digit8: 28, Digit0: 29, BracketRight: 30, KeyO: 31, KeyU: 32,
+    BracketLeft: 33, KeyI: 34, KeyP: 35, KeyL: 37, KeyJ: 38, Quote: 39, KeyK: 40, Semicolon: 41, Backslash: 42, Comma: 43, Slash: 44, KeyN: 45, KeyM: 46, Period: 47, Space: 49, Backquote: 50,
+    F1: 122, F2: 120, F3: 99, F4: 118, F5: 96, F6: 97, F7: 98, F8: 100, F9: 101, F10: 109, F11: 103, F12: 111 };
+  var LABEL = { Equal: '=', Minus: '-', BracketRight: ']', BracketLeft: '[', Quote: '\'', Semicolon: ';', Backslash: '\\', Comma: ',', Slash: '/', Period: '.', Space: 'Space', Backquote: '`' };
+  var ORDER = ['control', 'option', 'shift', 'command'], SIGN = { control: '⌃', option: '⌥', shift: '⇧', command: '⌘' }, WORD = { control: 'Control', option: 'Option', shift: 'Shift', command: 'Command' };
+  var SUGGESTED = { keyCode: 17, modifiers: ['control', 'option'], key: 'T' };
+  var MODIFIER_KEYS = /^(Control|Alt|Shift|Meta|OS)(Left|Right)$|^(CapsLock|Fn|FnLock)$/;
+
+  function clean(chord) {
+    if (!chord || typeof chord.keyCode !== 'number' || chord.keyCode < 0 || chord.keyCode > 127 || Math.floor(chord.keyCode) !== chord.keyCode) return null;
+    var mods = ORDER.filter(function (m) { return Array.isArray(chord.modifiers) && chord.modifiers.indexOf(m) >= 0; });
+    return { keyCode: chord.keyCode, modifiers: mods, key: String(chord.key == null ? '' : chord.key).slice(0, 8) || '?' };
+  }
+  function show(chord) { var c = clean(chord); return c ? c.modifiers.map(function (m) { return SIGN[m]; }).join('') + c.key : ''; }
+  function words(chord) { var c = clean(chord); return c ? c.modifiers.map(function (m) { return WORD[m]; }).concat([c.key]).join('-') : ''; }
+  function same(a, b) { a = clean(a); b = clean(b); return !!a && !!b && a.keyCode === b.keyCode && a.modifiers.join() === b.modifiers.join(); }
+  /* a key press in the Settings window while a shortcut is being set */
+  function fromKeyEvent(e) {
+    if (!e || MODIFIER_KEYS.test(String(e.code))) return { ok: false, waiting: true };
+    var code = CODES[e.code];
+    if (code == null) return { ok: false, message: 'That key cannot be part of a shortcut. Use a letter, a digit or F1 to F12 with Control or Option.' };
+    var mods = []; if (e.ctrlKey) mods.push('control'); if (e.altKey) mods.push('option'); if (e.shiftKey) mods.push('shift'); if (e.metaKey) mods.push('command');
+    var label = /^Key[A-Z]$/.test(e.code) ? e.code.slice(3) : /^Digit\d$/.test(e.code) ? e.code.slice(5) : /^F\d+$/.test(e.code) ? e.code : LABEL[e.code];
+    return { ok: true, chord: clean({ keyCode: code, modifiers: mods, key: label }) };
+  }
+  /* may this chord be the shortcut? `current` is what is set now; `others` are Context's other shortcuts: [{ name, chord }] */
+  function check(chord, current, others) {
+    var c = clean(chord);
+    if (!c) return { ok: false, code: 'bad', message: 'That is not a key chord.' };
+    if (c.modifiers.indexOf('control') < 0 && c.modifiers.indexOf('option') < 0) return { ok: false, code: 'needs-modifier', message: 'Use Control or Option in the shortcut, so that it does not take over a key you type or a menu command.' };
+    if (current && same(c, current)) return { ok: false, code: 'same', message: show(c) + ' is already the shortcut.' };
+    var clash = (others || []).filter(function (o) { return same(o.chord, c); })[0];
+    if (clash) return { ok: false, code: 'duplicate', message: show(c) + ' is already Context\'s shortcut for ' + clash.name + '.' };
+    return { ok: true, chord: c };
+  }
+  /* what is kept in the settings file: known fields only */
+  function sanitize(raw) {
+    var out = { version: 1, tagShortcut: null, insert: { on: false, browsers: [] } };
+    if (!raw || typeof raw !== 'object') return out;
+    var c = clean(raw.tagShortcut); if (c && check(c, null, []).ok) out.tagShortcut = c;
+    if (raw.insert && typeof raw.insert === 'object') {
+      out.insert.browsers = (Array.isArray(raw.insert.browsers) ? raw.insert.browsers : []).filter(function (b) { return b && typeof b.name === 'string' && typeof b.bundleId === 'string' && typeof b.manifest === 'string'; })
+        .map(function (b) { return { name: b.name.slice(0, 80), bundleId: b.bundleId.slice(0, 200), manifest: b.manifest.slice(0, 1024) }; });
+      out.insert.on = raw.insert.on === true && out.insert.browsers.length > 0;
+    }
+    return out;
+  }
+
+  function create(host, onChange, opts) {
+    opts = opts || {};
+    var st = { loaded: false, tagShortcut: null, recording: false, message: '', kind: '', insert: { on: false, browsers: [] }, insertMessage: '', insertKind: '', extensionFolder: '', busy: false };
+    function changed() { if (onChange) onChange(view()); return view(); }
+    function ask(name, arg) { var p; try { p = Promise.resolve(host[name](arg)); } catch (e) { p = Promise.reject(e); } return p.then(function (r) { return r || { ok: false }; }, function () { return { ok: false }; }); }
+    function take(s) { st.tagShortcut = clean(s.tagShortcut); st.insert = { on: !!(s.insert && s.insert.on), browsers: ((s.insert && s.insert.browsers) || []).slice() }; if (s.extensionFolder) st.extensionFolder = String(s.extensionFolder); }
+    function load() { return ask('state').then(function (s) { if (s.ok) take(s); st.loaded = true; return changed(); }); }
+    function record() { st.recording = true; st.message = ''; st.kind = ''; return changed(); }
+    function cancel() { st.recording = false; st.message = ''; st.kind = ''; return changed(); }
+    /* a chord was chosen (pressed in the window, or the suggested one). Nothing changes unless macOS takes it. */
+    function assign(chord) {
+      var was = st.tagShortcut, c = check(chord, was, opts.others || []);
+      st.recording = false;
+      if (!c.ok) { st.message = c.message + (was && c.code !== 'same' ? ' The shortcut is still ' + show(was) + '.' : ''); st.kind = c.code === 'same' ? '' : 'error'; return Promise.resolve(changed()); }
+      st.busy = true;
+      return ask('setShortcut', c.chord).then(function (r) {
+        st.busy = false;
+        if (r.ok) { st.tagShortcut = c.chord; st.message = 'Tag current item is now ' + show(c.chord) + '.'; st.kind = 'done'; }
+        else {
+          st.message = (r.reason === 'not-saved' ? show(c.chord) + ' could not be saved.' : 'macOS did not accept ' + show(c.chord) + (r.code === -9878 ? ': it is already in use' : '') + (r.code != null ? ' (' + r.code + ').' : '.')) +
+            (was ? ' The shortcut is still ' + show(was) + '.' : ' No shortcut is set.');
+          st.kind = 'error';
+        }
+        return changed();
+      });
+    }
+    function key(e) {
+      if (!st.recording || st.busy) return Promise.resolve(view());
+      if (e && e.code === 'Escape' && !e.ctrlKey && !e.altKey && !e.metaKey && !e.shiftKey) return Promise.resolve(cancel());
+      var k = fromKeyEvent(e);
+      if (k.waiting) return Promise.resolve(view());
+      if (!k.ok) { st.recording = false; st.message = k.message + (st.tagShortcut ? ' The shortcut is still ' + show(st.tagShortcut) + '.' : ''); st.kind = 'error'; return Promise.resolve(changed()); }
+      return assign(k.chord);
+    }
+    function useSuggested() { return assign(SUGGESTED); }
+    function clear() {
+      if (!st.tagShortcut || st.busy) return Promise.resolve(view());
+      var was = st.tagShortcut; st.busy = true;
+      return ask('clearShortcut').then(function (r) {
+        st.busy = false; st.recording = false;
+        if (r.ok) { st.tagShortcut = null; st.message = 'No shortcut is set. ' + show(was) + ' is free again.'; st.kind = 'done'; }
+        else { st.message = 'The shortcut could not be cleared. It is still ' + show(was) + '.'; st.kind = 'error'; }
+        return changed();
+      });
+    }
+    function insertEnable(which) {
+      st.busy = true;
+      return ask('insertEnable', which).then(function (r) {
+        st.busy = false;
+        if (r.ok) { st.insert = { on: !!r.insert.on, browsers: (r.insert.browsers || []).slice() }; st.insertMessage = 'Registered. Now the three steps, in that browser.'; st.insertKind = 'done'; }
+        else if (r.reason !== 'cancelled') { st.insertMessage = { 'no-folder': 'That browser\'s folder for local helpers was not found. Is the browser installed, and has it been started once?', 'not-saved': 'The helper could not be registered. Nothing was changed.', 'not-a-browser': 'That is not an application.', 'no-socket': 'Context could not open its local connection. Nothing was changed.' }[r.reason] || 'That did not work. Nothing was changed.'; st.insertKind = 'error'; }
+        return changed();
+      });
+    }
+    function insertDisable() {
+      st.busy = true;
+      return ask('insertDisable').then(function (r) {
+        st.busy = false;
+        if (r.ok) { st.insert = { on: false, browsers: [] }; st.insertMessage = 'Insert context is off. The browser extension can no longer reach Context.'; st.insertKind = 'done'; }
+        else { st.insertMessage = 'It could not be switched off completely. Try again.'; st.insertKind = 'error'; }
+        return changed();
+      });
+    }
+    function view() {
+      return { loaded: st.loaded, busy: st.busy, shortcut: st.tagShortcut ? { text: show(st.tagShortcut), words: words(st.tagShortcut) } : null, recording: st.recording, suggested: show(SUGGESTED), suggestedWords: words(SUGGESTED),
+        message: st.message, kind: st.message ? st.kind : '', insert: { on: st.insert.on, browsers: st.insert.browsers.slice() }, insertMessage: st.insertMessage, insertKind: st.insertMessage ? st.insertKind : '', extensionFolder: st.extensionFolder };
+    }
+    return { load: load, record: record, cancel: cancel, key: key, useSuggested: useSuggested, clear: clear, insertEnable: insertEnable, insertDisable: insertDisable, view: view };
+  }
+  return { create: create, show: show, words: words, same: same, clean: clean, check: check, fromKeyEvent: fromKeyEvent, sanitize: sanitize, SUGGESTED: SUGGESTED, CODES: CODES };
+})();
+if (typeof module !== 'undefined' && module.exports) module.exports = ContextSettings;
+
+</script>
+<script>
+(function () {
+  'use strict';
+  function $(id) { return document.getElementById(id); }
+  var native = window.webkit && window.webkit.messageHandlers && window.webkit.messageHandlers.settings;
+  var pretend = typeof window.__contextSettingsTestCall === 'function' ? window.__contextSettingsTestCall : null;
+  function call(op, arg) {
+    if (native) return native.postMessage({ op: op, arg: arg == null ? '' : arg });
+    if (pretend) return pretend(op, arg == null ? '' : arg);
+    return Promise.resolve({ ok: false });
+  }
+  var host = { state: function () { return call('state'); }, setShortcut: function (c) { return call('setShortcut', c); }, clearShortcut: function () { return call('clearShortcut'); },
+    insertEnable: function (w) { return call('insertEnable', w); }, insertDisable: function () { return call('insertDisable'); } };
+  var tick = 0, settings = ContextSettings.create(host, render);
+
+  function render(v) {
+    var keep = document.activeElement ? document.activeElement.id : '';
+    var c = $('chord'), set = $('setBtn');
+    c.textContent = v.shortcut ? v.shortcut.text : 'Not set'; c.className = 'chord' + (v.shortcut ? '' : ' none');
+    c.setAttribute('aria-label', v.shortcut ? 'Shortcut: ' + v.shortcut.words : 'No shortcut set');
+    set.textContent = v.recording ? 'Press the keys… Esc cancels' : v.shortcut ? 'Change…' : 'Set…'; set.className = 'btn' + (v.recording ? ' rec' : ''); set.disabled = v.busy;
+    set.setAttribute('aria-pressed', v.recording ? 'true' : 'false');
+    $('suggestBtn').hidden = !!v.shortcut || v.recording; $('suggestBtn').textContent = 'Use ' + v.suggested; $('suggestBtn').setAttribute('aria-label', 'Use the suggested shortcut, ' + v.suggestedWords); $('suggestBtn').disabled = v.busy;
+    $('clearBtn').hidden = !v.shortcut || v.recording; $('clearBtn').disabled = v.busy;
+    $('chord').hidden = v.recording;
+    $('shortMsg').textContent = v.message ? (v.kind === 'done' ? '✓ ' : '') + v.message : ''; $('shortMsg').className = 'msg' + (v.message ? ' on' : ''); $('shortMsg').setAttribute('role', v.kind === 'error' ? 'alert' : 'status');
+    var on = v.insert.on;
+    $('insertState').textContent = on ? 'On for ' + v.insert.browsers.join(' and ') : 'Off';
+    $('chromeBtn').hidden = $('otherBtn').hidden = on; $('folderBtn').hidden = $('offBtn').hidden = !on; $('steps').hidden = !on; $('insertHelp').hidden = on;
+    ['chromeBtn', 'otherBtn', 'folderBtn', 'offBtn'].forEach(function (id) { $(id).disabled = v.busy; });
+    $('insertMsg').textContent = v.insertMessage ? (v.insertKind === 'done' ? '✓ ' : '') + v.insertMessage : ''; $('insertMsg').className = 'msg' + (v.insertMessage ? ' on' : ''); $('insertMsg').setAttribute('role', v.insertKind === 'error' ? 'alert' : 'status');
+    if (keep && $(keep) && !$(keep).hidden && !$(keep).disabled) $(keep).focus();
+    document.body.setAttribute('data-ready', String(++tick));
+  }
+  $('setBtn').addEventListener('click', function () { if (settings.view().recording) settings.cancel(); else settings.record(); $('setBtn').focus(); });
+  /* While the button reads "Press the keys…", the next chord pressed IN THIS WINDOW is taken as the shortcut. */
+  $('setBtn').addEventListener('keydown', function (e) {
+    if (!settings.view().recording) return;
+    e.preventDefault(); e.stopPropagation();
+    settings.key({ code: e.code, ctrlKey: e.ctrlKey, altKey: e.altKey, shiftKey: e.shiftKey, metaKey: e.metaKey }).then(function () { $('setBtn').focus(); });
+  });
+  $('setBtn').addEventListener('blur', function () { if (settings.view().recording) settings.cancel(); });
+  $('suggestBtn').addEventListener('click', function () { settings.useSuggested().then(function () { $('setBtn').focus(); }); });
+  $('clearBtn').addEventListener('click', function () { settings.clear().then(function () { $('setBtn').focus(); }); });
+  $('chromeBtn').addEventListener('click', function () { settings.insertEnable('chrome'); });
+  $('otherBtn').addEventListener('click', function () { settings.insertEnable('other'); });
+  $('offBtn').addEventListener('click', function () { settings.insertDisable(); });
+  $('folderBtn').addEventListener('click', function () { call('reveal'); });
+  $('doneBtn').addEventListener('click', function () { call('close'); });
+  document.addEventListener('keydown', function (e) { if (e.key === 'Escape' && !settings.view().recording) { e.preventDefault(); call('close'); } });
+  /* called by the Mac app when the window is shown */
+  window.contextSettingsShown = function () { return settings.load().then(function () { $('setBtn').focus(); return 'ok'; }); };
+  render(settings.view());
+})();
+</script>
+</body>
+</html>

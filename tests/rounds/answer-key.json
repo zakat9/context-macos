@@ -1,0 +1,47 @@
+{
+  "about": "Prewritten answer key for the synthetic corpus 'Pine Ridge tooling budget' (fictional). Written by hand from the scenario, before and apart from the product's output. Values are the final saved state on the day of the question (19 Nov 2026).",
+  "tag": "Cost",
+  "questionDay": "2026-11-19",
+  "chronology": [
+    { "key": "kestrel", "kind": "Email", "title": "Competing quote: Pine Ridge housing mold", "date": "Nov 6, 2026 15:40", "dateKind": "sent" },
+    { "key": "quote", "kind": "Email", "title": "Revised tooling quote: Pine Ridge housing", "date": "Nov 10, 2026 09:12", "dateKind": "sent" },
+    { "key": "request", "kind": "Email", "title": "Request: raise the Pine Ridge tooling cap", "date": "Nov 12, 2026 16:30", "dateKind": "sent" },
+    { "key": "note", "kind": "Note", "title": "Supplier call: Harborline", "date": "Nov 13, 2026 17:05", "dateKind": "last saved" },
+    { "key": "approval", "kind": "Email", "title": "Approved: Pine Ridge tooling cap", "date": "Nov 17, 2026 14:05", "dateKind": "sent" },
+    { "key": "workbook", "kind": "Workbook", "title": "tooling-budget.xlsx", "date": "Nov 18, 2026 16:40", "dateKind": "last saved" }
+  ],
+  "dateUnknown": [ { "key": "fyi", "kind": "Email", "title": "FYI: steel grade" } ],
+  "unavailable": [ { "key": "shortlist", "title": "vendor-shortlist.csv", "reason": "file not found" } ],
+  "values": [
+    { "id": "cap", "question": "What is the current approved tooling budget cap, and where is it recorded?", "source": "workbook", "sheet": "Summary", "cell": "B1", "label": "Budget cap", "display": "$55,000.00", "amount": 55000, "currency": "USD" },
+    { "id": "quote", "question": "What is the selected quote?", "source": "workbook", "sheet": "Summary", "cell": "B2", "label": "Selected quote", "display": "$48,500.00", "amount": 48500, "currency": "USD" },
+    { "id": "headroom", "question": "How much headroom is left under the cap?", "source": "workbook", "sheet": "Summary", "cell": "B3", "label": "Headroom", "display": "$6,500.00", "amount": 6500, "currency": "USD", "formula": "B1-B2" },
+    { "id": "mold-krw", "question": "What is the mold estimate in won?", "source": "workbook", "sheet": "견적", "cell": "B2", "label": "금형", "display": "₩64,990,000", "amount": 64990000, "currency": "KRW" },
+    { "id": "machining-krw", "question": "What is the local machining estimate in won?", "source": "workbook", "sheet": "견적", "cell": "B3", "label": "가공", "display": "₩12,400,000", "amount": 12400000, "currency": "KRW" },
+    { "id": "total-krw", "question": "What is the won total?", "source": "workbook", "sheet": "견적", "cell": "B4", "label": "합계", "display": "77,390,000원", "amount": 77390000, "currency": "KRW", "formula": "B2+B3" },
+    { "id": "freight-usd", "question": "What is the freight line?", "source": "workbook", "sheet": "견적", "cell": "B5", "label": "Freight", "display": "1,350.50 USD", "amount": 1350.5, "currency": "USD" }
+  ],
+  "requestVsApproval": {
+    "question": "Was the cap increase requested or approved, by whom and when?",
+    "request": { "source": "request", "by": "Mina Seo", "date": "Nov 12, 2026 16:30", "mustContain": "Requesting approval to raise the Pine Ridge tooling cap from USD 50,000 to USD 55,000" },
+    "approval": { "source": "approval", "by": "Jonas Reyes", "date": "Nov 17, 2026 14:05", "mustContain": "Approved. The Pine Ridge tooling cap is USD 55,000 as of today" }
+  },
+  "conflict": {
+    "what": "The call note (13 Nov) still says the cap is USD 50,000; the approval mail (17 Nov) and the workbook (18 Nov) say USD 55,000. Both statements must be present, each under its own source and date. The tool must not merge or resolve them.",
+    "earlier": { "source": "note", "mustContain": "Cap is USD 50,000 for now" },
+    "later": { "source": "approval", "mustContain": "USD 55,000 as of today" }
+  },
+  "requiredEvidence": [
+    { "source": "kestrel", "mustContain": "USD 51,200" },
+    { "source": "quote", "mustContain": "2-cavity mold, P20 steel: USD 48,500" },
+    { "source": "request", "mustContain": "Requesting approval to raise" },
+    { "source": "note", "mustContain": "Harborline will hold the price until Nov 30" },
+    { "source": "note", "mustContain": "국내 가공 견적은 ₩12,400,000" },
+    { "source": "approval", "mustContain": "Approved. The Pine Ridge tooling cap is USD 55,000" },
+    { "source": "workbook", "mustContain": "Sheet “Summary”" },
+    { "source": "workbook", "mustContain": "Sheet “견적”" }
+  ],
+  "staleTokens": [ "51234", "51,234", "68512000", "68,512,000", "48234", "48,234", "1766", "1,766", "66321000", "66,321,000", "STALE-NOTE-V1", "Nov 25" ],
+  "irrelevantTokens": [ "IRRELEVANT-CANARY-UNTAGGED-NOTE", "IRRELEVANT-CANARY-TRAVEL", "IRRELEVANT-CANARY-OLD-COPY", "tooling-budget (old copy)" ],
+  "unselected": { "source": "kestrel", "tokens": [ "UNSELECTED-CANARY-KESTREL", "USD 51,200", "Kestrel Moldworks", "Competing quote" ] }
+}

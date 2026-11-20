@@ -1,0 +1,130 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta http-equiv="Content-Security-Policy" content="default-src 'none'; style-src 'unsafe-inline'; script-src 'unsafe-inline'">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>App access</title>
+<style>
+/* The App access window's content, 360 × 338: the size of the window it replaces. Same type and greys as the popover. */
+:root{color-scheme:light;--paper:#fafafa;--sheet:#fff;--ink:#313438;--soft:#61666b;--rule:#e2e4e6;--rule-strong:#c9cdd0;--field:#878d93;--accent:#33566a;--tint:#eef3f5;
+  --sans:-apple-system,BlinkMacSystemFont,"Helvetica Neue","Apple SD Gothic Neo","Segoe UI","Noto Sans","Noto Sans CJK KR","DejaVu Sans",sans-serif}
+*{box-sizing:border-box}
+html,body{margin:0;height:100%}
+body{background:var(--paper);color:var(--ink);font:400 13px/1.4 var(--sans);overflow:hidden;display:flex;flex-direction:column;padding:11px 12px 12px;cursor:default;-webkit-user-select:none;user-select:none}
+h1,p{margin:0;padding:0;font:inherit}
+button,input{font:inherit;color:inherit;margin:0}
+[hidden]{display:none!important}
+:focus{outline:none}
+:focus-visible{outline:2px solid var(--accent);outline-offset:1px;border-radius:4px}
+.top{display:flex;align-items:baseline;justify-content:space-between}
+h1{font-size:15px;line-height:20px}
+.soft{font-size:12px;line-height:16px;color:var(--soft)}
+#why{margin-top:3px}
+form{flex:1;min-height:0;display:flex;flex-direction:column}
+#list{flex:1;min-height:0;overflow-y:auto;margin-top:7px;border-top:1px solid var(--rule);border-bottom:1px solid var(--rule)}
+.app{display:flex;align-items:center;gap:8px;min-height:26px;border-top:1px solid var(--rule)}
+.app:first-child{border-top:0}
+.app label{display:flex;align-items:center;gap:7px;width:118px;flex:none;min-height:25px;cursor:pointer}
+.app label.fixed{cursor:default}
+.app input{width:14px;height:14px;flex:none;accent-color:var(--accent)}
+.app .mark{width:14px;flex:none;text-align:center;font-size:12px;color:var(--soft)}
+.app .name{overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.app .st{flex:1;min-width:0;font-size:12px;color:var(--soft);overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.app.allowed .st,.app.asking .st,.app.denied .st{color:var(--ink)}
+.btn{height:26px;padding:0 10px;border-radius:5px;border:1px solid var(--field);background:var(--sheet);cursor:pointer;white-space:nowrap}
+.btn.small{height:22px;padding:0 8px;font-size:12px;flex:none}
+.btn:disabled{border-color:var(--rule-strong);color:var(--soft);cursor:default}
+.btn.primary{background:var(--accent);border-color:var(--accent);color:#fff}
+.btn.primary:disabled{background:var(--tint);border-color:var(--rule);color:var(--soft)}
+.link{border:0;background:none;padding:0 2px;min-height:22px;color:var(--soft);cursor:pointer;font-size:12px;text-decoration:underline;text-underline-offset:2px}
+.link:disabled{text-decoration:none;cursor:default;opacity:.6}
+#missing{margin-top:5px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+#note{margin-top:5px;min-height:32px;color:var(--ink)}
+.bar{display:flex;justify-content:space-between;gap:8px;margin-top:6px}
+@media (prefers-contrast:more){:root{--soft:#43474b;--rule:#b9bdc1;--rule-strong:#878d93;--field:#5c6166}}
+</style>
+</head>
+<body>
+<div class="top"><h1 id="title">App access</h1><button type="button" class="link" id="allBtn">Select all</button></div>
+<p class="soft" id="why">macOS asks you once per app, in its own prompt. It says “control”; Context only reads which item is selected.</p>
+<form id="form" novalidate>
+  <div id="list" role="group" aria-labelledby="title"></div>
+  <p class="soft" id="missing" hidden></p>
+  <p class="soft" id="note" role="status"></p>
+  <div class="bar">
+    <button type="button" class="btn" id="doneBtn">Done</button>
+    <button type="submit" class="btn primary" id="requestBtn" disabled>Request selected</button>
+  </div>
+</form>
+<script>
+/*__ACCESS__*/
+</script>
+<script>
+(function () {
+  'use strict';
+  function $(id) { return document.getElementById(id); }
+  function el(tag, cls, text) { var e = document.createElement(tag); if (cls) e.className = cls; if (text != null) e.textContent = text; return e; }
+  var native = window.webkit && window.webkit.messageHandlers && window.webkit.messageHandlers.access;
+  var pretend = typeof window.__contextAccessTestCall === 'function' ? window.__contextAccessTestCall : null;
+  function call(op, arg) {
+    if (native) return native.postMessage({ op: op, arg: arg == null ? '' : arg });
+    if (pretend) return pretend(op, arg == null ? '' : arg);
+    return Promise.resolve({ ok: false });
+  }
+  var host = { apps: function () { return call('apps'); }, check: function (id) { return call('check', id); }, request: function (id) { return call('request', id); } };
+  var tick = 0, MARK = { allowed: '✓', denied: '–', checking: '·', asking: '…' };
+  var access = ContextAccess.create(host, render);
+
+  function render(v) {
+    var keep = document.activeElement && document.activeElement.getAttribute ? document.activeElement.getAttribute('data-key') || document.activeElement.id : '';
+    var list = $('list'), top = list.scrollTop; list.textContent = '';
+    v.rows.forEach(function (r) {
+      var row = el('div', 'app ' + r.status), lab = el('label', r.eligible || r.ticked ? '' : 'fixed');
+      if (r.eligible || r.status === 'closed' || r.status === 'not-asked' || r.status === 'no-open' || r.status === 'no-answer' || r.status === 'error') {
+        var box = el('input'); box.type = 'checkbox'; box.checked = r.ticked; box.disabled = !r.eligible; box.setAttribute('data-key', 'tick:' + r.id); box.setAttribute('data-id', r.id);
+        box.setAttribute('aria-label', r.name + ', ' + r.text);
+        box.addEventListener('change', function () { access.toggle(r.id, box.checked); });
+        lab.appendChild(box);
+      } else { var m = el('span', 'mark', MARK[r.status] || ''); m.setAttribute('aria-hidden', 'true'); lab.appendChild(m); }
+      var nm = el('span', 'name', r.name); nm.title = r.name; lab.appendChild(nm); row.appendChild(lab);
+      var stt = el('span', 'st', r.text); stt.title = r.text; row.appendChild(stt);
+      if (r.settings) { var b = el('button', 'btn small', 'Settings…'); b.type = 'button'; b.setAttribute('data-key', 'settings:' + r.id); b.setAttribute('aria-label', 'Open Automation settings to allow ' + r.name); b.addEventListener('click', function () { call('settings'); }); row.appendChild(b); }
+      list.appendChild(row);
+    });
+    if (!v.rows.length) list.appendChild(el('p', 'soft', v.loaded ? 'None of the apps Context follows is installed.' : 'Looking at the apps on this Mac…'));
+    list.scrollTop = top;
+    $('missing').hidden = !v.missing.length; $('missing').textContent = 'Not installed: ' + v.missing.join(', '); $('missing').title = v.missing.join(', ');
+    $('note').textContent = v.note;
+    $('allBtn').disabled = !v.canSelect; $('allBtn').textContent = v.allSelected ? 'Deselect all' : 'Select all';
+    $('requestBtn').disabled = !v.canRequest; $('requestBtn').textContent = v.busy ? 'Asking ' + Math.min(v.progress.done + 1, v.progress.total) + ' of ' + v.progress.total + '…' : v.selectedCount ? 'Request selected (' + v.selectedCount + ')' : 'Request selected';
+    $('doneBtn').textContent = v.busy ? 'Stop' : 'Done'; $('doneBtn').disabled = v.busy && v.stopping;
+    if (keep) { var all = document.querySelectorAll('[data-key],[id]'); for (var i = 0; i < all.length; i++) if ((all[i].getAttribute('data-key') || all[i].id) === keep && !all[i].disabled) { all[i].focus(); break; } }
+    document.body.setAttribute('data-ready', String(++tick));
+  }
+  $('form').addEventListener('submit', function (e) { e.preventDefault(); if (!$('requestBtn').disabled) access.start(); });
+  $('allBtn').addEventListener('click', function () { access.toggleAll(); });
+  $('doneBtn').addEventListener('click', function () { if (access.view().busy) access.stop(); else call('close'); });
+  document.addEventListener('keydown', function (e) {
+    var a = document.activeElement;
+    if (e.key === 'Escape') { e.preventDefault(); if (access.view().busy) access.stop(); else call('close'); return; }
+    if ((e.key === 'ArrowDown' || e.key === 'ArrowUp') && a && a.closest && a.closest('#list')) {
+      var stops = Array.prototype.slice.call(document.querySelectorAll('#list input:not(:disabled), #list button')), i = stops.indexOf(a) + (e.key === 'ArrowDown' ? 1 : -1);
+      e.preventDefault(); if (stops[i]) { stops[i].focus(); stops[i].scrollIntoView({ block: 'nearest' }); } else if (e.key === 'ArrowDown') $('requestBtn').disabled ? $('doneBtn').focus() : $('requestBtn').focus();
+    }
+  });
+  /* called by the Mac app: when the window is shown or comes back to the front, and once at launch */
+  window.contextAccessShown = function (info) {
+    return access.refresh().then(function () {
+      var want = info && info.focus ? document.querySelector('[data-key="settings:' + String(info.focus).replace(/[^A-Za-z0-9.-]/g, '') + '"]') : null;
+      var first = want || document.querySelector('#list input:not(:disabled)') || ($('requestBtn').disabled ? $('doneBtn') : $('requestBtn'));
+      if (first) { first.focus(); if (first.scrollIntoView) first.scrollIntoView({ block: 'nearest' }); }
+      return 'ok';
+    });
+  };
+  window.contextAccessLaunch = function (hasIndex) { return access.shouldShowAtLaunch(!!hasIndex).then(function (show) { if (show) call('show'); return show ? 'show' : 'skip'; }); };
+  render(access.view());
+})();
+</script>
+</body>
+</html>

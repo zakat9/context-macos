@@ -1,0 +1,98 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<title>Fixture chat aaa</title>
+<!-- A FIXTURE. This is not ChatGPT. The tests answer requests for https://chatgpt.com/... inside the test browser
+     with this page, so that the extension's page script (which runs on that address only) is loaded into it.
+     It has one message box with the id the extension looks for, in several kinds chosen by ?composer=..., and
+     everything a real chat page has that must NOT be touched: a transcript, another text field, a search field,
+     a password field, a Send button. It counts what a send or a key press would have caused. Fictional text only. -->
+<style>
+body{font:14px/1.4 sans-serif;margin:16px;max-width:760px}
+#transcript{border:1px solid #ccc;padding:8px;margin:8px 0}
+#prompt-textarea,.box{border:1px solid #888;min-height:60px;padding:6px;white-space:pre-wrap}
+textarea#prompt-textarea{width:100%;height:120px}
+#prompt-textarea p{margin:0}
+</style>
+</head>
+<body>
+<nav><button id="chatA" type="button">Chat aaa</button> <button id="chatB" type="button">Chat bbb</button> <input id="search" placeholder="Search chats"></nav>
+<div id="transcript"><div class="turn" id="turn1">An earlier message (fictional)</div><div class="turn">An earlier answer (fictional)</div></div>
+<textarea id="edit-earlier">Editing an earlier message</textarea>
+<input id="pw" type="password" value="FICTIONAL-PASSWORD">
+<form id="composer-form"><div id="slot"></div><button id="send" type="submit">Send</button></form>
+<script>
+(function () {
+  var q = new URLSearchParams(location.search), kind = q.get('composer') || 'editable', slot = document.getElementById('slot');
+  window.__sent = 0; window.__keys = 0; window.__sendClicks = 0; window.__pasteHandled = 0; window.__kind = kind;
+  function box() { return document.querySelector('#slot #prompt-textarea'); }
+  function editable(extra) { var d = document.createElement('div'); d.id = 'prompt-textarea'; d.contentEditable = 'true'; d.innerHTML = '<p><br></p>'; if (extra) extra(d); return d; }
+  function mount() {
+    slot.innerHTML = '';
+    if (kind === 'textarea') { var t = document.createElement('textarea'); t.id = 'prompt-textarea'; slot.appendChild(t); }
+    else if (kind === 'none') { /* a page without a message box */ }
+    else if (kind === 'two') { slot.appendChild(editable()); slot.appendChild(editable()); }
+    else if (kind === 'input') { var i = document.createElement('input'); i.id = 'prompt-textarea'; slot.appendChild(i); }
+    else if (kind === 'password') { var pw = document.createElement('input'); pw.type = 'password'; pw.id = 'prompt-textarea'; slot.appendChild(pw); }
+    else if (kind === 'handover') {
+      /* an editor that keeps its own copy of the text (as editors with a document model do): whatever is put into its
+         box from outside is put back a moment later; text reaches its copy only through its own handling of pasted
+         text, which reads the event it is handed, never the system clipboard */
+      slot.appendChild(editable(function (d) {
+        var model = { lines: [''], line: 0, col: 0 }, obs;
+        function draw() {
+          d.innerHTML = '';
+          model.lines.forEach(function (line) { var n = document.createElement('p'); if (line) n.textContent = line; else n.innerHTML = '<br>'; d.appendChild(n); });
+          var p = d.children[model.line], r = document.createRange(); if (p.firstChild && p.firstChild.nodeType === 3) r.setStart(p.firstChild, model.col); else r.setStart(p, 0); r.collapse(true);
+          var sel = getSelection(); sel.removeAllRanges(); sel.addRange(r);
+          if (obs) obs.takeRecords();
+        }
+        obs = new MutationObserver(function () { window.__reverted = (window.__reverted || 0) + 1; draw(); });
+        obs.observe(d, { childList: true, subtree: true, characterData: true });
+        d.__set = function (text, caret) { model.lines = text.split('\n'); var i = 0, at = caret; while (i < model.lines.length - 1 && at > model.lines[i].length) { at -= model.lines[i].length + 1; i++; } model.line = i; model.col = at; draw(); };
+        d.addEventListener('paste', function (e) {
+          e.preventDefault(); window.__pasteHandled++;
+          var text = e.clipboardData.getData('text/plain'), cur = model.lines[model.line], parts = (cur.slice(0, model.col) + text + cur.slice(model.col)).split('\n'), tail = cur.length - model.col;
+          model.lines.splice.apply(model.lines, [model.line, 1].concat(parts)); model.line += parts.length - 1; model.col = parts[parts.length - 1].length - tail; draw();
+        });
+        setTimeout(draw, 0);
+      }));
+    }
+    else slot.appendChild(editable());
+  }
+  mount();
+  document.getElementById('composer-form').addEventListener('submit', function (e) { e.preventDefault(); window.__sent++; });
+  document.getElementById('send').addEventListener('click', function () { window.__sendClicks++; });
+  document.addEventListener('keydown', function (e) { window.__keys++; if (e.key === 'Enter' && !e.shiftKey && box() && box().contains(e.target)) window.__sent++; }, true);
+  window.__switchChat = function (id, remount) { history.pushState({}, '', '/c/' + id + location.search); document.title = 'Fixture chat ' + id; document.getElementById('transcript').textContent = 'Transcript of ' + id + ' (fictional)'; if (remount) mount(); };
+  document.getElementById('chatA').addEventListener('click', function () { window.__switchChat('aaa'); });
+  document.getElementById('chatB').addEventListener('click', function () { window.__switchChat('bbb'); });
+  /* the fixture's own reading and writing of the draft, apart from the extension's */
+  window.__setDraft = function (text, caret, caretEnd) {
+    var b = box(); b.focus();
+    if (b.__set) { b.__set(text, caret); return; }
+    if (b.tagName === 'TEXTAREA' || b.tagName === 'INPUT') { b.value = text; b.setSelectionRange(caret, caretEnd == null ? caret : caretEnd); return; }
+    b.innerHTML = '';
+    text.split('\n').forEach(function (line) { var p = document.createElement('p'); if (line) p.textContent = line; else p.innerHTML = '<br>'; b.appendChild(p); });
+    function place(at) { var lines = text.split('\n'), i = 0; while (i < lines.length - 1 && at > lines[i].length) { at -= lines[i].length + 1; i++; } var p = b.children[i]; return p.firstChild && p.firstChild.nodeType === 3 ? [p.firstChild, at] : [p, 0]; }
+    var a = place(caret), z = place(caretEnd == null ? caret : caretEnd), r = document.createRange(); r.setStart(a[0], a[1]); r.setEnd(z[0], z[1]);
+    var s = getSelection(); s.removeAllRanges(); s.addRange(r);
+  };
+  window.__draft = function () { var b = box(); if (!b) return null; if (b.tagName === 'TEXTAREA' || b.tagName === 'INPUT') return b.value; return b.children.length ? Array.prototype.map.call(b.children, function (p) { return p.textContent; }).join('\n') : b.textContent; };
+  window.__caret = function () {
+    var b = box(); if (b.tagName === 'TEXTAREA') return b.selectionStart === b.selectionEnd ? b.selectionStart : -1;
+    var s = getSelection(); if (!s.rangeCount || !s.isCollapsed || !b.contains(s.anchorNode)) return -1;
+    var n = s.anchorNode, off = s.anchorOffset, p = n; while (p && p.parentNode !== b) p = p.parentNode;
+    var before = 0, kids = Array.prototype.slice.call(b.children), i = kids.indexOf(p);
+    for (var k = 0; k < i; k++) before += kids[k].textContent.length + 1;
+    if (n.nodeType === 3) { var w = document.createTreeWalker(p, NodeFilter.SHOW_TEXT), t; while ((t = w.nextNode()) && t !== n) before += t.data.length; return before + off; }
+    if (n === p) { for (var c = 0; c < off; c++) before += p.childNodes[c].textContent.length; return before; }
+    return before;
+  };
+  window.__outside = function () { return [document.getElementById('transcript').innerHTML, document.getElementById('edit-earlier').value, document.getElementById('pw').value, document.getElementById('search').value, document.querySelectorAll('body *').length - (box() ? box().querySelectorAll('*').length : 0)].join(' | '); };
+  window.__focusOn = function (id) { document.getElementById(id).focus(); };
+})();
+</script>
+</body>
+</html>

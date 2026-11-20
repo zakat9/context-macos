@@ -1,0 +1,128 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta http-equiv="Content-Security-Policy" content="default-src 'none'; style-src 'unsafe-inline'; script-src 'unsafe-inline'">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Settings</title>
+<style>
+/* The Settings window's content, 360 × 338: the size of the App access window. Same type and greys. */
+:root{color-scheme:light;--paper:#fafafa;--sheet:#fff;--ink:#313438;--soft:#61666b;--rule:#e2e4e6;--rule-strong:#c9cdd0;--field:#878d93;--accent:#33566a;--tint:#eef3f5;
+  --sans:-apple-system,BlinkMacSystemFont,"Helvetica Neue","Apple SD Gothic Neo","Segoe UI","Noto Sans","Noto Sans CJK KR","DejaVu Sans",sans-serif}
+*{box-sizing:border-box}
+html,body{margin:0;height:100%}
+body{background:var(--paper);color:var(--ink);font:400 13px/1.4 var(--sans);overflow:hidden;display:flex;flex-direction:column;padding:11px 12px 12px;cursor:default;-webkit-user-select:none;user-select:none}
+h1,h2,p,ol,li{margin:0;padding:0;font:inherit}
+button{font:inherit;color:inherit;margin:0}
+body>*{flex:none}
+[hidden]{display:none!important}
+:focus{outline:none}
+:focus-visible{outline:2px solid var(--accent);outline-offset:1px;border-radius:4px}
+.head{display:flex;align-items:center;justify-content:space-between;min-height:24px}
+h1{font-size:15px;line-height:20px}
+h2{font-size:12px;line-height:16px;color:var(--soft);margin-top:9px;padding-top:8px;border-top:1px solid var(--rule)}
+.head+h2{margin-top:4px}
+.soft{font-size:12px;line-height:16px;color:var(--soft)}
+.line{display:flex;align-items:center;gap:6px;margin-top:5px;min-height:26px}
+.line .what{flex:1;min-width:0}
+.chord{font-size:13px;min-width:44px;text-align:center;border:1px solid var(--rule-strong);border-radius:5px;background:var(--sheet);padding:2px 8px;line-height:18px}
+.chord.none{border-style:dashed;color:var(--soft)}
+.btn{height:24px;padding:0 9px;border-radius:5px;border:1px solid var(--field);background:var(--sheet);cursor:pointer;white-space:nowrap;font-size:12px}
+.btn:disabled{border-color:var(--rule-strong);color:var(--soft);cursor:default}
+.btn.rec{border-color:var(--accent);background:var(--tint);color:var(--accent)}
+.msg{font-size:12px;line-height:16px;min-height:16px;margin-top:3px;color:var(--soft)}
+.msg.on{color:var(--ink)}
+ol{list-style:none;margin-top:4px;counter-reset:s}
+ol li{font-size:12px;line-height:16px;color:var(--soft);padding-left:16px;position:relative}
+ol li::before{counter-increment:s;content:counter(s) ".";position:absolute;left:0}
+code{font:inherit;color:var(--ink);-webkit-user-select:text;user-select:text}
+@media (prefers-contrast:more){:root{--soft:#43474b;--rule:#b9bdc1;--rule-strong:#878d93;--field:#5c6166}}
+</style>
+</head>
+<body>
+<div class="head"><h1 id="title">Settings</h1><button type="button" class="btn" id="doneBtn">Done</button></div>
+<h2 id="hShort">Shortcuts</h2>
+<div class="line" role="group" aria-labelledby="hShort">
+  <span class="what" id="shortName">Tag current item</span>
+  <span class="chord none" id="chord" aria-live="off">Not set</span>
+  <button type="button" class="btn" id="setBtn" aria-describedby="shortHelp">Set…</button>
+  <button type="button" class="btn" id="suggestBtn"></button>
+  <button type="button" class="btn" id="clearBtn" hidden>Clear</button>
+</div>
+<p class="soft" id="shortHelp">Opens the tag editor for the item selected in Notes, Mail, Finder or a document app, while that app is in front.</p>
+<p class="msg" id="shortMsg" role="status"></p>
+<h2 id="hInsert">Insert context</h2>
+<p class="soft" id="insertHelp">Puts tagged sources into the ChatGPT message box, from a Chromium browser, through an extension you load yourself. Off until you set it up.</p>
+<div class="line" id="insertLine" role="group" aria-labelledby="hInsert">
+  <span class="what" id="insertState">Off</span>
+  <button type="button" class="btn" id="chromeBtn">Set up for Google Chrome</button>
+  <button type="button" class="btn" id="otherBtn">Other…</button>
+  <button type="button" class="btn" id="folderBtn" hidden>Show extension</button>
+  <button type="button" class="btn" id="offBtn" hidden>Turn off</button>
+</div>
+<ol id="steps" hidden>
+  <li><code>chrome://extensions</code>: Developer mode on, Load unpacked, then the folder that Show extension opens.</li>
+  <li><code>chrome://extensions/shortcuts</code>: give “Insert context at the caret” a key.</li>
+  <li>In ChatGPT, click the message box and press that key.</li>
+</ol>
+<p class="msg" id="insertMsg" role="status"></p>
+<script>
+/*__SETTINGS__*/
+</script>
+<script>
+(function () {
+  'use strict';
+  function $(id) { return document.getElementById(id); }
+  var native = window.webkit && window.webkit.messageHandlers && window.webkit.messageHandlers.settings;
+  var pretend = typeof window.__contextSettingsTestCall === 'function' ? window.__contextSettingsTestCall : null;
+  function call(op, arg) {
+    if (native) return native.postMessage({ op: op, arg: arg == null ? '' : arg });
+    if (pretend) return pretend(op, arg == null ? '' : arg);
+    return Promise.resolve({ ok: false });
+  }
+  var host = { state: function () { return call('state'); }, setShortcut: function (c) { return call('setShortcut', c); }, clearShortcut: function () { return call('clearShortcut'); },
+    insertEnable: function (w) { return call('insertEnable', w); }, insertDisable: function () { return call('insertDisable'); } };
+  var tick = 0, settings = ContextSettings.create(host, render);
+
+  function render(v) {
+    var keep = document.activeElement ? document.activeElement.id : '';
+    var c = $('chord'), set = $('setBtn');
+    c.textContent = v.shortcut ? v.shortcut.text : 'Not set'; c.className = 'chord' + (v.shortcut ? '' : ' none');
+    c.setAttribute('aria-label', v.shortcut ? 'Shortcut: ' + v.shortcut.words : 'No shortcut set');
+    set.textContent = v.recording ? 'Press the keys… Esc cancels' : v.shortcut ? 'Change…' : 'Set…'; set.className = 'btn' + (v.recording ? ' rec' : ''); set.disabled = v.busy;
+    set.setAttribute('aria-pressed', v.recording ? 'true' : 'false');
+    $('suggestBtn').hidden = !!v.shortcut || v.recording; $('suggestBtn').textContent = 'Use ' + v.suggested; $('suggestBtn').setAttribute('aria-label', 'Use the suggested shortcut, ' + v.suggestedWords); $('suggestBtn').disabled = v.busy;
+    $('clearBtn').hidden = !v.shortcut || v.recording; $('clearBtn').disabled = v.busy;
+    $('chord').hidden = v.recording;
+    $('shortMsg').textContent = v.message ? (v.kind === 'done' ? '✓ ' : '') + v.message : ''; $('shortMsg').className = 'msg' + (v.message ? ' on' : ''); $('shortMsg').setAttribute('role', v.kind === 'error' ? 'alert' : 'status');
+    var on = v.insert.on;
+    $('insertState').textContent = on ? 'On for ' + v.insert.browsers.join(' and ') : 'Off';
+    $('chromeBtn').hidden = $('otherBtn').hidden = on; $('folderBtn').hidden = $('offBtn').hidden = !on; $('steps').hidden = !on; $('insertHelp').hidden = on;
+    ['chromeBtn', 'otherBtn', 'folderBtn', 'offBtn'].forEach(function (id) { $(id).disabled = v.busy; });
+    $('insertMsg').textContent = v.insertMessage ? (v.insertKind === 'done' ? '✓ ' : '') + v.insertMessage : ''; $('insertMsg').className = 'msg' + (v.insertMessage ? ' on' : ''); $('insertMsg').setAttribute('role', v.insertKind === 'error' ? 'alert' : 'status');
+    if (keep && $(keep) && !$(keep).hidden && !$(keep).disabled) $(keep).focus();
+    document.body.setAttribute('data-ready', String(++tick));
+  }
+  $('setBtn').addEventListener('click', function () { if (settings.view().recording) settings.cancel(); else settings.record(); $('setBtn').focus(); });
+  /* While the button reads "Press the keys…", the next chord pressed IN THIS WINDOW is taken as the shortcut. */
+  $('setBtn').addEventListener('keydown', function (e) {
+    if (!settings.view().recording) return;
+    e.preventDefault(); e.stopPropagation();
+    settings.key({ code: e.code, ctrlKey: e.ctrlKey, altKey: e.altKey, shiftKey: e.shiftKey, metaKey: e.metaKey }).then(function () { $('setBtn').focus(); });
+  });
+  $('setBtn').addEventListener('blur', function () { if (settings.view().recording) settings.cancel(); });
+  $('suggestBtn').addEventListener('click', function () { settings.useSuggested().then(function () { $('setBtn').focus(); }); });
+  $('clearBtn').addEventListener('click', function () { settings.clear().then(function () { $('setBtn').focus(); }); });
+  $('chromeBtn').addEventListener('click', function () { settings.insertEnable('chrome'); });
+  $('otherBtn').addEventListener('click', function () { settings.insertEnable('other'); });
+  $('offBtn').addEventListener('click', function () { settings.insertDisable(); });
+  $('folderBtn').addEventListener('click', function () { call('reveal'); });
+  $('doneBtn').addEventListener('click', function () { call('close'); });
+  document.addEventListener('keydown', function (e) { if (e.key === 'Escape' && !settings.view().recording) { e.preventDefault(); call('close'); } });
+  /* called by the Mac app when the window is shown */
+  window.contextSettingsShown = function () { return settings.load().then(function () { $('setBtn').focus(); return 'ok'; }); };
+  render(settings.view());
+})();
+</script>
+</body>
+</html>

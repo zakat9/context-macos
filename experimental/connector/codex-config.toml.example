@@ -1,0 +1,7 @@
+# Codex (CLI and IDE extension): add this table to ~/.codex/config.toml, with the real path.
+# Codex starts the connector itself as a local process. Nothing listens on a network port.
+# Not run by the author of this build: see CLIENTS.md.
+
+[mcp_servers.work-index]
+command = "node"
+args = ["/ABSOLUTE/PATH/TO/work-index/dev/workindex.js", "mcp"]

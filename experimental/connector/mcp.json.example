@@ -1,0 +1,8 @@
+{
+  "mcpServers": {
+    "work-index": {
+      "command": "node",
+      "args": ["/ABSOLUTE/PATH/TO/work-index/dev/workindex.js", "mcp"]
+    }
+  }
+}

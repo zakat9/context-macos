@@ -1,0 +1,32 @@
+From: Jonas Reyes <jonas.reyes@northfield-devices.example>
+To: Mina Seo <mina.seo@northfield-devices.example>
+Subject: Tooling budget cap for Pine Ridge
+Date: Tue, 17 Nov 2026 14:05:00 +0900
+Message-ID: <cap-20261117-1405@northfield-devices.example>
+MIME-Version: 1.0
+Content-Type: multipart/mixed; boundary="OUTER-7f3a"
+
+--OUTER-7f3a
+Content-Type: multipart/alternative; boundary="ALT-91c2"
+
+--ALT-91c2
+Content-Type: text/plain; charset=UTF-8
+Content-Transfer-Encoding: base64
+
+TWluYSwKClRoZSBhcHByb3ZlZCBjYXAgZm9yIFBpbmUgUmlkZ2UgdG9vbGluZyBpcyBVU0QgNTAs
+MDAwLgpBbnl0aGluZyBhYm92ZSB0aGUgY2FwIG5lZWRzIGEgc2Vjb25kIHNpZ24tb2ZmIGZyb20g
+bWUgYmVmb3JlIE5vdiAyMC4KCkpvbmFzIFJleWVzCkZpbmFuY2UsIE5vcnRoZmllbGQgRGV2aWNl
+cwo=
+--ALT-91c2
+Content-Type: text/html; charset=UTF-8
+Content-Transfer-Encoding: 7bit
+
+<html><body><p>Mina,</p><p>The approved cap for Pine Ridge tooling is <b>USD 50,000</b>.</p></body></html>
+--ALT-91c2--
+--OUTER-7f3a
+Content-Type: application/pdf; name="cap-memo.pdf"
+Content-Disposition: attachment; filename="cap-memo.pdf"
+Content-Transfer-Encoding: base64
+
+JVBERi0xLjQK
+--OUTER-7f3a--
